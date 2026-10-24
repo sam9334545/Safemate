@@ -302,8 +302,8 @@ def test_deepfake_service_aggregate_predictions():
 
 def test_deepfake_service_normalize_face():
     """Test face normalization generates correctly shaped and typed ImageNet tensors."""
+    torch = pytest.importorskip("torch")
     import numpy as np
-    import torch
 
     dummy_face = np.full((120, 120, 3), 128, dtype=np.uint8)
     tensor = VideoDeepfakeService._normalize_face(dummy_face, target_size=224)

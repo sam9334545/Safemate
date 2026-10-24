@@ -81,3 +81,12 @@ class EvidenceRecordDetail(BaseModel):
     timestamp: str
     simulated_dispatch_status: str
     google_maps_url: str
+
+
+class EvidenceDeleteResponse(BaseModel):
+    """Response returned upon securely shredding and deleting an evidence record."""
+
+    status: str = Field(default="success", description="Status confirmation")
+    message: str = Field(..., description="Confirmation explanation message")
+    evidence_id: str = Field(..., description="Unique identifier of the deleted evidence record")
+

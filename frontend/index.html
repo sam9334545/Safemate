@@ -158,27 +158,52 @@
       </div>
 
       <!-- Feature 2: SafeWalk Escort & Live Map (Real Photo: Woman walking safely at twilight) -->
-      id="safewalk-section">
+      <div class="feature-card" id="safewalk-section">
         <div class="feature-img-box">
           <img src="assets/real_safewalk.jpg" alt="Woman walking safely along city street">
           <span class="feature-badge">SafeWalk Escort</span>
         </div>
         <div class="feature-body">
-          <h3 class="feature-title">SafeWalk Escort &amp; Crowd Map</h3>
+          <h3 class="feature-title">SafeWalk Escort &amp; Live Tracking</h3>
           <p class="feature-desc">
-            Walking home late? Create a temporary live Trip Token link for friends to monitor your route, with an automatic countdown alert if you don't check in upon arrival.
+            Walking home late? Create a live Trip Token link for friends to monitor your route, with an automatic countdown alert if you don't check in upon arrival.
           </p>
 
           <div class="simple-control-panel">
+            <div id="safewalk-setup-panel">
+              <input type="text" id="safewalk-destination" placeholder="Destination (e.g. Home, Dorm Block 3, Metro)" value="Home" style="width:100%; padding:8px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:8px; box-sizing:border-box;">
+              <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+                <label style="font-size:0.78rem; font-weight:600; color:#475569;">Duration:</label>
+                <select id="safewalk-duration-select" style="padding:6px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+                  <option value="15">15 Minutes</option>
+                  <option value="20" selected>20 Minutes</option>
+                  <option value="30">30 Minutes</option>
+                  <option value="45">45 Minutes</option>
+                </select>
+              </div>
+            </div>
+
             <div class="simple-control-row">
               <span style="font-size:0.85rem; font-weight:600; color:#0f172a;">
-                Timer: <span id="safewalk-timer-display" style="color:#e52543; font-family:monospace;">20:00</span>
+                Timer: <span id="safewalk-timer-display" style="color:#e52543; font-family:monospace; font-weight:700;">20:00</span>
               </span>
-              <button class="btn-primary" id="btn-toggle-safewalk" style="padding:10px 20px; font-size:13px;">
-                Start 20-Min Escort
+              <button class="btn-primary" id="btn-toggle-safewalk" style="padding:10px 18px; font-size:13px; font-weight:700;">
+                Start SafeWalk Escort
               </button>
             </div>
-            <div id="safewalk-status-box" class="status-callout" style="display:none;"></div>
+
+            <div id="safewalk-active-actions" style="display:none; margin-top:10px; gap:8px; flex-direction:column;">
+              <div style="display:flex; gap:8px;">
+                <button type="button" id="btn-share-safewalk" class="btn-outline" style="flex:1; padding:8px; font-size:12px; font-weight:600;">
+                  🔗 Share Live Link
+                </button>
+                <button type="button" id="btn-complete-safewalk" class="btn-primary" style="flex:1; padding:8px; font-size:12px; background:#059669; border-color:#059669; font-weight:700;">
+                  ✓ I Have Arrived Safely
+                </button>
+              </div>
+            </div>
+
+            <div id="safewalk-status-box" class="status-callout" style="display:none; margin-top:10px;"></div>
           </div>
         </div>
       </div>
@@ -192,7 +217,7 @@
         <div class="feature-body">
           <h3 class="feature-title">AI Deepfake &amp; Manipulation Detector</h3>
           <p class="feature-desc">
-            Verify whether screenshots or shared photos have been synthetically altered or face-swapped using our neural forensics screening engine.
+            Verify whether screenshots, shared photos, or videos have been synthetically altered or face-swapped using our dual-engine neural forensics classifier.
           </p>
 
           <div class="simple-control-panel">
@@ -202,7 +227,7 @@
             </button>
             <div id="deepfake-selected-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
 
-            <button type="button" class="btn-primary" id="btn-scan-deepfake" style="width:100%; padding:10px 16px; font-size:13px; cursor:pointer;">
+            <button type="button" class="btn-primary" id="btn-scan-deepfake" style="width:100%; padding:10px 16px; font-size:13px; cursor:pointer; font-weight:700;">
               🔍 Screen for Synthetic Manipulation
             </button>
             <div id="deepfake-status-box" class="status-callout" style="display:none; margin-top:10px;"></div>
@@ -211,56 +236,56 @@
       </div>
 
       <!-- Feature 4: Leak Tracer -->
-      id="leak-section">
-          <div class="feature-img-box">
-            <img src="assets/real_phone_message.jpg" alt="Real photo of hands holding smartphone sending private photo">
-            <span class="feature-badge">Forensic Watermarking</span>
-          </div>
-          <div class="feature-body">
-            <h3 class="feature-title">Leak Tracer (Invisible Watermarking)</h3>
-            <p class="feature-desc">
-              When sharing photos, SafeMate embeds an invisible cryptographic signature for each recipient. If it leaks, the watermark pinpoints which copy it came from.
-            </p>
+      <div class="feature-card" id="leak-section">
+        <div class="feature-img-box">
+          <img src="assets/real_phone_message.jpg" alt="Real photo of hands holding smartphone sending private photo">
+          <span class="feature-badge">Forensic Watermarking</span>
+        </div>
+        <div class="feature-body">
+          <h3 class="feature-title">Leak Tracer (Invisible Watermarking)</h3>
+          <p class="feature-desc">
+            When sharing photos, SafeMate embeds an invisible cryptographic signature for each recipient. If it leaks, the watermark pinpoints which copy it came from.
+          </p>
 
-            <div class="simple-control-panel">
-              <!-- Mode Tabs -->
-              <div style="display:flex; gap:8px; margin-bottom:12px;">
-                <button type="button" id="leak-tab-embed" class="btn-primary" style="flex:1; padding:8px 10px; font-size:12px; cursor:pointer;">1. Protect & Share</button>
-                <button type="button" id="leak-tab-extract" class="btn-outline" style="flex:1; padding:8px 10px; font-size:12px; cursor:pointer;">2. Trace Leaked Image</button>
-              </div>
-
-              <!-- Embed Panel -->
-              <div id="leak-panel-embed">
-                <input type="file" id="leak-file-input" accept="image/*" style="display:none;">
-                <button type="button" class="btn-outline" id="btn-select-leak-img" style="width:100%; padding:9px 14px; font-size:13px; margin-bottom:8px; cursor:pointer;">
-                  📁 Select Photo to Protect
-                </button>
-                <div id="leak-selected-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
-                
-                <input type="text" id="leak-recipients-input" placeholder="Recipients: e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; box-sizing:border-box;">
-
-                <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width:100%; padding:10px 16px; font-size:13px; cursor:pointer;">
-                  🔒 Generate Watermarked Copies (ZIP)
-                </button>
-              </div>
-
-              <!-- Extract Panel -->
-              <div id="leak-panel-extract" style="display:none;">
-                <input type="file" id="leak-extract-file-input" accept="image/*" style="display:none;">
-                <button type="button" class="btn-outline" id="btn-select-extract-img" style="width:100%; padding:9px 14px; font-size:13px; margin-bottom:8px; cursor:pointer;">
-                  🔍 Select Suspected Leaked Photo
-                </button>
-                <div id="leak-extract-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
-                
-                <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width:100%; padding:10px 16px; font-size:13px; background:#dc2626; border-color:#dc2626; cursor:pointer;">
-                  🕵️ Trace Leaker & Verify Attribution
-                </button>
-              </div>
-
-              <div id="leak-tracer-status-box" class="status-callout" style="display:none; margin-top:12px;"></div>
+          <div class="simple-control-panel">
+            <!-- Mode Tabs -->
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <button type="button" id="leak-tab-embed" class="btn-primary" style="flex:1; padding:8px 10px; font-size:12px; cursor:pointer;">1. Protect &amp; Share</button>
+              <button type="button" id="leak-tab-extract" class="btn-outline" style="flex:1; padding:8px 10px; font-size:12px; cursor:pointer;">2. Trace Leaked Image</button>
             </div>
+
+            <!-- Embed Panel -->
+            <div id="leak-panel-embed">
+              <input type="file" id="leak-file-input" accept="image/*" style="display:none;">
+              <button type="button" class="btn-outline" id="btn-select-leak-img" style="width:100%; padding:9px 14px; font-size:13px; margin-bottom:8px; cursor:pointer;">
+                📁 Select Photo to Protect
+              </button>
+              <div id="leak-selected-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
+              
+              <input type="text" id="leak-recipients-input" placeholder="Recipients: e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:10px; box-sizing:border-box;">
+
+              <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width:100%; padding:10px 16px; font-size:13px; cursor:pointer; font-weight:700;">
+                🔒 Generate Watermarked Copies (ZIP)
+              </button>
+            </div>
+
+            <!-- Extract Panel -->
+            <div id="leak-panel-extract" style="display:none;">
+              <input type="file" id="leak-extract-file-input" accept="image/*" style="display:none;">
+              <button type="button" class="btn-outline" id="btn-select-extract-img" style="width:100%; padding:9px 14px; font-size:13px; margin-bottom:8px; cursor:pointer;">
+                🔍 Select Suspected Leaked Photo
+              </button>
+              <div id="leak-extract-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
+              
+              <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width:100%; padding:10px 16px; font-size:13px; background:#dc2626; border-color:#dc2626; cursor:pointer; font-weight:700;">
+                🕵️ Trace Leaker &amp; Verify Attribution
+              </button>
+            </div>
+
+            <div id="leak-tracer-status-box" class="status-callout" style="display:none; margin-top:12px;"></div>
           </div>
         </div>
+      </div>
 
         <!-- Feature 5: Disguised Evidence Vault -->
       <div class="feature-card" id="vault-section">
@@ -289,6 +314,8 @@
               <div class="vault-timer-display" id="vault-timer">00:00</div>
             </div>
 
+            <input type="text" id="vault-note-input" placeholder="Incident note (e.g. Someone following near parking lot)" style="width:100%; padding:8px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:8px; box-sizing:border-box;">
+
             <div class="vault-btn-row">
               <button class="btn-primary btn-record-act" id="btn-record-vault">
                 <span class="record-dot"></span>
@@ -298,7 +325,20 @@
                 🧮 Calculator Mode
               </button>
             </div>
-            <div id="vault-status-box" class="status-callout" style="display:none;"></div>
+
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button type="button" class="btn-outline" id="btn-select-vault-file" style="flex:1; padding:7px 10px; font-size:11px; cursor:pointer;">
+                📁 Choose File to Seal
+              </button>
+              <button type="button" class="btn-primary" id="btn-upload-vault-file" style="flex:1; padding:7px 10px; font-size:11px; cursor:pointer;">
+                🔒 Seal &amp; Encrypt File
+              </button>
+            </div>
+            <input type="file" id="vault-file-input" style="display:none;">
+            <div id="vault-selected-filename" style="font-size:0.78rem; color:#0284c7; margin-top:4px; display:none; font-weight:600;"></div>
+
+            <div id="vault-status-box" class="status-callout" style="display:none; margin-top:10px;"></div>
+            <div id="vault-items-list" style="margin-top:10px;"></div>
           </div>
         </div>
       </div>
@@ -514,6 +554,41 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discreet Calculator Disguise Overlay -->
+  <div class="modal-overlay" id="calc-disguise-modal" style="z-index: 99999;">
+    <div style="background:#1e293b; border-radius:24px; padding:24px; width:300px; box-shadow:0 20px 50px rgba(0,0,0,0.5); color:#fff;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:0.75rem; color:#94a3b8; font-family:monospace; letter-spacing:0.05em;">STANDARD CALCULATOR</span>
+        <button type="button" id="btn-close-calc" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;" title="Exit Calculator">✕</button>
+      </div>
+      <div id="calc-display" style="background:#0f172a; border-radius:12px; padding:16px; font-size:1.8rem; font-family:monospace; text-align:right; margin-bottom:16px; overflow:hidden; min-height:64px; color:#f8fafc; border:1px solid #334155;">0</div>
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;">
+        <button class="calc-btn" data-val="C" style="padding:14px; background:#ef4444; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">C</button>
+        <button class="calc-btn" data-val="DEL" style="padding:14px; background:#475569; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1rem; cursor:pointer;">⌫</button>
+        <button class="calc-btn" data-val="%" style="padding:14px; background:#475569; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">%</button>
+        <button class="calc-btn" data-val="/" style="padding:14px; background:#f97316; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">÷</button>
+        <button class="calc-btn" data-val="7" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">7</button>
+        <button class="calc-btn" data-val="8" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">8</button>
+        <button class="calc-btn" data-val="9" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">9</button>
+        <button class="calc-btn" data-val="*" style="padding:14px; background:#f97316; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">×</button>
+        <button class="calc-btn" data-val="4" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">4</button>
+        <button class="calc-btn" data-val="5" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">5</button>
+        <button class="calc-btn" data-val="6" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">6</button>
+        <button class="calc-btn" data-val="-" style="padding:14px; background:#f97316; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">−</button>
+        <button class="calc-btn" data-val="1" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">1</button>
+        <button class="calc-btn" data-val="2" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">2</button>
+        <button class="calc-btn" data-val="3" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">3</button>
+        <button class="calc-btn" data-val="+" style="padding:14px; background:#f97316; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">+</button>
+        <button class="calc-btn" data-val="0" style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer; grid-column: span 2;">0</button>
+        <button class="calc-btn" data-val="." style="padding:14px; background:#334155; border:none; border-radius:12px; color:#fff; font-weight:600; font-size:1.1rem; cursor:pointer;">.</button>
+        <button class="calc-btn" data-val="=" style="padding:14px; background:#10b981; border:none; border-radius:12px; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;">=</button>
+      </div>
+      <div style="font-size:0.7rem; color:#64748b; text-align:center; margin-top:14px;">
+        Tip: Press ESC or click ✕ to return to SafeMate
       </div>
     </div>
   </div>

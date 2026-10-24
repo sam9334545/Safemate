@@ -208,3 +208,90 @@ def test_evidence_upload_requires_auth(client, test_user):
     stored_path = SECURE_STORAGE_DIR / f"{res_data['evidence_id']}_evidence_auth_test.png"
     if stored_path.exists():
         stored_path.unlink()
+
+
+def test_login_json_success(client, test_user):
+    """Test user login with JSON payload."""
+    res = client.post(
+        "/api/v1/auth/login-json",
+        json={"email": test_user["email"], "password": test_user["password"]},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_login_json_invalid(client, test_user):
+    """Test JSON login with incorrect credentials fails."""
+    res = client.post(
+        "/api/v1/auth/login-json",
+        json={"email": test_user["email"], "password": "WrongPasswordX"},
+    )
+    assert res.status_code == 401
+
+
+def test_guest_session_success(client):
+    """Test issuing anonymous guest session access token."""
+    res = client.post("/api/v1/auth/guest-session")
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+    # Verify guest token can access authenticated /me
+    me_res = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {data['access_token']}"})
+    assert me_res.status_code == 200
+    assert "guest_" in me_res.json()["email"]
+
+
+def test_change_password_and_login(client, test_user):
+    """Test authenticated password change and verifying new password."""
+    # 1. Attempt with incorrect current password
+    fail_res = client.post(
+        "/api/v1/auth/change-password",
+        json={"current_password": "WrongCurrentPassword123!", "new_password": "BrandNewPassword789!"},
+        headers=test_user["headers"],
+    )
+    assert fail_res.status_code == 400
+    assert "current password does not match" in fail_res.json()["detail"].lower()
+
+    # 2. Change password with correct current password
+    succ_res = client.post(
+        "/api/v1/auth/change-password",
+        json={"current_password": test_user["password"], "new_password": "BrandNewPassword789!"},
+        headers=test_user["headers"],
+    )
+    assert succ_res.status_code == 200
+    assert succ_res.json()["status"] == "success"
+
+    # 3. Old password login now fails
+    old_login = client.post(
+        "/api/v1/auth/login-json",
+        json={"email": test_user["email"], "password": test_user["password"]},
+    )
+    assert old_login.status_code == 401
+
+    # 4. New password login succeeds
+    new_login = client.post(
+        "/api/v1/auth/login-json",
+        json={"email": test_user["email"], "password": "BrandNewPassword789!"},
+    )
+    assert new_login.status_code == 200
+    assert "access_token" in new_login.json()
+
+
+def test_token_refresh_flow(client, test_user):
+    """Test refreshing an access token."""
+    res = client.post("/api/v1/auth/refresh", headers=test_user["headers"])
+    assert res.status_code == 200
+    data = res.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+    # Verify refreshed token allows accessing /me
+    me_res = client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {data['access_token']}"})
+    assert me_res.status_code == 200
+    assert me_res.json()["email"] == test_user["email"]
+
+

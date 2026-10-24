@@ -8,8 +8,11 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import HTMLResponse
 
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field
 from app.models import UserModel
 from app.utils.auth import get_optional_current_user
+from app.chatbot.knowledge.resources import get_emergency_resources
 from app.schemas.chatbot import (
     ChatbotFeedbackRequest,
     ChatbotFeedbackResponse,
@@ -20,12 +23,110 @@ from app.schemas.chatbot import (
     ChatbotResourceListResponse,
     ChatbotStartRequest,
     ChatbotStartResponse,
+    SafetyResourceResponse,
 )
 from app.services.chatbot_service import chatbot_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/chatbot", tags=["Safety & Legal Chatbot"])
+
+
+class EmergencyOverrideRequest(BaseModel):
+    """Payload for triggering immediate emergency hotline override."""
+
+    country: Optional[str] = Field(
+        default="IN",
+        description="ISO 3166-1 alpha-2 country code (e.g. IN, US, GB, CA, AU, GLOBAL)",
+    )
+
+
+SUPPORTED_COUNTRIES: List[Dict[str, str]] = [
+    {
+        "code": "IN",
+        "name": "India",
+        "emergency_number": "112",
+        "women_helpline": "1091 / 181",
+        "cybercrime_portal": "1930 (cybercrime.gov.in)",
+    },
+    {
+        "code": "US",
+        "name": "United States",
+        "emergency_number": "911",
+        "women_helpline": "1-800-799-7233 (NDVH)",
+        "cybercrime_portal": "ic3.gov",
+    },
+    {
+        "code": "GB",
+        "name": "United Kingdom",
+        "emergency_number": "999",
+        "women_helpline": "0808 2000 247 (Refuge)",
+        "cybercrime_portal": "actionfraud.police.uk",
+    },
+    {
+        "code": "CA",
+        "name": "Canada",
+        "emergency_number": "911",
+        "women_helpline": "1-866-863-0511 (Assaulted Women's Helpline)",
+        "cybercrime_portal": "antifraudcentre-centreantifraude.ca",
+    },
+    {
+        "code": "AU",
+        "name": "Australia",
+        "emergency_number": "000",
+        "women_helpline": "1800 737 732 (1800RESPECT)",
+        "cybercrime_portal": "cyber.gov.au",
+    },
+    {
+        "code": "GLOBAL",
+        "name": "International Fallback",
+        "emergency_number": "112 / 911 / 999",
+        "women_helpline": "StopNCII.org",
+        "cybercrime_portal": "takeitdown.ncmec.org",
+    },
+]
+
+
+@router.get(
+    "/countries",
+    summary="List Supported Countries for Localized Safety Hotlines",
+    description="Returns list of supported countries with their national emergency, women helpline, and cybercrime reporting contacts.",
+)
+async def list_supported_countries() -> List[Dict[str, str]]:
+    """Return list of countries supported by the safety knowledge engine."""
+    return SUPPORTED_COUNTRIES
+
+
+@router.post(
+    "/emergency-override",
+    summary="Direct Emergency Hotline Override",
+    description="Immediate non-LLM safety circuit breaker returning official emergency hotlines and rapid actions.",
+)
+async def emergency_override(
+    payload: Optional[EmergencyOverrideRequest] = None,
+) -> Dict[str, Any]:
+    """Provide instant deterministic emergency resources and guidelines."""
+    country = (payload.country if payload and payload.country else "IN").strip().upper()
+    resources = get_emergency_resources(country)
+    return {
+        "status": "EMERGENCY_OVERRIDE_ACTIVATED",
+        "guidance": (
+            "🚨 CRITICAL SAFETY INTERRUPT: If you are in immediate danger, please contact local emergency authorities "
+            "immediately or activate your SafeMate Emergency SOS button."
+        ),
+        "country": country,
+        "emergency_resources": [
+            {
+                "resource_id": r.resource_id,
+                "display_name": r.display_name,
+                "phone_number": r.phone_number,
+                "action_url": r.action_url,
+                "description": r.description,
+                "intended_use": r.intended_use,
+            }
+            for r in resources
+        ],
+    }
 
 
 @router.get("/health", response_model=ChatbotHealthResponse, summary="Chatbot readiness health check")

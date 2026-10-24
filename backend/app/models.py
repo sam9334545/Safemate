@@ -37,14 +37,17 @@ class SafeWalkTrip(Base):
     duration_minutes = Column(Integer, nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
+    breadcrumbs = Column(Text, default="[]", nullable=False)
     status = Column(String(32), default="active", nullable=False)
     created_at = Column(String(64), nullable=False)
     expected_arrival = Column(String(64), nullable=False)
     last_updated_at = Column(String(64), nullable=True)
     shareable_link = Column(String(256), nullable=False)
+    cancellation_reason = Column(String(512), nullable=True)
 
     def __repr__(self) -> str:
         return f"<SafeWalkTrip(token='{self.trip_token}', user_id='{self.user_id}', status='{self.status}')>"
+
 
 
 class EvidenceRecord(Base):
@@ -122,6 +125,7 @@ class EmergencyLogModel(Base):
     __tablename__ = "emergency_logs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    alert_id = Column(String(64), index=True, nullable=True)
     user_id = Column(String(128), index=True, nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
@@ -130,6 +134,8 @@ class EmergencyLogModel(Base):
     distress_message = Column(Text, nullable=True)
     google_maps_url = Column(String(512), nullable=True)
     contacts_alerted_count = Column(Integer, default=0, nullable=False)
+    resolved_at = Column(String(64), nullable=True)
+    resolution_notes = Column(Text, nullable=True)
 
     def __repr__(self) -> str:
         return f"<EmergencyLogModel(id={self.id}, user_id='{self.user_id}', status='{self.status}')>"
@@ -137,4 +143,5 @@ class EmergencyLogModel(Base):
 
 # Semantic alias
 EmergencyLog = EmergencyLogModel
+
 

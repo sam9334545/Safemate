@@ -8,13 +8,8 @@ from app.services.model_service import ModelService
 
 @pytest.mark.integration
 def test_real_huggingface_model_inference():
-    """Live verification using real umm-maybe/AI-image-detector model from Hugging Face.
-
-    NOTE: Excluded by default in pytest.ini.
-    Run explicitly with:
-        pytest -m integration -v
-    Requires active internet connection and ~350MB disk download.
-    """
+    """Live verification using real umm-maybe/AI-image-detector model from Hugging Face."""
+    pytest.importorskip("torch")
     service = ModelService("umm-maybe/AI-image-detector")
     success = service.load()
     assert success is True, f"Failed to load real model: {service.initialization_error}"

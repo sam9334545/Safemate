@@ -480,3 +480,28 @@ async def test_cascading_provider_all_fail_returns_none():
     assert res is None
 
 
+def test_list_supported_countries(client: TestClient):
+    """Verify listing supported countries for localized hotlines."""
+    res = client.get("/api/v1/chatbot/countries")
+    assert res.status_code == 200
+    countries = res.json()
+    assert isinstance(countries, list)
+    country_codes = [c["code"] for c in countries]
+    assert "IN" in country_codes
+    assert "US" in country_codes
+    assert "GB" in country_codes
+    assert "GLOBAL" in country_codes
+
+
+def test_emergency_override_circuit_breaker(client: TestClient):
+    """Verify immediate deterministic emergency override endpoint."""
+    res = client.post("/api/v1/chatbot/emergency-override", json={"country": "IN"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "EMERGENCY_OVERRIDE_ACTIVATED"
+    assert "CRITICAL SAFETY INTERRUPT" in data["guidance"]
+    assert len(data["emergency_resources"]) >= 1
+    assert any(r["phone_number"] == "112" for r in data["emergency_resources"])
+
+
+

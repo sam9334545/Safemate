@@ -185,6 +185,11 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(watermark.router)
 
+    # Mount frontend web application static files if directory exists
+    frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+    if frontend_dir.exists():
+        app.mount("/app", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+
     @app.get("/chatbot", tags=["Chatbot UI"])
     def chatbot_redirect():
         from fastapi.responses import RedirectResponse
@@ -196,6 +201,7 @@ def create_app() -> FastAPI:
             "name": settings.APP_NAME,
             "version": "1.0.0",
             "docs": "/docs",
+            "web_app": "/app",
             "health": f"{settings.API_V1_PREFIX}/health",
             "ready": f"{settings.API_V1_PREFIX}/health/ready",
             "model_info": f"{settings.API_V1_PREFIX}/model-info",
@@ -205,18 +211,32 @@ def create_app() -> FastAPI:
             "video_deepfake_model_info": f"{settings.API_V1_PREFIX}/deepfake/model-info",
             "emergency_sos": f"{settings.API_V1_PREFIX}/emergency/sos",
             "emergency_contacts": f"{settings.API_V1_PREFIX}/emergency/contacts",
+            "emergency_alerts": f"{settings.API_V1_PREFIX}/emergency/alerts",
+            "emergency_call": f"{settings.API_V1_PREFIX}/emergency/call",
+            "emergency_resolve": f"{settings.API_V1_PREFIX}/emergency/sos/{{alert_id}}/resolve",
             "safewalk_create_trip": f"{settings.API_V1_PREFIX}/safewalk/create-trip",
             "safewalk_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}",
             "safewalk_update_location": f"{settings.API_V1_PREFIX}/safewalk/update-location",
+            "safewalk_complete_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/complete",
+            "safewalk_cancel_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/cancel",
+            "safewalk_escalate_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/escalate",
             "evidence_upload": f"{settings.API_V1_PREFIX}/evidence/upload",
+            "evidence_download": f"{settings.API_V1_PREFIX}/evidence/download/{{evidence_id}}",
+            "evidence_record": f"{settings.API_V1_PREFIX}/evidence/record/{{evidence_id}}",
             "chatbot_ui": "/chatbot",
             "chatbot_health": f"{settings.API_V1_PREFIX}/chatbot/health",
             "chatbot_resources": f"{settings.API_V1_PREFIX}/chatbot/resources",
+            "chatbot_countries": f"{settings.API_V1_PREFIX}/chatbot/countries",
+            "chatbot_emergency_override": f"{settings.API_V1_PREFIX}/chatbot/emergency-override",
             "chatbot_flows": f"{settings.API_V1_PREFIX}/chatbot/flows",
             "chatbot_start": f"{settings.API_V1_PREFIX}/chatbot/start",
             "chatbot_message": f"{settings.API_V1_PREFIX}/chatbot/message",
             "auth_register": f"{settings.API_V1_PREFIX}/auth/register",
             "auth_login": f"{settings.API_V1_PREFIX}/auth/login",
+            "auth_login_json": f"{settings.API_V1_PREFIX}/auth/login-json",
+            "auth_guest_session": f"{settings.API_V1_PREFIX}/auth/guest-session",
+            "auth_change_password": f"{settings.API_V1_PREFIX}/auth/change-password",
+            "auth_refresh": f"{settings.API_V1_PREFIX}/auth/refresh",
             "leak_tracer_embed": f"{settings.API_V1_PREFIX}/watermark/embed",
             "leak_tracer_batch": f"{settings.API_V1_PREFIX}/watermark/batch-embed",
             "leak_tracer_extract": f"{settings.API_V1_PREFIX}/watermark/extract",

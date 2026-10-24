@@ -12,7 +12,15 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import UserModel
-from app.schemas.auth import Token, UserCreate, UserLogin, UserResponse
+from app.schemas.auth import (
+    PasswordChangeRequest,
+    PasswordChangeResponse,
+    Token,
+    TokenRefreshResponse,
+    UserCreate,
+    UserLogin,
+    UserResponse,
+)
 from app.utils.auth import create_access_token, get_current_user, get_password_hash, verify_password
 
 logger = logging.getLogger(__name__)
@@ -106,6 +114,71 @@ async def oauth2_token(
     return await login(form_data=form_data, db=db)
 
 
+@router.post(
+    "/login-json",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="User Login (JSON Payload)",
+    description="Authenticates credentials via JSON body, returning a signed JWT access token.",
+)
+async def login_json(
+    payload: UserLogin,
+    db: Session = Depends(get_db),
+) -> Token:
+    """Authenticate user with email and password submitted as JSON."""
+    user = db.query(UserModel).filter(UserModel.email == payload.email).first()
+    if not user or not verify_password(payload.password, user.hashed_password):
+        logger.warning(f"Failed JSON login attempt for email: {payload.email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user account",
+        )
+
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    logger.info(f"User {user.email} logged in successfully via JSON.")
+    return Token(access_token=access_token, token_type="bearer")
+
+
+@router.post(
+    "/guest-session",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="Issue Anonymous Guest Session Token",
+    description="Issues an ephemeral, privacy-first JWT access token for emergency and fast feature access without prior registration.",
+)
+async def guest_session(
+    db: Session = Depends(get_db),
+) -> Token:
+    """Issue a privacy-preserving temporary guest user token."""
+    import secrets
+    guest_suffix = secrets.token_hex(4)
+    guest_email = f"guest_{guest_suffix}@safemate.internal"
+    random_pw = secrets.token_urlsafe(16)
+    hashed_pw = get_password_hash(random_pw)
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    guest_user = UserModel(
+        email=guest_email,
+        hashed_password=hashed_pw,
+        created_at=now_iso,
+        is_active=True,
+    )
+    db.add(guest_user)
+    db.commit()
+    db.refresh(guest_user)
+
+    access_token = create_access_token(data={"sub": guest_user.email, "user_id": guest_user.id})
+    logger.info(f"Guest session created: {guest_user.email}")
+    return Token(access_token=access_token, token_type="bearer")
+
+
 @router.get(
     "/me",
     response_model=UserResponse,
@@ -118,3 +191,56 @@ async def get_me(
 ) -> UserResponse:
     """Return profile of the authenticated user."""
     return current_user
+
+
+@router.post(
+    "/change-password",
+    response_model=PasswordChangeResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Change Authenticated User Password",
+    description="Verifies the user's current password and securely updates to a new hashed password.",
+)
+async def change_password(
+    payload: PasswordChangeRequest,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> PasswordChangeResponse:
+    """Change account password for authenticated user."""
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password does not match.",
+        )
+
+    current_user.hashed_password = get_password_hash(payload.new_password)
+    db.commit()
+    db.refresh(current_user)
+
+    logger.info(f"User {current_user.email} successfully updated account password.")
+    return PasswordChangeResponse(
+        status="success",
+        message="Password updated successfully. Please use your new password on next login.",
+    )
+
+
+@router.post(
+    "/refresh",
+    response_model=TokenRefreshResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Refresh JWT Access Token",
+    description="Issues a fresh JWT access token with an extended expiration lifetime for the authenticated user.",
+)
+async def refresh_token(
+    current_user: UserModel = Depends(get_current_user),
+) -> TokenRefreshResponse:
+    """Issue a fresh JWT token for authenticated active user."""
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user account",
+        )
+
+    new_token = create_access_token(data={"sub": current_user.email, "user_id": current_user.id})
+    return TokenRefreshResponse(access_token=new_token, token_type="bearer")
+
+

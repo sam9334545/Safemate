@@ -68,3 +68,28 @@ class UserResponse(BaseModel):
     model_config = {
         "from_attributes": True,
     }
+
+
+class PasswordChangeRequest(BaseModel):
+    """Payload for changing authenticated user password."""
+
+    current_password: str = Field(..., min_length=1, description="Current existing password")
+    new_password: str = Field(..., min_length=6, description="New password (minimum 6 characters)")
+
+
+class PasswordChangeResponse(BaseModel):
+    """Response payload confirming password change."""
+
+    status: str = Field(default="success", description="Status confirmation")
+    message: str = Field(
+        default="Password updated successfully.",
+        description="Status explanation message",
+    )
+
+
+class TokenRefreshResponse(BaseModel):
+    """Response returning refreshed access token."""
+
+    access_token: str = Field(..., description="Fresh JWT access token")
+    token_type: str = Field(default="bearer", description="Token type specification")
+

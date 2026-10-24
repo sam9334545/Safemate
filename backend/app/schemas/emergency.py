@@ -178,3 +178,54 @@ class DirectCallResponse(BaseModel):
     message: str = Field(..., description="Status explanation or spoken alert note")
     call_sid: Optional[str] = Field(None, description="Twilio Call SID if telephony provider is configured")
     tel_link: str = Field(..., description="Native device dialer link (tel: protocol)")
+
+
+# ---------------------------------------------------------------------------
+# Incident Lifecycle & Contact Update Schemas (100% Completeness)
+# ---------------------------------------------------------------------------
+class ContactUpdate(BaseModel):
+    """Payload to update an existing trusted emergency contact."""
+
+    name: Optional[str] = Field(default=None, min_length=1, max_length=255, description="Updated contact name")
+    phone_number: Optional[str] = Field(default=None, min_length=3, max_length=64, description="Updated phone number")
+    email: Optional[str] = Field(default=None, max_length=255, description="Updated email address")
+    relationship: Optional[str] = Field(default=None, max_length=128, description="Updated relationship")
+
+
+class SOSResolveRequest(BaseModel):
+    """Request payload to mark an active emergency alert as resolved or safe."""
+
+    resolution_notes: Optional[str] = Field(
+        default=None,
+        description="Optional notes documenting situation de-escalation or responder resolution",
+        examples=["User confirmed safe. Accompanied by campus escort."],
+    )
+
+
+class SOSResolveResponse(BaseModel):
+    """Response confirming that an emergency alert has been resolved."""
+
+    status: str = Field(default="resolved", description="Incident state")
+    message: str = Field(
+        default="Emergency alert successfully marked as resolved.",
+        description="Resolution status confirmation message",
+    )
+    alert_id: str = Field(..., description="Alert ID")
+    resolved_at: str = Field(..., description="ISO 8601 timestamp when the alert was resolved")
+    resolution_notes: Optional[str] = Field(default=None, description="Resolution notes")
+
+
+class SOSAlertDetail(BaseModel):
+    """Full incident and audit record of an emergency dispatch."""
+
+    alert_id: str = Field(..., description="Unique emergency incident identifier")
+    user_id: str = Field(..., description="User ID associated with the alert")
+    timestamp: str = Field(..., description="Timestamp when the alert was triggered")
+    status: str = Field(..., description="Alert status ('ACTIVE', 'DELIVERED', 'RESOLVED', etc.)")
+    latitude: float = Field(..., description="Latitude coordinate")
+    longitude: float = Field(..., description="Longitude coordinate")
+    distress_message: Optional[str] = Field(default=None, description="Distress message broadcasted")
+    google_maps_url: Optional[str] = Field(default=None, description="Google Maps location link")
+    contacts_alerted_count: int = Field(default=0, description="Total contacts alerted")
+    resolved_at: Optional[str] = Field(default=None, description="Timestamp of resolution")
+    resolution_notes: Optional[str] = Field(default=None, description="Incident notes upon resolution")

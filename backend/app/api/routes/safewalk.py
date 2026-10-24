@@ -6,22 +6,54 @@ import datetime
 import json
 import logging
 import secrets
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import SafeWalkTrip, UserModel
-from app.utils.auth import get_current_user
+from app.models import EmergencyLogModel, SafeWalkTrip, TrustedContactModel, UserModel
+from app.utils.auth import get_current_user, get_optional_current_user
 from app.schemas.safewalk import (
     LocationUpdateRequest,
     LocationUpdateResponse,
+    TripCancelRequest,
+    TripCancelResponse,
+    TripCompleteResponse,
     TripCreateRequest,
     TripCreateResponse,
+    TripEscalateResponse,
     TripSessionDetail,
 )
+from app.api.routes.emergency import dispatch_emergency_notifications, get_emergency_contacts
 
 logger = logging.getLogger(__name__)
+
+
+def to_session_detail(trip: SafeWalkTrip) -> TripSessionDetail:
+    """Helper to convert SafeWalkTrip database model to TripSessionDetail schema."""
+    try:
+        crumbs = json.loads(trip.breadcrumbs or "[]")
+    except Exception:
+        crumbs = []
+
+    return TripSessionDetail(
+        trip_token=trip.trip_token,
+        token=trip.trip_token,
+        user_id=trip.user_id,
+        destination=trip.destination,
+        latitude=trip.latitude,
+        longitude=trip.longitude,
+        status=trip.status,
+        expected_arrival=trip.expected_arrival,
+        expected_arrival_time=trip.expected_arrival,
+        duration_minutes=trip.duration_minutes,
+        created_at=trip.created_at,
+        last_updated_at=trip.last_updated_at,
+        shareable_link=trip.shareable_link,
+        breadcrumbs=crumbs,
+        cancellation_reason=trip.cancellation_reason,
+    )
+
 
 # Router definition with project prefix /api/v1/safewalk and tag "SafeWalk Escort"
 router = APIRouter(prefix="/api/v1/safewalk", tags=["SafeWalk Escort"])
@@ -38,6 +70,8 @@ def generate_unique_trip_token(db: Session) -> str:
 
 def check_and_update_overdue(trip: SafeWalkTrip, db: Session) -> str:
     """Check if trip duration has elapsed and update status to 'overdue' if necessary."""
+    if trip.status in ("completed", "cancelled", "escalated"):
+        return trip.status
     try:
         expected_arrival_dt = datetime.datetime.fromisoformat(trip.expected_arrival)
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -94,6 +128,7 @@ async def create_trip(
         expected_arrival=expected_arrival,
         last_updated_at=None,
         shareable_link=shareable_link,
+        breadcrumbs="[]",
         status="active",
     )
     db.add(new_trip)
@@ -156,21 +191,7 @@ async def get_trip(
     # Check if trip time has exceeded expected duration
     check_and_update_overdue(trip, db)
 
-    return TripSessionDetail(
-        trip_token=trip.trip_token,
-        token=trip.trip_token,
-        user_id=trip.user_id,
-        destination=trip.destination,
-        latitude=trip.latitude,
-        longitude=trip.longitude,
-        status=trip.status,
-        expected_arrival=trip.expected_arrival,
-        expected_arrival_time=trip.expected_arrival,
-        duration_minutes=trip.duration_minutes,
-        created_at=trip.created_at,
-        last_updated_at=trip.last_updated_at,
-        shareable_link=trip.shareable_link,
-    )
+    return to_session_detail(trip)
 
 
 @router.post(
@@ -200,10 +221,21 @@ async def update_location(
     now = datetime.datetime.now(datetime.timezone.utc)
     now_iso = now.isoformat()
 
-    # Update database coordinates
+    # Update database coordinates and breadcrumbs trail
     trip.latitude = payload.latitude
     trip.longitude = payload.longitude
     trip.last_updated_at = now_iso
+
+    try:
+        crumbs = json.loads(trip.breadcrumbs or "[]")
+    except Exception:
+        crumbs = []
+    crumbs.append({
+        "latitude": payload.latitude,
+        "longitude": payload.longitude,
+        "timestamp": now_iso,
+    })
+    trip.breadcrumbs = json.dumps(crumbs)
 
     # Check and update overdue status
     current_status = check_and_update_overdue(trip, db)
@@ -230,21 +262,7 @@ async def update_location(
         longitude=payload.longitude,
         trip_status=current_status,
         expected_arrival=trip.expected_arrival,
-        trip=TripSessionDetail(
-            trip_token=trip.trip_token,
-            token=trip.trip_token,
-            user_id=trip.user_id,
-            destination=trip.destination,
-            latitude=trip.latitude,
-            longitude=trip.longitude,
-            status=trip.status,
-            expected_arrival=trip.expected_arrival,
-            expected_arrival_time=trip.expected_arrival,
-            duration_minutes=trip.duration_minutes,
-            created_at=trip.created_at,
-            last_updated_at=trip.last_updated_at,
-            shareable_link=trip.shareable_link,
-        ),
+        trip=to_session_detail(trip),
     )
 
 
@@ -259,21 +277,197 @@ async def list_active_trips(db: Session = Depends(get_db)) -> List[TripSessionDe
     trips = db.query(SafeWalkTrip).all()
     for trip in trips:
         check_and_update_overdue(trip, db)
-    return [
-        TripSessionDetail(
-            trip_token=trip.trip_token,
-            token=trip.trip_token,
-            user_id=trip.user_id,
-            destination=trip.destination,
-            latitude=trip.latitude,
-            longitude=trip.longitude,
-            status=trip.status,
-            expected_arrival=trip.expected_arrival,
-            expected_arrival_time=trip.expected_arrival,
-            duration_minutes=trip.duration_minutes,
-            created_at=trip.created_at,
-            last_updated_at=trip.last_updated_at,
-            shareable_link=trip.shareable_link,
+    return [to_session_detail(trip) for trip in trips]
+
+
+@router.post(
+    "/trip/{token}/complete",
+    response_model=TripCompleteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Complete SafeWalk Trip (I Am Safe)",
+    description=(
+        "Marks an active or overdue SafeWalk trip session as safely completed. "
+        "Records completion timestamp and logs structured confirmation."
+    ),
+)
+async def complete_trip(
+    token: str,
+    db: Session = Depends(get_db),
+) -> TripCompleteResponse:
+    """Safely end and complete an active SafeWalk escort session."""
+    trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+    if not trip:
+        logger.warning(f"Attempted completion for unknown/expired token: '{token}'")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip token not found or expired",
         )
-        for trip in trips
-    ]
+
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    trip.status = "completed"
+    trip.last_updated_at = now_iso
+
+    db.commit()
+    db.refresh(trip)
+
+    # Log structured confirmation
+    log_payload = {
+        "event": "SAFEWALK_TRIP_COMPLETED",
+        "trip_token": token,
+        "user_id": trip.user_id,
+        "completed_at": now_iso,
+        "destination": trip.destination,
+        "status": "completed",
+    }
+    logger.info(json.dumps(log_payload))
+
+    return TripCompleteResponse(
+        status="success",
+        message="SafeWalk escort successfully completed. Traveler confirmed safe.",
+        trip_token=token,
+        trip_status="completed",
+        completed_at=now_iso,
+        trip=to_session_detail(trip),
+    )
+
+
+@router.post(
+    "/trip/{token}/cancel",
+    response_model=TripCancelResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Cancel SafeWalk Escort Session",
+    description="Cancels an active or overdue SafeWalk session, recording an optional cancellation reason.",
+)
+async def cancel_trip(
+    token: str,
+    payload: Optional[TripCancelRequest] = None,
+    db: Session = Depends(get_db),
+) -> TripCancelResponse:
+    """Abort or cancel an active SafeWalk escort session early."""
+    trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip token not found or expired",
+        )
+
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    trip.status = "cancelled"
+    trip.last_updated_at = now_iso
+    if payload and payload.reason:
+        trip.cancellation_reason = payload.reason
+
+    db.commit()
+    db.refresh(trip)
+
+    logger.info(f"SafeWalk trip '{token}' cancelled. Reason: '{trip.cancellation_reason}'")
+
+    return TripCancelResponse(
+        status="cancelled",
+        message="SafeWalk escort session has been cancelled.",
+        trip_token=token,
+        trip_status="cancelled",
+        cancelled_at=now_iso,
+        cancellation_reason=trip.cancellation_reason,
+        trip=to_session_detail(trip),
+    )
+
+
+@router.post(
+    "/trip/{token}/escalate",
+    response_model=TripEscalateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Escalate SafeWalk Escort to Emergency SOS",
+    description="Immediately transitions a live SafeWalk session into an active Emergency SOS alert, dispatching coordinates to emergency contacts.",
+)
+async def escalate_trip(
+    token: str,
+    db: Session = Depends(get_db),
+) -> TripEscalateResponse:
+    """Escalate active SafeWalk escort to emergency SOS dispatch."""
+    trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip token not found or expired",
+        )
+
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    trip.status = "escalated"
+    trip.last_updated_at = now_iso
+
+    lat = trip.latitude if trip.latitude is not None else 0.0
+    lon = trip.longitude if trip.longitude is not None else 0.0
+    google_maps_url = f"https://maps.google.com/?q={lat},{lon}"
+    alert_id = f"esc_{secrets.token_hex(6)}"
+
+    # Fetch contacts
+    search_keys = [trip.user_id]
+    db_contacts = (
+        db.query(TrustedContactModel)
+        .filter(TrustedContactModel.user_id.in_(search_keys))
+        .all()
+    )
+    contacts: List[Dict[str, Any]] = []
+    if db_contacts:
+        for c in db_contacts:
+            contacts.append({
+                "name": c.name,
+                "phone": c.phone_number,
+                "email": c.email,
+                "relationship": c.relationship or "Trusted Emergency Contact",
+            })
+    else:
+        contacts = get_emergency_contacts(trip.user_id)
+
+    distress_message = (
+        f"🚨 SAFEWALK ESCALATION ALERT [SAFEMATE] 🚨\n"
+        f"User '{trip.user_id}' requested emergency escalation during active SafeWalk to '{trip.destination}'!\n"
+        f"Trip Token: {token}\n"
+        f"Live GPS Location: {lat}, {lon}\n"
+        f"Google Maps Link: {google_maps_url}\n"
+        f"IMMEDIATE ASSISTANCE REQUIRED."
+    )
+
+    try:
+        await dispatch_emergency_notifications(
+            alert_id=alert_id,
+            user_id=trip.user_id,
+            contacts=contacts,
+            distress_message=distress_message,
+            google_maps_url=google_maps_url,
+            dispatch_timestamp=now_iso,
+        )
+    except Exception as exc:
+        logger.warning(f"Failed to dispatch escalation notifications: {exc}")
+
+    try:
+        emergency_log = EmergencyLogModel(
+            alert_id=alert_id,
+            user_id=trip.user_id,
+            latitude=lat,
+            longitude=lon,
+            triggered_at=now_iso,
+            status="escalated_from_safewalk",
+            distress_message=distress_message,
+            google_maps_url=google_maps_url,
+            contacts_alerted_count=len(contacts),
+        )
+        db.add(emergency_log)
+    except Exception as log_err:
+        logger.warning(f"Failed to record EmergencyLogModel for escalation: {log_err}")
+
+    db.commit()
+    db.refresh(trip)
+
+    return TripEscalateResponse(
+        status="escalated",
+        message="SafeWalk escort escalated to active Emergency SOS. Emergency contacts notified.",
+        trip_token=token,
+        alert_id=alert_id,
+        escalated_at=now_iso,
+        contacts_alerted=len(contacts),
+        trip=to_session_detail(trip),
+    )
+
+

@@ -212,3 +212,118 @@ def test_root_lists_safewalk_endpoints(client):
     assert data["safewalk_create_trip"] == "/api/v1/safewalk/create-trip"
     assert data["safewalk_trip"] == "/api/v1/safewalk/trip/{token}"
     assert data["safewalk_update_location"] == "/api/v1/safewalk/update-location"
+    assert data["safewalk_complete_trip"] == "/api/v1/safewalk/trip/{token}/complete"
+
+
+def test_complete_trip_success(client, auth_headers):
+    """Test safely completing an active SafeWalk trip."""
+    create_res = client.post("/api/v1/safewalk/create-trip", json={
+        "user_id": "usr_safe_traveler",
+        "destination": "Dormitory 4",
+        "duration_minutes": 15,
+    }, headers=auth_headers)
+    assert create_res.status_code == 200
+    token = create_res.json()["trip_token"]
+
+    comp_res = client.post(f"/api/v1/safewalk/trip/{token}/complete")
+    assert comp_res.status_code == 200
+    data = comp_res.json()
+    assert data["status"] == "success"
+    assert data["trip_status"] == "completed"
+    assert data["trip"]["status"] == "completed"
+
+    # Verify get_trip returns completed and does not overwrite to overdue
+    get_res = client.get(f"/api/v1/safewalk/trip/{token}")
+    assert get_res.status_code == 200
+    assert get_res.json()["status"] == "completed"
+
+
+def test_complete_trip_not_found(client):
+    """Test completing nonexistent trip token returns 404."""
+    res = client.post("/api/v1/safewalk/trip/tk_nonexistent_xyz/complete")
+    assert res.status_code == 404
+
+
+def test_safewalk_breadcrumbs_trail(client, auth_headers):
+    """Verify multiple location updates append to breadcrumbs history."""
+    create_res = client.post("/api/v1/safewalk/create-trip", json={
+        "user_id": "usr_trail_walker",
+        "destination": "Student Union",
+        "duration_minutes": 20,
+    }, headers=auth_headers)
+    token = create_res.json()["trip_token"]
+
+    # 1st point
+    client.post("/api/v1/safewalk/update-location", json={
+        "token": token,
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+    })
+
+    # 2nd point
+    up2 = client.post("/api/v1/safewalk/update-location", json={
+        "token": token,
+        "latitude": 37.7755,
+        "longitude": -122.4180,
+    })
+    assert up2.status_code == 200
+    crumbs = up2.json()["trip"]["breadcrumbs"]
+    assert len(crumbs) == 2
+    assert crumbs[0]["latitude"] == 37.7749
+    assert crumbs[1]["latitude"] == 37.7755
+
+    # Verify get_trip returns the full breadcrumbs trail
+    get_res = client.get(f"/api/v1/safewalk/trip/{token}")
+    assert len(get_res.json()["breadcrumbs"]) == 2
+
+
+def test_cancel_safewalk_trip(client, auth_headers):
+    """Verify cancelling an active trip sets cancelled status and records reason."""
+    create_res = client.post("/api/v1/safewalk/create-trip", json={
+        "user_id": "usr_cancel_walker",
+        "destination": "Metro Station",
+        "duration_minutes": 15,
+    }, headers=auth_headers)
+    token = create_res.json()["trip_token"]
+
+    cancel_res = client.post(
+        f"/api/v1/safewalk/trip/{token}/cancel",
+        json={"reason": "Boarded campus shuttle bus with colleagues."},
+    )
+    assert cancel_res.status_code == 200
+    data = cancel_res.json()
+    assert data["status"] == "cancelled"
+    assert data["trip_status"] == "cancelled"
+    assert data["cancellation_reason"] == "Boarded campus shuttle bus with colleagues."
+
+    # Verify GET reflects cancelled state
+    get_res = client.get(f"/api/v1/safewalk/trip/{token}")
+    assert get_res.json()["status"] == "cancelled"
+    assert get_res.json()["cancellation_reason"] == "Boarded campus shuttle bus with colleagues."
+
+
+def test_escalate_safewalk_trip(client, auth_headers):
+    """Verify escalating an active SafeWalk trip directly triggers Emergency SOS."""
+    create_res = client.post("/api/v1/safewalk/create-trip", json={
+        "user_id": "usr_escalate_walker",
+        "destination": "Parking Lot B",
+        "duration_minutes": 10,
+    }, headers=auth_headers)
+    token = create_res.json()["trip_token"]
+
+    # Update location first so escalation has GPS coordinates
+    client.post("/api/v1/safewalk/update-location", json={
+        "token": token,
+        "latitude": 37.7780,
+        "longitude": -122.4160,
+    })
+
+    esc_res = client.post(f"/api/v1/safewalk/trip/{token}/escalate")
+    assert esc_res.status_code == 200
+    esc_data = esc_res.json()
+    assert esc_data["status"] == "escalated"
+    assert esc_data["alert_id"] is not None
+    assert esc_data["contacts_alerted"] >= 1
+    assert esc_data["trip"]["status"] == "escalated"
+
+

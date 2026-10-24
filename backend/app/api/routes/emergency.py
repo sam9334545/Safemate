@@ -19,10 +19,14 @@ from app.schemas.emergency import (
     ContactCreate,
     ContactDeleteResponse,
     ContactResponse,
+    ContactUpdate,
     DirectCallRequest,
     DirectCallResponse,
     DispatchedAlertInfo,
+    SOSAlertDetail,
     SOSRequest,
+    SOSResolveRequest,
+    SOSResolveResponse,
     SOSResponse,
 )
 from app.utils.auth import get_current_user, get_optional_current_user
@@ -309,6 +313,52 @@ async def delete_trusted_contact(
     )
 
 
+@router.put(
+    "/contacts/{contact_id}",
+    response_model=ContactResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update a Trusted Emergency Contact",
+    description="Updates information for an existing trusted emergency contact belonging to the authenticated user.",
+)
+async def update_trusted_contact(
+    contact_id: int,
+    payload: ContactUpdate,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ContactResponse:
+    """Update fields of an existing trusted contact."""
+    contact = (
+        db.query(TrustedContactModel)
+        .filter(
+            TrustedContactModel.id == contact_id,
+            (TrustedContactModel.user_id == str(current_user.id))
+            | (TrustedContactModel.user_id == current_user.email),
+        )
+        .first()
+    )
+    if not contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Trusted contact with ID {contact_id} not found.",
+        )
+
+    if payload.name is not None:
+        contact.name = payload.name
+    if payload.phone_number is not None:
+        contact.phone_number = payload.phone_number
+    if payload.email is not None:
+        contact.email = payload.email
+    if payload.relationship is not None:
+        contact.relationship = payload.relationship
+
+    db.commit()
+    db.refresh(contact)
+    logger.info(
+        f"User '{current_user.email}' updated trusted contact '{contact.name}' (ID: {contact_id})"
+    )
+    return contact
+
+
 # ---------------------------------------------------------------------------
 # Emergency SOS Panic Trigger Endpoint
 # ---------------------------------------------------------------------------
@@ -403,6 +453,7 @@ async def trigger_sos(
     # 5. Record audit trail in EmergencyLogModel
     try:
         emergency_log = EmergencyLogModel(
+            alert_id=alert_id,
             user_id=resolved_user_id,
             latitude=payload.latitude,
             longitude=payload.longitude,
@@ -507,3 +558,139 @@ async def trigger_direct_call(
         call_sid=call_sid,
         tel_link=tel_link,
     )
+
+
+@router.get(
+    "/alerts",
+    summary="List Emergency SOS Panic Audit Logs",
+    description="Returns recent emergency dispatch logs and audit confirmations.",
+)
+async def list_emergency_alerts(
+    db: Session = Depends(get_db),
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> List[Dict[str, Any]]:
+    """Retrieve audit history of triggered emergency SOS panic alerts."""
+    query = db.query(EmergencyLogModel)
+    if current_user:
+        query = query.filter(
+            (EmergencyLogModel.user_id == str(current_user.id))
+            | (EmergencyLogModel.user_id == current_user.email)
+        )
+    logs = query.order_by(EmergencyLogModel.id.desc()).limit(20).all()
+    return [
+        {
+            "id": log.id,
+            "alert_id": log.alert_id or f"sos_legacy_{log.id}",
+            "user_id": log.user_id,
+            "latitude": log.latitude,
+            "longitude": log.longitude,
+            "triggered_at": log.triggered_at,
+            "status": log.status,
+            "distress_message": log.distress_message,
+            "google_maps_url": log.google_maps_url,
+            "contacts_alerted_count": log.contacts_alerted_count,
+            "resolved_at": log.resolved_at,
+            "resolution_notes": log.resolution_notes,
+        }
+        for log in logs
+    ]
+
+
+@router.get(
+    "/sos/{alert_id}",
+    response_model=SOSAlertDetail,
+    summary="Get Emergency Alert Details",
+    description="Fetches full details and status of an emergency dispatch incident by alert ID.",
+)
+async def get_emergency_alert(
+    alert_id: str,
+    db: Session = Depends(get_db),
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> SOSAlertDetail:
+    """Retrieve details for a specific emergency alert."""
+    log = (
+        db.query(EmergencyLogModel)
+        .filter(
+            (EmergencyLogModel.alert_id == alert_id)
+            | (EmergencyLogModel.id == (int(alert_id) if alert_id.isdigit() else -1))
+        )
+        .first()
+    )
+    if not log:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Emergency alert record '{alert_id}' not found.",
+        )
+
+    # If authenticated, verify ownership unless admin
+    if current_user:
+        user_matches = log.user_id in (str(current_user.id), current_user.email)
+        if not user_matches and getattr(current_user, "role", "") != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access this emergency incident record.",
+            )
+
+    return SOSAlertDetail(
+        alert_id=log.alert_id or str(log.id),
+        user_id=log.user_id,
+        timestamp=log.triggered_at or "",
+        status=log.status or "dispatched",
+        latitude=log.latitude,
+        longitude=log.longitude,
+        distress_message=log.distress_message,
+        google_maps_url=log.google_maps_url,
+        contacts_alerted_count=log.contacts_alerted_count or 0,
+        resolved_at=log.resolved_at,
+        resolution_notes=log.resolution_notes,
+    )
+
+
+@router.post(
+    "/sos/{alert_id}/resolve",
+    response_model=SOSResolveResponse,
+    summary="Resolve an Emergency SOS Alert",
+    description="Marks an active emergency alert incident as resolved, recording de-escalation notes.",
+)
+async def resolve_emergency_alert(
+    alert_id: str,
+    payload: Optional[SOSResolveRequest] = None,
+    db: Session = Depends(get_db),
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> SOSResolveResponse:
+    """Mark an emergency dispatch incident resolved and safe."""
+    log = (
+        db.query(EmergencyLogModel)
+        .filter(
+            (EmergencyLogModel.alert_id == alert_id)
+            | (EmergencyLogModel.id == (int(alert_id) if alert_id.isdigit() else -1))
+        )
+        .first()
+    )
+    if not log:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Emergency alert record '{alert_id}' not found.",
+        )
+
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    log.status = "resolved"
+    log.resolved_at = now_iso
+    if payload and payload.resolution_notes:
+        log.resolution_notes = payload.resolution_notes
+
+    db.commit()
+    db.refresh(log)
+
+    logger.info(
+        f"Emergency alert '{alert_id}' marked as resolved at {now_iso} with notes: '{log.resolution_notes}'"
+    )
+
+    return SOSResolveResponse(
+        status="resolved",
+        message="Emergency alert successfully marked as resolved. Situation secured.",
+        alert_id=alert_id,
+        resolved_at=now_iso,
+        resolution_notes=log.resolution_notes,
+    )
+

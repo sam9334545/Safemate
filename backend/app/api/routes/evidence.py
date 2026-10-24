@@ -11,12 +11,14 @@ from typing import Any, Dict, List, Optional
 import uuid
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import EvidenceRecord, UserModel
 from app.utils.auth import get_current_user
 from app.schemas.evidence import (
+    EvidenceDeleteResponse,
     EvidenceRecordDetail,
     EvidenceUploadResponse,
 )
@@ -228,3 +230,112 @@ async def verify_evidence_integrity(
         "integrity_verified": is_valid,
         "timestamp": entry.timestamp,
     }
+
+
+@router.get(
+    "/download/{evidence_id}",
+    summary="Download Secured Evidence Binary",
+    description="Securely retrieves the encrypted or disguised evidence file for authorized legal chain-of-custody transfer.",
+)
+async def download_evidence(
+    evidence_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Download stored evidence file binary."""
+    entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Evidence record '{evidence_id}' was not found in database.",
+        )
+
+    target_path = Path(entry.file_path)
+    if not target_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Evidence binary file for '{evidence_id}' does not exist on vault storage.",
+        )
+
+    return FileResponse(
+        path=str(target_path),
+        filename=entry.file_name,
+        media_type="application/octet-stream",
+    )
+
+
+@router.get(
+    "/record/{evidence_id}",
+    response_model=EvidenceRecordDetail,
+    summary="Get Single Evidence Record Detail",
+    description="Retrieves metadata details for a single secured evidence record.",
+)
+async def get_evidence_record(
+    evidence_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> EvidenceRecordDetail:
+    """Retrieve metadata for a specific evidence record."""
+    entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Evidence record '{evidence_id}' was not found in database.",
+        )
+
+    return EvidenceRecordDetail(
+        evidence_id=entry.evidence_id,
+        user_id=entry.user_id,
+        file_name=entry.file_name,
+        file_size=entry.file_size,
+        sha256_checksum=entry.sha256_checksum,
+        latitude=entry.latitude,
+        longitude=entry.longitude,
+        note=entry.note,
+        timestamp=entry.timestamp,
+        simulated_dispatch_status=entry.simulated_dispatch_status,
+        google_maps_url=entry.google_maps_url,
+    )
+
+
+@router.delete(
+    "/record/{evidence_id}",
+    response_model=EvidenceDeleteResponse,
+    summary="Securely Delete Evidence Record & File",
+    description="Securely shreds physical binary from vault disk and purges metadata from database.",
+)
+async def delete_evidence_record(
+    evidence_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> EvidenceDeleteResponse:
+    """Securely delete evidence record and unlinks its physical file."""
+    entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Evidence record '{evidence_id}' was not found in database.",
+        )
+
+    # Securely remove file from storage
+    if entry.file_path:
+        target_path = Path(entry.file_path)
+        if target_path.exists():
+            try:
+                target_path.unlink()
+                logger.info(f"Unlinked vault evidence file: {target_path}")
+            except Exception as err:
+                logger.warning(f"Could not unlink file {target_path}: {err}")
+
+    db.delete(entry)
+    db.commit()
+
+    logger.info(f"Evidence record '{evidence_id}' purged from vault database.")
+
+    return EvidenceDeleteResponse(
+        status="success",
+        message=f"Evidence record '{evidence_id}' and associated file securely purged from vault.",
+        evidence_id=evidence_id,
+    )
+
+

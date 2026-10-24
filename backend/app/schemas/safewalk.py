@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -84,6 +84,14 @@ class TripSessionDetail(BaseModel):
         default=None, description="Timestamp of the most recent coordinate update"
     )
     shareable_link: str = Field(..., description="Shareable live-tracking web URL")
+    breadcrumbs: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Historical sequence of recorded GPS coordinates and timestamps",
+    )
+    cancellation_reason: Optional[str] = Field(
+        default=None,
+        description="Reason if the walk was cancelled early",
+    )
 
 
 class LocationUpdateRequest(BaseModel):
@@ -131,3 +139,59 @@ class LocationUpdateResponse(BaseModel):
     trip_status: str = Field(..., description="Current status of the trip ('active' or 'overdue')")
     expected_arrival: str = Field(..., description="Expected arrival timestamp")
     trip: TripSessionDetail = Field(..., description="Current trip metadata")
+
+
+class TripCompleteResponse(BaseModel):
+    """Response returned upon safely completing a SafeWalk escort trip."""
+
+    status: str = Field(default="success", description="Status confirmation")
+    message: str = Field(
+        default="SafeWalk escort successfully completed. Traveler confirmed safe.",
+        description="Confirmation message",
+    )
+    trip_token: str = Field(..., description="Trip token identifier")
+    trip_status: str = Field(default="completed", description="Final trip status")
+    completed_at: str = Field(..., description="Timestamp of completion")
+    trip: TripSessionDetail = Field(..., description="Completed trip metadata")
+
+
+class TripCancelRequest(BaseModel):
+    """Request payload to cancel an active SafeWalk escort session."""
+
+    reason: Optional[str] = Field(
+        default=None,
+        description="Optional reason explaining why the walk was cancelled early",
+        examples=["Reached destination via vehicle with a friend.", "Change of plans."],
+    )
+
+
+class TripCancelResponse(BaseModel):
+    """Response returned upon cancelling an active SafeWalk session."""
+
+    status: str = Field(default="cancelled", description="Status confirmation")
+    message: str = Field(
+        default="SafeWalk escort session has been cancelled.",
+        description="Cancellation confirmation message",
+    )
+    trip_token: str = Field(..., description="Trip token identifier")
+    trip_status: str = Field(default="cancelled", description="Trip status")
+    cancelled_at: str = Field(..., description="Timestamp of cancellation")
+    cancellation_reason: Optional[str] = Field(default=None, description="Reason recorded for cancellation")
+    trip: TripSessionDetail = Field(..., description="Cancelled trip metadata")
+
+
+class TripEscalateResponse(BaseModel):
+    """Response returned when an active SafeWalk session is escalated into an emergency SOS dispatch."""
+
+    status: str = Field(default="escalated", description="Escalation status")
+    message: str = Field(
+        default="SafeWalk escort escalated to active Emergency SOS. Emergency contacts notified.",
+        description="Incident escalation message",
+    )
+    trip_token: str = Field(..., description="Trip token identifier")
+    alert_id: Optional[str] = Field(default=None, description="Emergency alert identifier generated")
+    escalated_at: str = Field(..., description="Timestamp when escalation occurred")
+    contacts_alerted: int = Field(default=0, description="Total emergency contacts alerted")
+    trip: TripSessionDetail = Field(..., description="Escalated trip metadata")
+
+

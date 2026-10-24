@@ -186,3 +186,64 @@ def test_root_endpoint_lists_evidence_upload(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json()["evidence_upload"] == "/api/v1/evidence/upload"
+    assert response.json()["evidence_download"] == "/api/v1/evidence/download/{evidence_id}"
+
+
+def test_download_evidence_success(client, auth_headers):
+    """Test downloading a previously uploaded evidence binary."""
+    content = b"evidence_binary_content_for_download_test"
+    files = {"file": ("recording.wav", io.BytesIO(content), "audio/wav")}
+    form_data = {
+        "user_id": "usr_safemate_001",
+        "latitude": "37.774929",
+        "longitude": "-122.419416",
+        "note": "Download test audio",
+    }
+    upload_res = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
+    assert upload_res.status_code == 200
+    evidence_id = upload_res.json()["evidence_id"]
+
+    download_res = client.get(f"/api/v1/evidence/download/{evidence_id}", headers=auth_headers)
+    assert download_res.status_code == 200
+    assert download_res.content == content
+
+
+def test_download_evidence_not_found(client, auth_headers):
+    """Test downloading non-existent evidence returns 404."""
+    download_res = client.get("/api/v1/evidence/download/evd_nonexistent999", headers=auth_headers)
+    assert download_res.status_code == 404
+
+
+def test_get_and_delete_evidence_record(client, auth_headers):
+    """Test retrieving single evidence metadata and securely deleting it."""
+    content = b"evidence_binary_for_deletion_test"
+    files = {"file": ("temp_evidence.wav", io.BytesIO(content), "audio/wav")}
+    form_data = {
+        "user_id": "usr_safemate_001",
+        "latitude": "37.774929",
+        "longitude": "-122.419416",
+        "note": "Temporary test audio for deletion",
+    }
+    upload_res = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
+    assert upload_res.status_code == 200
+    evidence_id = upload_res.json()["evidence_id"]
+
+    # 1. Get single evidence record
+    get_res = client.get(f"/api/v1/evidence/record/{evidence_id}", headers=auth_headers)
+    assert get_res.status_code == 200
+    record = get_res.json()
+    assert record["evidence_id"] == evidence_id
+    assert record["file_name"] == "temp_evidence.wav"
+
+    # 2. Delete evidence record
+    del_res = client.delete(f"/api/v1/evidence/record/{evidence_id}", headers=auth_headers)
+    assert del_res.status_code == 200
+    del_data = del_res.json()
+    assert del_data["status"] == "success"
+    assert del_data["evidence_id"] == evidence_id
+
+    # 3. Verify get returns 404 after deletion
+    get_after = client.get(f"/api/v1/evidence/record/{evidence_id}", headers=auth_headers)
+    assert get_after.status_code == 404
+
+

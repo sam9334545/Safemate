@@ -285,3 +285,92 @@ def test_sos_with_authenticated_user_custom_contacts(client, test_user):
         assert log_entry.longitude == -122.419416
         assert log_entry.status == "dispatched"
         assert "East Quad Gate" in log_entry.distress_message
+
+
+def test_list_emergency_alerts(client, test_user):
+    """Verify querying emergency SOS audit logs endpoint."""
+    res = client.get("/api/v1/emergency/alerts", headers=test_user["headers"])
+    assert res.status_code == 200
+    data = res.json()
+    assert isinstance(data, list)
+    if len(data) > 0:
+        alert = data[0]
+        assert "id" in alert
+        assert "latitude" in alert
+        assert "longitude" in alert
+        assert "triggered_at" in alert
+        assert "status" in alert
+
+
+def test_update_trusted_contact(client, test_user):
+    """Verify editing an existing trusted contact via PUT."""
+    # 1. Create a contact
+    create_res = client.post(
+        "/api/v1/emergency/contacts",
+        json={
+            "name": "Original Name",
+            "phone_number": "+1-555-8888",
+            "relationship": "Roommate",
+        },
+        headers=test_user["headers"],
+    )
+    assert create_res.status_code == 201
+    contact_id = create_res.json()["id"]
+
+    # 2. Update contact
+    update_res = client.put(
+        f"/api/v1/emergency/contacts/{contact_id}",
+        json={
+            "name": "Updated Safe Contact",
+            "relationship": "Primary Guardian",
+        },
+        headers=test_user["headers"],
+    )
+    assert update_res.status_code == 200
+    updated_data = update_res.json()
+    assert updated_data["name"] == "Updated Safe Contact"
+    assert updated_data["relationship"] == "Primary Guardian"
+    assert updated_data["phone_number"] == "+1-555-8888"
+
+
+def test_emergency_alert_lifecycle_and_resolution(client, test_user):
+    """Verify triggering an alert, fetching it by ID, and resolving it with notes."""
+    # 1. Trigger SOS
+    sos_res = client.post(
+        "/api/v1/emergency/sos",
+        json={
+            "latitude": 34.052235,
+            "longitude": -118.243683,
+            "message": "Testing emergency resolution flow",
+        },
+        headers=test_user["headers"],
+    )
+    assert sos_res.status_code == 200
+    alert_id = sos_res.json()["alert_id"]
+
+    # 2. Get alert detail
+    detail_res = client.get(f"/api/v1/emergency/sos/{alert_id}", headers=test_user["headers"])
+    assert detail_res.status_code == 200
+    detail = detail_res.json()
+    assert detail["alert_id"] == alert_id
+    assert detail["status"] == "dispatched"
+    assert detail["latitude"] == 34.052235
+
+    # 3. Resolve alert
+    resolve_res = client.post(
+        f"/api/v1/emergency/sos/{alert_id}/resolve",
+        json={"resolution_notes": "Safe at home. Verified by escort."},
+        headers=test_user["headers"],
+    )
+    assert resolve_res.status_code == 200
+    resolve_data = resolve_res.json()
+    assert resolve_data["status"] == "resolved"
+    assert resolve_data["alert_id"] == alert_id
+    assert resolve_data["resolution_notes"] == "Safe at home. Verified by escort."
+
+    # 4. Verify updated detail reflects resolved state
+    updated_detail = client.get(f"/api/v1/emergency/sos/{alert_id}", headers=test_user["headers"]).json()
+    assert updated_detail["status"] == "resolved"
+    assert updated_detail["resolved_at"] is not None
+    assert updated_detail["resolution_notes"] == "Safe at home. Verified by escort."
+
