@@ -68,12 +68,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      // 1. If calcModal is open, close it
       const calcModal = document.getElementById('calc-disguise-modal');
       if (calcModal && calcModal.classList.contains('active')) {
         calcModal.classList.remove('active');
-      } else {
-        toggleRecipeDisguise();
+        return;
       }
+      // 2. If any workspace modal or tell-once modal is open, close it first
+      const activeModal = document.querySelector('.modal-overlay.active');
+      if (activeModal) {
+        activeModal.classList.remove('active');
+        document.body.style.overflow = '';
+        if (activeModal.id === 'tell-once-modal') {
+          if (typeof stopSpeechRecognition === 'function') stopSpeechRecognition();
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+        return;
+      }
+      // 3. Otherwise toggle stealth recipe disguise
+      toggleRecipeDisguise();
     }
   });
 
@@ -1438,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnEmergencyScroll = document.getElementById('btn-emergency-scroll');
   if (btnEmergencyScroll) {
     btnEmergencyScroll.addEventListener('click', () => {
-      document.getElementById('sos-section').scrollIntoView({ behavior: 'smooth' });
+      openWorkspaceModal('modal-feature-sos');
     });
   }
 
@@ -1948,4 +1961,102 @@ document.addEventListener('DOMContentLoaded', () => {
       initiateTellOnceIntake(tellOnceLanguage);
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // 11. Feature Detail Workspaces & Category Filter Controller
+  // ---------------------------------------------------------------------------
+  function openWorkspaceModal(modalId) {
+    if (!modalId) return;
+    if (modalId === 'tell-once-modal') {
+      openTellOnceModal(tellOnceLanguage || 'en');
+      return;
+    }
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      // Auto-focus first input or button inside the modal
+      const focusTarget = modal.querySelector('input:not([type="hidden"]), textarea, button.btn-primary');
+      if (focusTarget) setTimeout(() => focusTarget.focus(), 120);
+    }
+  }
+
+  function closeWorkspaceModal(modalId) {
+    if (!modalId) return;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      if (modalId === 'tell-once-modal') {
+        stopSpeechRecognition();
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    }
+  }
+
+  // Open workspace modal on feature card tile click
+  document.querySelectorAll('.feature-card-tile').forEach((tile) => {
+    tile.addEventListener('click', (e) => {
+      // Do not trigger if user clicked an interactive anchor inside
+      if (e.target.closest('a')) return;
+      const targetModal = tile.getAttribute('data-target-modal');
+      if (targetModal) openWorkspaceModal(targetModal);
+    });
+  });
+
+  // Open workspace modal on "Open in Detail / Open Workspace" button click
+  document.querySelectorAll('.btn-open-workspace').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetModal = btn.getAttribute('data-target-modal');
+      if (targetModal) openWorkspaceModal(targetModal);
+    });
+  });
+
+  // Close workspace modal buttons (X buttons and Done buttons)
+  document.querySelectorAll('[data-close-workspace]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetModal = btn.getAttribute('data-close-workspace');
+      if (targetModal) closeWorkspaceModal(targetModal);
+    });
+  });
+
+  // Modal backdrop click to close
+  document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeWorkspaceModal(overlay.id);
+      }
+    });
+  });
+
+  // Hero SOS quick launch to open SOS Workspace
+  const btnHeroSos = document.getElementById('btn-hero-sos');
+  if (btnHeroSos) {
+    btnHeroSos.addEventListener('click', () => {
+      openWorkspaceModal('modal-feature-sos');
+    });
+  }
+
+  // Category Filter Tabs
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  const featureTiles = document.querySelectorAll('.feature-card-tile');
+
+  filterTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      const cat = tab.getAttribute('data-filter');
+
+      featureTiles.forEach((tile) => {
+        const tileCat = tile.getAttribute('data-feature-cat');
+        if (cat === 'all' || tileCat === cat) {
+          tile.style.display = 'flex';
+        } else {
+          tile.style.display = 'none';
+        }
+      });
+    });
+  });
 });
