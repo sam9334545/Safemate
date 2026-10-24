@@ -92,6 +92,12 @@ class FakeVideoDeepfakeService(VideoDeepfakeService):
         self.device = "cpu"
         self.artificial_score = artificial_score
         self.no_face = no_face
+        if is_loaded:
+            self.model = object()
+            self.detector = object()
+        else:
+            self.model = None
+            self.detector = None
 
     def load(self) -> bool:
         return self.is_loaded

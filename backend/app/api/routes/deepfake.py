@@ -7,7 +7,11 @@ from fastapi import APIRouter, Depends, File, Header, Query, UploadFile, status
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.schemas.deepfake import VideoDeepfakeResponse
+from app.schemas.deepfake import (
+    DeepfakeModelInfoResponse,
+    DeepfakeReadinessResponse,
+    VideoDeepfakeResponse,
+)
 from app.schemas.errors import ValidationException
 from app.services.video_deepfake_service import VideoDeepfakeService, get_video_deepfake_service
 from app.utils.request_id import get_request_id, set_request_id
@@ -15,6 +19,79 @@ from app.utils.request_id import get_request_id, set_request_id
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/deepfake", tags=["Video Deepfake Screening"])
+
+
+@router.get(
+    "/ready",
+    response_model=DeepfakeReadinessResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Video Deepfake Model Readiness Check",
+    responses={
+        200: {"description": "Video deepfake screening service is initialized and ready"},
+        503: {"description": "Video deepfake screening service is unready or initializing"},
+    },
+)
+def get_deepfake_readiness(
+    service: VideoDeepfakeService = Depends(get_video_deepfake_service),
+) -> JSONResponse:
+    """Check if the video deepfake neural model and face detector are loaded and ready."""
+    is_ready = service.is_loaded and service.model is not None and service.detector is not None
+    if is_ready:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "status": "ready",
+                "model_loaded": True,
+                "detector_loaded": True,
+                "model_id": service.model_id,
+                "device": service.device,
+            },
+        )
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={
+            "status": "unavailable",
+            "model_loaded": bool(service.model is not None),
+            "detector_loaded": bool(service.detector is not None),
+            "model_id": service.model_id,
+            "device": service.device,
+        },
+    )
+
+
+@router.get(
+    "/model-info",
+    response_model=DeepfakeModelInfoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Video Deepfake Screening Model Metadata",
+)
+def get_deepfake_model_info(
+    service: VideoDeepfakeService = Depends(get_video_deepfake_service),
+) -> DeepfakeModelInfoResponse:
+    """Return public metadata, supported classes, architecture, and limitations for video screening."""
+    return DeepfakeModelInfoResponse(
+        model_id=service.model_id,
+        task="video-deepfake-screening",
+        architecture="MS-EffGCViT-B0",
+        face_detector="YOLOv8n-Face",
+        description=(
+            "Mobile-Scale Efficient Global Context Vision Transformer (MS-EffGCViT-B0) paired with YOLOv8-Face. "
+            "Analyzes face bounding boxes extracted from video frames to screen for digital facial manipulation artifacts."
+        ),
+        model_loaded=service.is_loaded,
+        inference_available=service.is_loaded and service.model is not None,
+        labels=[
+            "potential_manipulation_detected",
+            "no_manipulation_detected_by_model",
+            "inconclusive",
+            "no_face_detected",
+        ],
+        limitations_notice=(
+            "This is an automated video deepfake screening estimate, not definitive proof that a video is authentic, "
+            "manipulated, or legally admissible evidence. It requires visible facial clarity and does not evaluate personal identity or consent."
+        ),
+    )
+
 
 
 @router.post(

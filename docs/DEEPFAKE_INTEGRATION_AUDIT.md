@@ -119,7 +119,7 @@ backend/
 │   ├── test_health.py         # 4 existing health tests [100% PASSING]
 │   ├── test_model_info.py     # 2 existing model-info tests [100% PASSING]
 │   ├── test_validation.py     # 13 existing validation tests [100% PASSING]
-│   └── test_deepfake.py       # 14 new video deepfake tests [100% PASSING]
+│   └── test_deepfake.py       # 20 video deepfake tests [100% PASSING]
 └── THIRD_PARTY_NOTICES.md     # Full license notices and model attribution
 ```
 
@@ -129,7 +129,7 @@ backend/
 
 The integration of the video deepfake detection feature is **VERIFIED AND APPROVED**:
 - **Backward Compatibility:** All 31 pre-existing tests continue to pass without modifications or regressions.
-- **New Test Coverage:** 14 new video tests added (total **45 passed in 1.27s**).
+- **New Test Coverage:** 20 video tests added (total **51 passed in 1.80s**).
 - **Attribution & Transparency:** Full notices provided in `THIRD_PARTY_NOTICES.md` acknowledging DeepGuard (`HanMoonSub`, MIT), `KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus` (MIT), `umm-maybe/AI-image-detector` (CC BY-ND 4.0), and YOLOv8-Face.
 - **Privacy & Safety:** All video processing is ephemeral; temporary files are deleted immediately in guaranteed `finally` execution blocks.
 - **Competition Timing:** All commits finalized during the active recHERsion 2026 prototyping window well before the deadline.

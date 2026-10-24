@@ -239,3 +239,85 @@ def test_backward_compatibility_existing_endpoints(client: TestClient, valid_jpe
     data = res.json()
     assert data["success"] is True
     assert data["prediction"]["label"] == "artificial"
+
+
+def test_deepfake_ready_endpoint_loaded(client: TestClient):
+    """Test GET /api/v1/deepfake/ready returns 200 when service is initialized."""
+    res = client.get("/api/v1/deepfake/ready")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "ready"
+    assert data["model_loaded"] is True
+    assert data["detector_loaded"] is True
+    assert data["model_id"] == "KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus"
+    assert data["device"] == "cpu"
+
+
+def test_deepfake_ready_endpoint_unready():
+    """Test GET /api/v1/deepfake/ready returns 503 when service is unavailable."""
+    app = create_app()
+    unready = FakeVideoDeepfakeService(is_loaded=False)
+    app.dependency_overrides[get_model_service] = lambda: FakeModelService(is_loaded=True)
+    app.dependency_overrides[get_video_deepfake_service] = lambda: unready
+
+    with TestClient(app) as test_client:
+        res = test_client.get("/api/v1/deepfake/ready")
+        assert res.status_code == 503
+        data = res.json()
+        assert data["status"] == "unavailable"
+        assert data["model_loaded"] is False
+
+
+def test_deepfake_model_info_endpoint(client: TestClient):
+    """Test GET /api/v1/deepfake/model-info returns metadata and disclaimers."""
+    res = client.get("/api/v1/deepfake/model-info")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["architecture"] == "MS-EffGCViT-B0"
+    assert data["face_detector"] == "YOLOv8n-Face"
+    assert data["task"] == "video-deepfake-screening"
+    assert "potential_manipulation_detected" in data["labels"]
+    assert len(data["limitations_notice"]) > 20
+
+
+def test_deepfake_service_aggregate_predictions():
+    """Test confidence, mean, and vote prediction aggregation methods."""
+    import numpy as np
+
+    # Empty array
+    assert VideoDeepfakeService._aggregate_predictions(np.array([])) == 0.0
+
+    # Mean mode
+    preds = np.array([0.2, 0.4, 0.6, 0.8])
+    assert round(VideoDeepfakeService._aggregate_predictions(preds, agg_mode="mean"), 2) == 0.50
+
+    # Vote mode
+    assert VideoDeepfakeService._aggregate_predictions(preds, agg_mode="vote") == 0.50
+
+    # High fake confidence
+    high_fakes = np.array([0.9, 0.95, 0.85, 0.92, 0.1, 0.2])
+    score = VideoDeepfakeService._aggregate_predictions(high_fakes, agg_mode="conf")
+    assert score > 0.85
+
+
+def test_deepfake_service_normalize_face():
+    """Test face normalization generates correctly shaped and typed ImageNet tensors."""
+    import numpy as np
+    import torch
+
+    dummy_face = np.full((120, 120, 3), 128, dtype=np.uint8)
+    tensor = VideoDeepfakeService._normalize_face(dummy_face, target_size=224)
+    assert isinstance(tensor, torch.Tensor)
+    assert tensor.shape == (3, 224, 224)
+    assert tensor.dtype == torch.float32
+
+
+def test_root_discovery_includes_deepfake_endpoints(client: TestClient):
+    """Verify GET / exposes deepfake screening, readiness, and metadata endpoints."""
+    res = client.get("/")
+    assert res.status_code == 200
+    data = res.json()
+    assert "video_deepfake_screening" in data
+    assert "video_deepfake_ready" in data
+    assert "video_deepfake_model_info" in data
+

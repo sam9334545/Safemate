@@ -170,6 +170,8 @@ def create_app() -> FastAPI:
             "model_info": f"{settings.API_V1_PREFIX}/model-info",
             "image_screening": f"{settings.API_V1_PREFIX}/detect",
             "video_deepfake_screening": f"{settings.API_V1_PREFIX}/deepfake/detect",
+            "video_deepfake_ready": f"{settings.API_V1_PREFIX}/deepfake/ready",
+            "video_deepfake_model_info": f"{settings.API_V1_PREFIX}/deepfake/model-info",
         }
 
     return app

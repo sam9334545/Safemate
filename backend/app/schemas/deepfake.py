@@ -38,3 +38,36 @@ class VideoDeepfakeResponse(BaseModel):
         description="Responsible usage disclaimers and operational limitations",
     )
     request_id: str = Field(..., description="Traceable correlation ID without personal data")
+
+
+class DeepfakeReadinessResponse(BaseModel):
+    """Schema for GET /api/v1/deepfake/ready."""
+
+    status: str = Field(..., description="'ready' or 'unavailable'")
+    model_loaded: bool = Field(..., description="Whether MS-EffGCViT model is loaded")
+    detector_loaded: bool = Field(..., description="Whether YOLO face detector is loaded")
+    model_id: str = Field(..., description="Video model identifier")
+    device: str = Field(..., description="Execution compute device (e.g. cpu)")
+
+
+class DeepfakeModelInfoResponse(BaseModel):
+    """Schema for GET /api/v1/deepfake/model-info."""
+
+    model_id: str = Field(..., description="Model identifier on Hugging Face Hub")
+    task: str = Field("video-deepfake-screening", description="Machine learning task name")
+    architecture: str = Field("MS-EffGCViT-B0", description="Underlying neural network architecture")
+    face_detector: str = Field("YOLOv8n-Face", description="Face localization model")
+    description: str = Field(..., description="Plain-language description of capabilities")
+    model_loaded: bool = Field(..., description="Whether model weights are loaded in memory")
+    inference_available: bool = Field(..., description="Whether inference is operational")
+    labels: List[str] = Field(
+        default_factory=lambda: [
+            "potential_manipulation_detected",
+            "no_manipulation_detected_by_model",
+            "inconclusive",
+            "no_face_detected",
+        ],
+        description="Possible screening classifications",
+    )
+    limitations_notice: str = Field(..., description="Safemate responsible screening notice")
+

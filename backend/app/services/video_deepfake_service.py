@@ -15,6 +15,10 @@ from app.schemas.errors import InferenceException, ModelNotReadyException, Valid
 
 logger = logging.getLogger(__name__)
 
+# Pre-allocated ImageNet normalization tensors for efficient CPU frame preprocessing
+_IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+_IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+
 
 class VideoDeepfakeService:
     """Service encapsulating video frame extraction, face detection, and MS-EffGCViT inference."""
@@ -72,7 +76,7 @@ class VideoDeepfakeService:
             return False
 
     def _sample_frames(self, video_path: str, num_frames: int) -> List[np.ndarray]:
-        """Evenly sample frames from the video file."""
+        """Evenly sample frames from the video file with resolution, duration, and frame bounds."""
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             cap.release()
@@ -91,13 +95,47 @@ class VideoDeepfakeService:
                 status_code=400,
             )
 
+        # 1. Enforce resolution limits
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if (
+            width > settings.MAX_VIDEO_RESOLUTION_DIMENSION
+            or height > settings.MAX_VIDEO_RESOLUTION_DIMENSION
+        ):
+            cap.release()
+            raise ValidationException(
+                message=f"Video dimensions ({width}x{height}) exceed maximum allowed dimension of {settings.MAX_VIDEO_RESOLUTION_DIMENSION}px.",
+                code="EXCESSIVE_DIMENSIONS",
+                status_code=400,
+            )
+
+        # 2. Enforce video duration limits
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        if fps and fps > 0:
+            duration_sec = total_frames / fps
+            if duration_sec > settings.MAX_VIDEO_DURATION_SECONDS:
+                cap.release()
+                raise ValidationException(
+                    message=f"Video duration ({duration_sec:.1f}s) exceeds maximum allowed duration of {settings.MAX_VIDEO_DURATION_SECONDS}s.",
+                    code="VIDEO_TOO_LONG",
+                    status_code=400,
+                )
+
         indices = np.linspace(0, max(total_frames - 1, 0), num_frames, dtype=int)
         frames = []
         for idx in indices:
             cap.set(cv2.CAP_PROP_POS_FRAMES, int(idx))
             ret, frame = cap.read()
             if ret and frame is not None:
-                # Convert BGR (OpenCV) to RGB
+                # Downscale frames larger than 1080p to conserve memory and CPU processing
+                fh, fw = frame.shape[:2]
+                if max(fh, fw) > 1080:
+                    scale = 1080.0 / max(fh, fw)
+                    frame = cv2.resize(
+                        frame, (int(fw * scale), int(fh * scale)), interpolation=cv2.INTER_AREA
+                    )
+
+                # Convert BGR (OpenCV standard) to RGB
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frames.append(rgb_frame)
 
@@ -115,30 +153,42 @@ class VideoDeepfakeService:
         if self.detector is None:
             return None
 
-        results = self.detector(img, conf=conf_thres, verbose=False)[0]
-        if len(results.boxes) == 0:
+        try:
+            results = self.detector(img, conf=conf_thres, verbose=False)[0]
+            if len(results.boxes) == 0:
+                return None
+
+            data = results.boxes.data.cpu().numpy()
+            if data.ndim < 2 or data.shape[0] == 0:
+                return None
+
+            # Support both class 0 (face in multi-class) and single-class detectors
+            if data.shape[1] >= 6:
+                faces = data[data[:, 5] == 0]
+            else:
+                faces = data
+
+            if len(faces) == 0:
+                return None
+
+            # Select largest face by bounding box area
+            areas = (faces[:, 2] - faces[:, 0]) * (faces[:, 3] - faces[:, 1])
+            idx = int(np.argmax(areas))
+            h, w = img.shape[:2]
+            if areas[idx] / (h * w) < min_face_ratio:
+                return None
+
+            xmin, ymin, xmax, ymax = faces[idx, :4]
+            pad_w = int((xmax - xmin) * margin_ratio)
+            pad_h = int((ymax - ymin) * margin_ratio)
+            y1, y2 = max(int(ymin - pad_h), 0), min(int(ymax + pad_h), h)
+            x1, x2 = max(int(xmin - pad_w), 0), min(int(xmax + pad_w), w)
+
+            crop = img[y1:y2, x1:x2]
+            return crop if crop.size > 0 else None
+        except Exception as exc:
+            logger.debug(f"Face detection encountered an issue on frame: {exc}")
             return None
-
-        data = results.boxes.data.cpu().numpy()
-        faces = data[data[:, 5] == 0]  # Class 0: face
-        if len(faces) == 0:
-            return None
-
-        # Select largest face by bounding box area
-        areas = (faces[:, 2] - faces[:, 0]) * (faces[:, 3] - faces[:, 1])
-        idx = int(np.argmax(areas))
-        h, w = img.shape[:2]
-        if areas[idx] / (h * w) < min_face_ratio:
-            return None
-
-        xmin, ymin, xmax, ymax = faces[idx, :4]
-        pad_w = int((xmax - xmin) * margin_ratio)
-        pad_h = int((ymax - ymin) * margin_ratio)
-        y1, y2 = max(int(ymin - pad_h), 0), min(int(ymax + pad_h), h)
-        x1, x2 = max(int(xmin - pad_w), 0), min(int(xmax + pad_w), w)
-
-        crop = img[y1:y2, x1:x2]
-        return crop if crop.size > 0 else None
 
     @staticmethod
     def _normalize_face(crop: np.ndarray, target_size: int = 224) -> torch.Tensor:
@@ -146,10 +196,7 @@ class VideoDeepfakeService:
         resized = cv2.resize(crop, (target_size, target_size), interpolation=cv2.INTER_LINEAR)
         # Convert HWC uint8 [0, 255] to CHW float32 [0.0, 1.0]
         tensor = torch.from_numpy(resized).permute(2, 0, 1).float() / 255.0
-        # ImageNet normalization
-        mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-        std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
-        return (tensor - mean) / std
+        return (tensor - _IMAGENET_MEAN) / _IMAGENET_STD
 
     @staticmethod
     def _aggregate_predictions(preds: np.ndarray, agg_mode: str = "conf") -> float:

@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     VIDEO_DEEPFAKE_MODEL_ID: str = "KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus"
     MAX_VIDEO_UPLOAD_MB: int = 50
     MAX_VIDEO_FRAMES_SAMPLED: int = 20
+    MAX_VIDEO_DURATION_SECONDS: int = 180
+    MAX_VIDEO_RESOLUTION_DIMENSION: int = 3840
     ALLOWED_VIDEO_EXTENSIONS: List[str] = [".mp4", ".mov", ".avi", ".webm", ".mkv"]
     ALLOWED_VIDEO_MIME_TYPES: List[str] = [
         "video/mp4",
