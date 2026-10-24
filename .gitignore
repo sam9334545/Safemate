@@ -1,0 +1,34 @@
+# Global Git Ignore for recHersion Project
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Hugging Face caches & weights
+.cache/
+hf_home/
+*.bin
+*.pt
+*.safetensors
+*.onnx
+
+# Node / Frontend
+node_modules/
+dist/
+.vite/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

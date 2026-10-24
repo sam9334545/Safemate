@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ai-image-screening-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter  # Starter plan with >=1GB RAM is recommended because PyTorch model weights + runtime exceed 512MB
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: MODEL_ID
+        value: umm-maybe/AI-image-detector
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: http://localhost:5173
+      - key: MAX_UPLOAD_MB
+        value: "10"
+      - key: MAX_IMAGE_PIXELS
+        value: "16000000"
+      - key: LOG_LEVEL
+        value: INFO
+    healthCheckPath: /api/v1/health
