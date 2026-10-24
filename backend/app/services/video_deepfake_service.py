@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Video deepfake screening service utilizing MS-EffGCViT and YOLO face detection."""
 
 import logging
@@ -7,17 +8,21 @@ import time
 from typing import Any, Dict, List, Optional
 import cv2
 import numpy as np
-import torch
+
+try:
+    import torch
+    _IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+    _IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+except ImportError:
+    torch = None
+    _IMAGENET_MEAN = None
+    _IMAGENET_STD = None
 
 from app.core.config import settings
 from app.schemas.deepfake import STANDARD_VIDEO_LIMITATIONS
 from app.schemas.errors import InferenceException, ModelNotReadyException, ValidationException
 
 logger = logging.getLogger(__name__)
-
-# Pre-allocated ImageNet normalization tensors for efficient CPU frame preprocessing
-_IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
-_IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
 
 class VideoDeepfakeService:
