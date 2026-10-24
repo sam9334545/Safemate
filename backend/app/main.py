@@ -185,6 +185,11 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(watermark.router)
 
+    # Mount static assets for chatbot UI
+    static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
     # Mount frontend web application static files if directory exists
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
     if frontend_dir.exists():
