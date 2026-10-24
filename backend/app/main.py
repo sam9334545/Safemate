@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.routes import deepfake, detect, health, model_info
+from app.api.routes import deepfake, detect, emergency, health, model_info
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
@@ -158,6 +158,7 @@ def create_app() -> FastAPI:
     app.include_router(model_info.router, prefix=settings.API_V1_PREFIX)
     app.include_router(detect.router, prefix=settings.API_V1_PREFIX)
     app.include_router(deepfake.router, prefix=settings.API_V1_PREFIX)
+    app.include_router(emergency.router)
 
     @app.get("/", tags=["Root"])
     def root():
@@ -172,6 +173,7 @@ def create_app() -> FastAPI:
             "video_deepfake_screening": f"{settings.API_V1_PREFIX}/deepfake/detect",
             "video_deepfake_ready": f"{settings.API_V1_PREFIX}/deepfake/ready",
             "video_deepfake_model_info": f"{settings.API_V1_PREFIX}/deepfake/model-info",
+            "emergency_sos": f"{settings.API_V1_PREFIX}/emergency/sos",
         }
 
     return app
