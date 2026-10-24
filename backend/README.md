@@ -111,6 +111,50 @@ Primary screening endpoint.
   }
   ```
 
+### E. `POST /api/v1/deepfake/detect`
+Video deepfake and face-manipulation screening endpoint.
+- **Content-Type**: `multipart/form-data`
+- **Form Field**: `file` (video file: `.mp4`, `.mov`, `.avi`, `.webm`, `.mkv`; max 50 MB)
+- **Query Param (Optional)**: `num_frames` (integer between 5 and 30, default 20 frames sampled uniformly)
+- **Headers (Optional)**: `X-Request-ID` (client-provided correlation ID)
+- **Response (200 OK — Face Detected & Screened)**:
+  ```json
+  {
+    "success": true,
+    "status": "success",
+    "prediction": "potential_manipulation_detected",
+    "score": 0.8842,
+    "score_type": "confidence_score",
+    "model_name": "KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus",
+    "frames_sampled": 20,
+    "faces_detected": 18,
+    "message": "Automated screening detected visual patterns frequently associated with digital face manipulation (confidence score: 88.4% across 18 analyzed face crops). This screening score is probabilistic and not definitive proof of manipulation.",
+    "limitations": [
+      "This is an automated video deepfake screening estimate, not definitive proof that a video is authentic, manipulated, or legally admissible evidence.",
+      "Detection accuracy is dependent on visible facial clarity, lighting, compression, frame rate, and head movement.",
+      "This screening tool does not verify individual identity, consent, intent, or whether video content is non-consensual or abusive.",
+      "Do not use this automated screening score as the sole basis for moderation, legal, or protective actions."
+    ],
+    "request_id": "req_video_987654321"
+  }
+  ```
+- **Response (200 OK — No Face Detected)**:
+  ```json
+  {
+    "success": true,
+    "status": "no_face_detected",
+    "prediction": null,
+    "score": null,
+    "score_type": "confidence_score",
+    "model_name": "KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus",
+    "frames_sampled": 20,
+    "faces_detected": 0,
+    "message": "No human face was detected in the sampled video frames. Video deepfake screening requires visible facial features.",
+    "limitations": [ ... ],
+    "request_id": "req_video_123456789"
+  }
+  ```
+
 ### Error Responses
 All errors follow a unified structure:
 ```json
@@ -211,6 +255,43 @@ export async function screenImage(selectedFile) {
   // result.request_id: 'req_...'
   return result;
 }
+
+/**
+ * Screen a video file for deepfake facial manipulation artifacts.
+ * @param {File} selectedFile - Video file object (.mp4, .mov, .webm, etc.)
+ * @param {number} numFrames - Number of frames to sample (5 to 30, default 20)
+ * @returns {Promise<object>}
+ */
+export async function screenVideo(selectedFile, numFrames = 20) {
+  if (!selectedFile) {
+    throw new Error("Please select a video file.");
+  }
+
+  const formData = new FormData();
+  formData.append("file", selectedFile);
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/deepfake/detect?num_frames=${numFrames}`, {
+    method: "POST",
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    const errorMsg = result?.error?.message || "Failed to process video deepfake screening.";
+    throw new Error(errorMsg);
+  }
+
+  // Result structure:
+  // result.status: 'success' | 'no_face_detected' | 'inconclusive'
+  // result.prediction: 'potential_manipulation_detected' | 'no_manipulation_detected_by_model' | null
+  // result.score: 0.8842 | null
+  // result.faces_detected: 18
+  // result.frames_sampled: 20
+  // result.message: '...'
+  // result.limitations: [...]
+  return result;
+}
 ```
 
 ### Display Guidelines for Hackathon UI
@@ -284,11 +365,28 @@ curl -X POST "http://localhost:8000/api/v1/detect" \
   -F "file=@sample_image.jpg;type=image/jpeg"
 ```
 
+### Sending a Test Video via PowerShell
+
+```powershell
+$form = @{
+    file = Get-Item "C:\path\to\sample_video.mp4"
+}
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/deepfake/detect?num_frames=20" -Method Post -Form $form
+```
+
+### Sending a Test Video via cURL
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/deepfake/detect?num_frames=20" \
+  -H "accept: application/json" \
+  -F "file=@sample_video.mp4;type=video/mp4"
+```
+
 ---
 
 ## 5. Automated Tests
 
-The test suite contains 31 fast, deterministic unit and integration tests that mock the model inference service so they run instantly without requiring an internet connection or downloading large model weights.
+The test suite contains 45 fast, deterministic unit and integration tests that mock external model inference services so they run in ~1.3 seconds without requiring external network connectivity or downloading model weights during continuous integration.
 
 ### Run Fast Test Suite (Default)
 ```powershell
@@ -296,8 +394,14 @@ python -m pytest
 ```
 Output:
 ```text
-31 passed, 1 deselected in ~0.8s
+45 passed, 1 deselected in ~1.27s
 ```
+
+The test suite verifies:
+- Health, readiness, and metadata endpoints.
+- Still-image screening with format validations, dimension constraints, corrupt-file handling, and header propagation.
+- Video deepfake screening with multipart decoding, frame sampling constraints, face presence detection, corrupted streams, oversized files, 503 unready handling, 500 inference failure handling, and guaranteed temporary file cleanup in `finally` blocks.
+- End-to-end backward compatibility of existing endpoints.
 
 ### Run Optional Live Hugging Face Integration Test
 To run live end-to-end inference using the actual Hugging Face model weights (~350 MB download):
@@ -320,11 +424,14 @@ A `render.yaml` blueprint is included in the project root and backend folder.
 
 ### Hardware & Hosting Constraints
 > [!IMPORTANT]
-> **RAM Sizing**: The `umm-maybe/AI-image-detector` model weighs ~348 MB on disk. When loaded into PyTorch memory alongside torchvision/transformers dependencies and Pillow buffers, runtime RAM usage is typically between **700 MB and 1.1 GB**.
+> **RAM Sizing**: 
+> - Still-image model (`umm-maybe/AI-image-detector`): ~348 MB weights.
+> - Video deepfake model (`KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus`): ~34.8 MB weights + YOLOv8n-Face (~6.1 MB).
+> - Total memory footprint under dual model concurrency: ~900 MB – 1.2 GB RAM.
 >
-> On Render's **Free Tier (512 MB RAM)**, loading the model into memory can trigger an Out-Of-Memory (OOM) process kill. For stable production hosting, select the **Render Starter plan (1 GB or 2 GB RAM)**.
+> On Render's **Free Tier (512 MB RAM)**, loading both models simultaneously can trigger an Out-Of-Memory (OOM) kill. For stable production hosting, select the **Render Starter plan (1 GB or 2 GB RAM)**.
 >
-> **CPU Inference Latency**: The model runs on CPU by default. Average inference time on modern multi-core cloud instances is approximately **0.3s to 1.2s** per image.
+> **CPU Inference Latency**: Models execute on CPU by default. Still-image inference latency is ~0.3s to 1.0s. Video deepfake screening (sampling 20 frames) executes in approximately 1.5s to 3.0s on multi-core cloud instances.
 
 ### Configuring CORS in Production
 In the Render Dashboard Environment settings (or via `render.yaml`):
@@ -336,18 +443,22 @@ CORS_ORIGINS=https://your-frontend-app.onrender.com,https://your-custom-domain.c
 
 ## 7. Model Attribution, License & Ethical Limitations
 
-### Attribution
-- **Model Name**: [umm-maybe/AI-image-detector](https://huggingface.co/umm-maybe/AI-image-detector)
-- **Model Creator**: Matthew Maybe (`umm-maybe`)
-- **Architecture**: Swin Transformer for Image Classification (`SwinForImageClassification`)
-- **Training**: Trained in October 2022 using AutoTrain on artistic images (binary classification: `artificial` vs. `human`).
+For complete license texts, copyright notices, and third-party dependency details, see [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) and [../docs/DEEPFAKE_INTEGRATION_AUDIT.md](../docs/DEEPFAKE_INTEGRATION_AUDIT.md).
 
-### License
-- **License**: Creative Commons Attribution-NoDerivatives 4.0 International ([CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/)).
-- **Permitted Use**: You may share, distribute, and make the model available as part of your application or service with proper attribution. It cannot be used within text-to-image systems to evade AI image detection.
+### 1. Still-Image AI Detection
+- **Model Identifier**: [umm-maybe/AI-image-detector](https://huggingface.co/umm-maybe/AI-image-detector)
+- **Author**: Matthew Maybe (`umm-maybe`)
+- **Architecture**: Swin Transformer for Image Classification
+- **License**: Creative Commons Attribution-NoDerivatives 4.0 International ([CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/))
+
+### 2. Video Deepfake Detection
+- **Model Checkpoint**: [KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus](https://huggingface.co/KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus)
+- **Reference Project**: [HanMoonSub/DeepGuard](https://github.com/HanMoonSub/DeepGuard)
+- **Architecture**: `MS-EffGCViT-B0` (Mobile-Scale Efficient Global Context Vision Transformer) + YOLOv8-Face
+- **License**: MIT License (Copyright 2024 HanMoonSub)
 
 ### Critical Limitations for Women's Safety Use
-1. **Not Proof of Manipulation**: This tool produces probabilistic classification scores based on 2022 image features. It is not cryptographic or legal proof that an image was AI-generated or manipulated.
-2. **Generative Model Drift**: Training data does not include recent generators like Midjourney v5+, SDXL, or DALL-E 3. It may miss artifacts or misclassify modern generated photos.
-3. **No Context, Identity, or Intent Recognition**: The model only analyzes pixel textures. It does not identify people, cannot verify age or identity, cannot evaluate consent, and cannot determine whether content constitutes harassment or non-consensual media.
-4. **Human Review Required**: High confidence scores (e.g. >90%) should serve only as a triaging cue for human review. Never base legal, punitive, or protective actions solely on this automated output.
+1. **Automated Screening Indicator Only**: Neither detector produces cryptographically or legally admissible proof of manipulation. Confidence scores represent heuristic proximity to training distributions.
+2. **Generative Distribution Drift**: Fast-evolving diffusion models and generative tools may create novel manipulation artifacts not present in benchmark datasets (e.g. FaceForensics++).
+3. **No Context, Identity, or Intent Recognition**: The models analyze pixel textures and facial artifacts. They do not identify individuals, cannot verify legal age or identity, cannot evaluate personal consent, and cannot determine whether content constitutes harassment or non-consensual sexual material.
+4. **Human Review Required**: High confidence scores should serve only as a preliminary triaging cue for human safety workers. Never base legal, punitive, or protective actions solely on automated model outputs.

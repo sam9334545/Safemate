@@ -23,10 +23,24 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
     ]
 
-    # Model configuration
+    # Still Image Model configuration
     MODEL_ID: str = "umm-maybe/AI-image-detector"
     HF_HOME: Optional[str] = None
     TRANSFORMERS_CACHE: Optional[str] = None
+
+    # Video Deepfake Model configuration
+    VIDEO_DEEPFAKE_MODEL_ID: str = "KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus"
+    MAX_VIDEO_UPLOAD_MB: int = 50
+    MAX_VIDEO_FRAMES_SAMPLED: int = 20
+    ALLOWED_VIDEO_EXTENSIONS: List[str] = [".mp4", ".mov", ".avi", ".webm", ".mkv"]
+    ALLOWED_VIDEO_MIME_TYPES: List[str] = [
+        "video/mp4",
+        "video/quicktime",
+        "video/x-msvideo",
+        "video/webm",
+        "video/x-matroska",
+        "application/octet-stream",
+    ]
 
     # Upload & processing constraints
     MAX_UPLOAD_MB: int = 10
@@ -56,6 +70,10 @@ class Settings(BaseSettings):
     @property
     def max_upload_bytes(self) -> int:
         return self.MAX_UPLOAD_MB * 1024 * 1024
+
+    @property
+    def max_video_upload_bytes(self) -> int:
+        return self.MAX_VIDEO_UPLOAD_MB * 1024 * 1024
 
     model_config = SettingsConfigDict(
         env_file=".env",

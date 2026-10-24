@@ -9,11 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.routes import detect, health, model_info
+from app.api.routes import deepfake, detect, health, model_info
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
 from app.services.model_service import model_service
+from app.services.video_deepfake_service import video_deepfake_service
 from app.utils.request_id import get_request_id, set_request_id
 
 logger = logging.getLogger(__name__)
@@ -27,12 +28,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"Configured CORS origins: {settings.CORS_ORIGINS}")
     logger.info(f"Configured max upload: {settings.MAX_UPLOAD_MB} MB")
 
-    # Load pretrained model once during startup
+    # Load pretrained still-image model
     logger.info(f"Attempting model startup load for: {settings.MODEL_ID}")
     try:
         model_service.load()
     except Exception as exc:
         logger.warning(f"Initial model loading failed: {type(exc).__name__}. Will report unready until loaded.")
+
+    # Load pretrained video deepfake model
+    logger.info(f"Attempting video deepfake startup load for: {settings.VIDEO_DEEPFAKE_MODEL_ID}")
+    try:
+        video_deepfake_service.load()
+    except Exception as exc:
+        logger.warning(f"Initial video deepfake model loading failed: {type(exc).__name__}. Will load lazily or report unready.")
 
     yield
 
@@ -43,6 +51,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         model_service.model = None
         model_service.processor = None
         model_service.is_loaded = False
+
+    if video_deepfake_service.model is not None:
+        del video_deepfake_service.model
+        del video_deepfake_service.detector
+        video_deepfake_service.model = None
+        video_deepfake_service.detector = None
+        video_deepfake_service.is_loaded = False
 
 
 def create_app() -> FastAPI:
@@ -142,6 +157,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router, prefix=settings.API_V1_PREFIX)
     app.include_router(model_info.router, prefix=settings.API_V1_PREFIX)
     app.include_router(detect.router, prefix=settings.API_V1_PREFIX)
+    app.include_router(deepfake.router, prefix=settings.API_V1_PREFIX)
 
     @app.get("/", tags=["Root"])
     def root():
@@ -152,6 +168,8 @@ def create_app() -> FastAPI:
             "health": f"{settings.API_V1_PREFIX}/health",
             "ready": f"{settings.API_V1_PREFIX}/health/ready",
             "model_info": f"{settings.API_V1_PREFIX}/model-info",
+            "image_screening": f"{settings.API_V1_PREFIX}/detect",
+            "video_deepfake_screening": f"{settings.API_V1_PREFIX}/deepfake/detect",
         }
 
     return app
