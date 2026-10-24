@@ -77,16 +77,22 @@ class BaseLLMProvider(ABC):
         pass
 
 
+_UNSET = object()
+
+
 class GroqLLMProvider(BaseLLMProvider):
     """Groq Cloud API integration using ultra-fast LLaMA models."""
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: Any = _UNSET,
         model: Optional[str] = None,
         timeout: float = 8.0,
     ) -> None:
-        self.api_key = api_key or settings.GROQ_API_KEY
+        if api_key is _UNSET:
+            self.api_key = settings.GROQ_API_KEY
+        else:
+            self.api_key = api_key
         self.model = model or settings.GROQ_MODEL
         self.timeout = timeout
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
@@ -147,11 +153,14 @@ class GeminiLLMProvider(BaseLLMProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: Any = _UNSET,
         model: Optional[str] = None,
         timeout: float = 8.0,
     ) -> None:
-        self.api_key = api_key or settings.GEMINI_API_KEY
+        if api_key is _UNSET:
+            self.api_key = settings.GEMINI_API_KEY
+        else:
+            self.api_key = api_key
         self.model = model or settings.GEMINI_MODEL
         self.timeout = timeout
 
