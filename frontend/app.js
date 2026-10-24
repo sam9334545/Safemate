@@ -922,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatLog.scrollTop = chatLog.scrollHeight;
   }
 
-  async function handleChatQuery(queryText) {
+  async function handleChatQuery(queryText, topicKey = null) {
     const userBubble = document.createElement('div');
     userBubble.className = 'chat-bubble-user';
     userBubble.textContent = queryText;
@@ -950,11 +950,15 @@ document.addEventListener('DOMContentLoaded', () => {
         chatLog.removeChild(thinkingBubble);
 
         let outputHtml = '';
+        if (data.is_emergency_priority) {
+          outputHtml += '<div style="background:#fee2e2; border-left:4px solid #ef4444; padding:8px 12px; border-radius:4px; margin-bottom:8px; font-weight:700; color:#b91c1c;">🚨 IMMEDIATE EMERGENCY DIRECTIVE</div>';
+        }
         if (data.title) {
           outputHtml += `<strong style="display:block; color:#0f172a; font-size:0.92rem; margin-bottom:6px;">${data.title}</strong>`;
         }
-        if (data.text) {
-          outputHtml += `<div style="margin-bottom:8px; line-height:1.5;">${data.text.replace(/\n/g, '<br>')}</div>`;
+        if (data.text || data.guidance) {
+          const bodyTxt = (data.text || data.guidance).replace(/\n/g, '<br>');
+          outputHtml += `<div style="margin-bottom:8px; line-height:1.5;">${bodyTxt}</div>`;
         }
 
         // Render numbered steps if provided
@@ -969,10 +973,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render verified helplines
         if (data.resources && data.resources.length > 0) {
           outputHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; margin-top:8px; font-size:0.8rem;">`;
-          outputHtml += `<strong>Verified 24/7 Helplines:</strong><br>`;
+          outputHtml += `<strong>Verified 24/7 Helplines & Portals:</strong><br>`;
           data.resources.forEach(r => {
             const cleanPh = sanitizePhone(r.phone_number);
-            outputHtml += `• <strong>${r.display_name}:</strong> <a href="tel:${cleanPh}" style="color:#dc2626; font-weight:700; text-decoration:none;">${r.phone_number}</a><br>`;
+            const telPart = r.phone_number ? `<a href="tel:${cleanPh}" style="color:#dc2626; font-weight:700; text-decoration:none;">📞 ${r.phone_number}</a>` : '';
+            const portalPart = r.action_url ? `<a href="${r.action_url}" target="_blank" style="margin-left:6px; color:#0284c7; text-decoration:none;">🌐 Portal ↗</a>` : '';
+            outputHtml += `• <strong>${r.display_name}:</strong> ${telPart} ${portalPart}<br>`;
           });
           outputHtml += `</div>`;
         }
@@ -1005,7 +1011,9 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('Chatbot backend error');
       }
     } catch (err) {
-      chatLog.removeChild(thinkingBubble);
+      if (thinkingBubble && thinkingBubble.parentNode) {
+        chatLog.removeChild(thinkingBubble);
+      }
       appendAiBubble(`
         <strong>VERIFIED SAFETY &amp; LEGAL ASSISTANCE:</strong><br>
         • <strong>National Emergency (Police):</strong> <a href="tel:112" style="color:#dc2626; font-weight:700;">112</a><br>
@@ -1013,6 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
         • <strong>National Cyber Crime Portal:</strong> <a href="tel:1930" style="color:#0284c7; font-weight:700;">1930</a> (cybercrime.gov.in)<br>
         • <strong>Key Legal Rights:</strong> Zero FIR (can be filed at any police station regardless of jurisdiction), Sections 66E, 67A IT Act, BNS Section 78 (stalking).
       `);
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
   }
 
