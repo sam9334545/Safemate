@@ -33,7 +33,10 @@ def test_user(client):
     assert reg_res.status_code in (201, 200)
 
     # Login to get token
-    login_res = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": email, "password": password},
+    )
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
 
@@ -94,10 +97,10 @@ def test_register_duplicate_email_fails(client, test_user):
 
 
 def test_login_success(client, test_user):
-    """Test login with correct credentials returns valid JWT token."""
+    """Test login with correct credentials via OAuth2 form data returns valid JWT token."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": test_user["email"], "password": test_user["password"]},
+        data={"username": test_user["email"], "password": test_user["password"]},
     )
     assert response.status_code == 200
     data = response.json()
@@ -109,7 +112,7 @@ def test_login_incorrect_password(client, test_user):
     """Test login with wrong password returns HTTP 401."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": test_user["email"], "password": "WrongPassword999!"},
+        data={"username": test_user["email"], "password": "WrongPassword999!"},
     )
     assert response.status_code == 401
     assert "incorrect" in response.json().get("detail", "").lower()
@@ -119,7 +122,7 @@ def test_login_nonexistent_email(client):
     """Test login with unregistered email returns HTTP 401."""
     response = client.post(
         "/api/v1/auth/login",
-        json={"email": "nonexistent_ghost@safemate.org", "password": "SomePassword123!"},
+        data={"username": "nonexistent_ghost@safemate.org", "password": "SomePassword123!"},
     )
     assert response.status_code == 401
 

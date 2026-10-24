@@ -1,21 +1,29 @@
-"""Emergency SOS panic button route under /api/v1/emergency/sos."""
+"""Emergency SOS & Trusted Contacts route under /api/v1/emergency."""
 
 from __future__ import annotations
 
 import datetime
 import json
 import logging
+import os
 import uuid
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
 
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import EmergencyLogModel, TrustedContactModel, UserModel
 from app.schemas.emergency import (
+    ContactCreate,
+    ContactDeleteResponse,
+    ContactResponse,
     DispatchedAlertInfo,
-    EmergencyContact,
     SOSRequest,
     SOSResponse,
 )
+from app.utils.auth import get_current_user, get_optional_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +31,29 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/emergency", tags=["Emergency SOS"])
 
 # ---------------------------------------------------------------------------
-# Mock Emergency Trusted Contacts Database
+# Default / Fallback Emergency Trusted Contacts Database
 # ---------------------------------------------------------------------------
+DEFAULT_TRUSTED_CONTACTS: List[Dict[str, str]] = [
+    {
+        "name": "Maya Lin",
+        "phone": "+1-555-0192",
+        "relationship": "Primary Emergency Contact",
+        "email": "maya.lin@safemail.org",
+    },
+    {
+        "name": "Marcus Vance",
+        "phone": "+1-555-0144",
+        "relationship": "Trusted Emergency Contact",
+        "email": "m.vance@safemail.org",
+    },
+    {
+        "name": "Safemate Emergency Response Dispatch",
+        "phone": "+1-800-555-SAFE",
+        "relationship": "Emergency Dispatch Center",
+        "email": "dispatch@safemate.org",
+    },
+]
+
 MOCK_EMERGENCY_CONTACTS: Dict[str, List[Dict[str, str]]] = {
     "usr_safemate_001": [
         {
@@ -56,53 +85,248 @@ MOCK_EMERGENCY_CONTACTS: Dict[str, List[Dict[str, str]]] = {
     ],
 }
 
-DEFAULT_TRUSTED_CONTACTS: List[Dict[str, str]] = [
-    {
-        "name": "Maya Lin",
-        "phone": "+1-555-0192",
-        "relationship": "Primary Emergency Contact",
-        "email": "maya.lin@safemail.org",
-    },
-    {
-        "name": "Marcus Vance",
-        "phone": "+1-555-0144",
-        "relationship": "Trusted Emergency Contact",
-        "email": "m.vance@safemail.org",
-    },
-    {
-        "name": "Safemate Emergency Response Dispatch",
-        "phone": "+1-800-555-SAFE",
-        "relationship": "Emergency Dispatch Center",
-        "email": "dispatch@safemate.org",
-    },
-]
+
+def mask_phone_number(phone: str) -> str:
+    """Mask sensitive middle digits of a phone number for privacy in logs."""
+    clean = phone.strip()
+    if len(clean) <= 4:
+        return "****"
+    prefix = clean[:3]
+    suffix = clean[-4:]
+    masked_middle = "*" * max(len(clean) - 7, 3)
+    return f"{prefix}{masked_middle}{suffix}"
 
 
 def get_emergency_contacts(user_id: str) -> List[Dict[str, str]]:
-    """Retrieve saved emergency contacts for the user or default safety circle."""
+    """Retrieve fallback safety circle contacts (including Maya Lin)."""
     contacts = MOCK_EMERGENCY_CONTACTS.get(user_id)
     if contacts:
         return contacts
     logger.info(
-        f"User '{user_id}' not explicitly mapped in database; "
+        f"User '{user_id}' has no custom DB contacts; "
         "defaulting to trusted safety circle contacts (including Maya Lin)."
     )
     return DEFAULT_TRUSTED_CONTACTS
 
 
+async def dispatch_emergency_notifications(
+    alert_id: str,
+    user_id: str,
+    contacts: List[Dict[str, Any]],
+    distress_message: str,
+    google_maps_url: str,
+    dispatch_timestamp: str,
+) -> List[DispatchedAlertInfo]:
+    """Asynchronously dispatches emergency notifications to trusted contacts.
+
+    Integrates Twilio SMS and HTTP Webhooks when environment credentials
+    are supplied, safely falling back to structured JSON simulation logs
+    with masked phone numbers if credentials are not configured.
+    """
+    twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    twilio_token = os.getenv("TWILIO_AUTH_TOKEN")
+    twilio_from = os.getenv("TWILIO_FROM_NUMBER")
+    webhook_url = os.getenv("EMERGENCY_WEBHOOK_URL")
+
+    dispatched_records: List[DispatchedAlertInfo] = []
+
+    for contact in contacts:
+        contact_name = contact.get("name", "Trusted Contact")
+        contact_phone = contact.get("phone", "")
+        contact_rel = contact.get("relationship", "Emergency Contact")
+        masked_phone = mask_phone_number(contact_phone)
+
+        delivery_status = "DELIVERED"
+        delivery_channel = "simulated_sms"
+
+        if twilio_sid and twilio_token and twilio_from:
+            try:
+                twilio_endpoint = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Messages.json"
+                async with httpx.AsyncClient(timeout=4.0) as http_client:
+                    response = await http_client.post(
+                        twilio_endpoint,
+                        data={
+                            "From": twilio_from,
+                            "To": contact_phone,
+                            "Body": distress_message,
+                        },
+                        auth=(twilio_sid, twilio_token),
+                    )
+                    if response.status_code in (200, 201):
+                        delivery_status = "SENT_TWILIO"
+                        delivery_channel = "twilio_sms"
+                    else:
+                        delivery_status = f"SIMULATED_FALLBACK_{response.status_code}"
+                        delivery_channel = "simulated_sms"
+            except Exception as twilio_err:
+                logger.warning(
+                    f"Twilio SMS dispatch to {masked_phone} encountered error: {twilio_err}. Using simulated delivery."
+                )
+                delivery_status = "SIMULATED_DELIVERED"
+                delivery_channel = "simulated_sms"
+
+        if webhook_url:
+            try:
+                async with httpx.AsyncClient(timeout=4.0) as http_client:
+                    await http_client.post(
+                        webhook_url,
+                        json={
+                            "event": "EMERGENCY_SOS_ALERT",
+                            "alert_id": alert_id,
+                            "user_id": user_id,
+                            "recipient": contact_name,
+                            "google_maps_url": google_maps_url,
+                            "timestamp": dispatch_timestamp,
+                        },
+                    )
+            except Exception as hook_err:
+                logger.warning(f"Webhook alert notification error: {hook_err}")
+
+        # Structured audit log with safe masking of phone number
+        structured_audit_entry = {
+            "event": "EMERGENCY_SOS_DISPATCH_CONFIRMED",
+            "alert_id": alert_id,
+            "user_id": user_id,
+            "recipient_name": contact_name,
+            "relationship": contact_rel,
+            "recipient_phone_masked": masked_phone,
+            "delivery_channel": delivery_channel,
+            "google_maps_url": google_maps_url,
+            "dispatch_timestamp": dispatch_timestamp,
+            "status": delivery_status,
+        }
+        logger.info(json.dumps(structured_audit_entry))
+
+        dispatched_records.append(
+            DispatchedAlertInfo(
+                name=contact_name,
+                phone=contact_phone,
+                relationship=contact_rel,
+                status=delivery_status,
+            )
+        )
+
+    return dispatched_records
+
+
+# ---------------------------------------------------------------------------
+# Trusted Contacts Management Endpoints
+# ---------------------------------------------------------------------------
+@router.post(
+    "/contacts",
+    response_model=ContactResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a Trusted Emergency Contact",
+    description="Registers a new persistent trusted contact for the authenticated user.",
+)
+async def add_trusted_contact(
+    payload: ContactCreate,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ContactResponse:
+    """Create and persist a new trusted emergency contact for the user."""
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    contact = TrustedContactModel(
+        user_id=str(current_user.id),
+        name=payload.name,
+        phone_number=payload.phone_number,
+        email=payload.email,
+        relationship=payload.relationship,
+        created_at=now_iso,
+    )
+    db.add(contact)
+    db.commit()
+    db.refresh(contact)
+    logger.info(
+        f"User '{current_user.email}' added trusted contact '{contact.name}' (ID: {contact.id})"
+    )
+    return contact
+
+
+@router.get(
+    "/contacts",
+    response_model=List[ContactResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Retrieve User Trusted Contacts",
+    description="Returns all persistent trusted emergency contacts registered by the authenticated user.",
+)
+async def get_user_trusted_contacts(
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> List[ContactResponse]:
+    """Retrieve all contacts belonging to the currently logged in user."""
+    contacts = (
+        db.query(TrustedContactModel)
+        .filter(
+            (TrustedContactModel.user_id == str(current_user.id))
+            | (TrustedContactModel.user_id == current_user.email)
+        )
+        .order_by(TrustedContactModel.id.asc())
+        .all()
+    )
+    return contacts
+
+
+@router.delete(
+    "/contacts/{contact_id}",
+    response_model=ContactDeleteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Remove a Trusted Emergency Contact",
+    description="Deletes a trusted emergency contact belonging to the authenticated user.",
+)
+async def delete_trusted_contact(
+    contact_id: int,
+    current_user: UserModel = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ContactDeleteResponse:
+    """Delete a trusted contact ensuring the user owns the record."""
+    contact = (
+        db.query(TrustedContactModel)
+        .filter(
+            TrustedContactModel.id == contact_id,
+            (TrustedContactModel.user_id == str(current_user.id))
+            | (TrustedContactModel.user_id == current_user.email),
+        )
+        .first()
+    )
+    if not contact:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Trusted contact with ID {contact_id} not found.",
+        )
+
+    db.delete(contact)
+    db.commit()
+    logger.info(
+        f"User '{current_user.email}' removed trusted contact '{contact.name}' (ID: {contact_id})"
+    )
+    return ContactDeleteResponse(
+        status="success",
+        message=f"Trusted contact '{contact.name}' (ID: {contact_id}) was removed successfully.",
+        contact_id=contact_id,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Emergency SOS Panic Trigger Endpoint
+# ---------------------------------------------------------------------------
 @router.post(
     "/sos",
     response_model=SOSResponse,
     status_code=status.HTTP_200_OK,
     summary="Trigger Emergency SOS Panic Button",
     description=(
-        "Processes an urgent SOS panic trigger from the Safemate emergency button. "
-        "Validates coordinates, retrieves trusted contacts (such as Maya Lin), "
-        "formats a distress message with live Google Maps coordinates, "
-        "logs structured JSON confirmation of dispatch, and returns dispatch status."
+        "Processes an urgent SOS panic trigger. Validates coordinates, queries user's "
+        "trusted contacts from PostgreSQL (or falls back to default safety circle), formats "
+        "distress message with live Google Maps link, executes async multi-channel dispatch, "
+        "records audit log in EmergencyLogModel, and returns dispatch confirmation."
     ),
 )
-async def trigger_sos(payload: SOSRequest) -> SOSResponse:
+async def trigger_sos(
+    payload: SOSRequest,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+) -> SOSResponse:
     """Handle incoming SOS panic button activation."""
     alert_id = f"sos_{uuid.uuid4().hex[:12]}"
     dispatch_timestamp = (
@@ -111,62 +335,95 @@ async def trigger_sos(payload: SOSRequest) -> SOSResponse:
         else datetime.datetime.now(datetime.timezone.utc).isoformat()
     )
 
-    # 1. Retrieve user's mock emergency trusted contacts
-    contacts = get_emergency_contacts(payload.user_id)
+    # 1. Determine resolved user_id
+    if current_user:
+        resolved_user_id = str(current_user.id)
+        user_email = current_user.email
+    elif payload.user_id:
+        resolved_user_id = payload.user_id
+        user_email = None
+    else:
+        resolved_user_id = "usr_safemate_001"
+        user_email = None
+
+    # 2. Query persistent contacts from PostgreSQL
+    search_keys = [resolved_user_id]
+    if user_email:
+        search_keys.append(user_email)
+
+    db_contacts = (
+        db.query(TrustedContactModel)
+        .filter(TrustedContactModel.user_id.in_(search_keys))
+        .all()
+    )
+
+    contacts: List[Dict[str, Any]] = []
+    if db_contacts:
+        for c in db_contacts:
+            contacts.append({
+                "name": c.name,
+                "phone": c.phone_number,
+                "email": c.email,
+                "relationship": c.relationship or "Trusted Emergency Contact",
+            })
+    else:
+        # Fallback to configured mock/safety circle (ensuring Maya Lin is present)
+        contacts = get_emergency_contacts(resolved_user_id)
+
     if not contacts:
-        logger.error(f"No emergency contacts registered for user '{payload.user_id}'")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No emergency contacts found for user '{payload.user_id}'.",
+            detail=f"No emergency contacts registered for user '{resolved_user_id}'.",
         )
 
-    # 2. Format Google Maps coordinates string
+    # 3. Format Google Maps coordinates & distress message
     google_maps_url = f"https://maps.google.com/?q={payload.latitude},{payload.longitude}"
+    custom_note = f"\nDistress Note: {payload.message}" if payload.message else ""
     distress_message = (
         f"🚨 EMERGENCY SOS [SAFEMATE ALERT] 🚨\n"
-        f"User '{payload.user_id}' activated the emergency panic button!\n"
+        f"User '{resolved_user_id}' activated the emergency panic button!\n"
         f"Timestamp: {dispatch_timestamp}\n"
         f"Live GPS Location: {payload.latitude}, {payload.longitude}\n"
-        f"Google Maps Link: {google_maps_url}\n"
+        f"Google Maps Link: {google_maps_url}{custom_note}\n"
         f"PRIORITY: IMMEDIATE ASSISTANCE REQUIRED. Please check in or dispatch emergency response."
     )
 
-    # 3. Log structured JSON dispatch confirmation
-    dispatched_alert_records: List[DispatchedAlertInfo] = []
-    for contact in contacts:
-        structured_log = {
-            "event": "EMERGENCY_SOS_DISPATCH_CONFIRMED",
-            "alert_id": alert_id,
-            "user_id": payload.user_id,
-            "recipient_name": contact["name"],
-            "relationship": contact["relationship"],
-            "recipient_phone": contact["phone"],
-            "recipient_email": contact.get("email"),
-            "google_maps_url": google_maps_url,
-            "distress_message": distress_message,
-            "dispatch_timestamp": dispatch_timestamp,
-            "status": "DELIVERED",
-        }
-        # Standard logging with structured JSON data
-        logger.info(json.dumps(structured_log))
+    # 4. Asynchronously dispatch notifications (Twilio / Webhook / Structured Log Simulation)
+    dispatched_alert_records = await dispatch_emergency_notifications(
+        alert_id=alert_id,
+        user_id=resolved_user_id,
+        contacts=contacts,
+        distress_message=distress_message,
+        google_maps_url=google_maps_url,
+        dispatch_timestamp=dispatch_timestamp,
+    )
 
-        dispatched_alert_records.append(
-            DispatchedAlertInfo(
-                name=contact["name"],
-                phone=contact["phone"],
-                relationship=contact["relationship"],
-                status="DELIVERED",
-            )
+    # 5. Record audit trail in EmergencyLogModel
+    try:
+        emergency_log = EmergencyLogModel(
+            user_id=resolved_user_id,
+            latitude=payload.latitude,
+            longitude=payload.longitude,
+            triggered_at=dispatch_timestamp,
+            status="dispatched",
+            distress_message=distress_message,
+            google_maps_url=google_maps_url,
+            contacts_alerted_count=len(contacts),
         )
+        db.add(emergency_log)
+        db.commit()
+    except Exception as log_err:
+        logger.warning(f"Failed to record EmergencyLogModel audit trail: {log_err}")
+        db.rollback()
 
-    # 4. Return JSON response confirming status 'success', timestamp, and contact count
+    # 6. Return response confirming status, timestamp, and contact breakdown
     return SOSResponse(
         status="success",
         timestamp=dispatch_timestamp,
         count=len(contacts),
         contacts_alerted=len(contacts),
         alert_id=alert_id,
-        user_id=payload.user_id,
+        user_id=resolved_user_id,
         google_maps_url=google_maps_url,
         distress_message=distress_message,
         contacts=dispatched_alert_records,

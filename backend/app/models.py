@@ -93,3 +93,48 @@ class EmergencySOSAlert(Base):
 
     def __repr__(self) -> str:
         return f"<EmergencySOSAlert(alert_id='{self.alert_id}', user_id='{self.user_id}', status='{self.status}')>"
+
+
+class TrustedContactModel(Base):
+    """Persistent database model for user trusted emergency contacts."""
+
+    __tablename__ = "trusted_contacts"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String(128), index=True, nullable=False)
+    name = Column(String(255), nullable=False)
+    phone_number = Column(String(64), nullable=False)
+    email = Column(String(255), nullable=True)
+    relationship = Column(String(128), nullable=True)
+    created_at = Column(String(64), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<TrustedContactModel(id={self.id}, user_id='{self.user_id}', name='{self.name}')>"
+
+
+# Semantic alias
+TrustedContact = TrustedContactModel
+
+
+class EmergencyLogModel(Base):
+    """Persistent database model for Emergency SOS panic button audit logs."""
+
+    __tablename__ = "emergency_logs"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String(128), index=True, nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    triggered_at = Column(String(64), nullable=False)
+    status = Column(String(32), default="dispatched", nullable=False)
+    distress_message = Column(Text, nullable=True)
+    google_maps_url = Column(String(512), nullable=True)
+    contacts_alerted_count = Column(Integer, default=0, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<EmergencyLogModel(id={self.id}, user_id='{self.user_id}', status='{self.status}')>"
+
+
+# Semantic alias
+EmergencyLog = EmergencyLogModel
+

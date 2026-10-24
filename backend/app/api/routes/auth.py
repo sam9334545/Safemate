@@ -63,17 +63,17 @@ async def register(
     "/login",
     response_model=Token,
     status_code=status.HTTP_200_OK,
-    summary="User Login (JSON Body)",
-    description="Authenticates credentials (email and password) and returns a signed JWT access token.",
+    summary="User Login (OAuth2 Password Request Form)",
+    description="Authenticates credentials via OAuth2 password request form for Swagger UI and API clients, returning a signed JWT access token.",
 )
 async def login(
-    payload: UserLogin,
+    form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ) -> Token:
-    """Authenticate user with email and password via JSON payload."""
-    user = db.query(UserModel).filter(UserModel.email == payload.email).first()
-    if not user or not verify_password(payload.password, user.hashed_password):
-        logger.warning(f"Failed login attempt for email: {payload.email}")
+    """Authenticate user with email (passed as username) and password via OAuth2 form data."""
+    user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        logger.warning(f"Failed login attempt for username/email: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -87,7 +87,7 @@ async def login(
         )
 
     access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
-    logger.info(f"User {user.email} logged in successfully.")
+    logger.info(f"User {user.email} logged in successfully via OAuth2 form.")
     return Token(access_token=access_token, token_type="bearer")
 
 
@@ -95,30 +95,15 @@ async def login(
     "/token",
     response_model=Token,
     status_code=status.HTTP_200_OK,
-    summary="OAuth2 Form Login (Swagger UI Authorization)",
-    description="OAuth2-compliant password form login endpoint for OpenAPI/Swagger UI.",
+    summary="OAuth2 Token Endpoint",
+    description="OAuth2-compliant password form login endpoint alias.",
 )
-async def oauth2_login(
+async def oauth2_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ) -> Token:
-    """Authenticate user via OAuth2 password form for Swagger UI integration."""
-    user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user account",
-        )
-
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
-    return Token(access_token=access_token, token_type="bearer")
+    """Authenticate user via OAuth2 password form (alias for /login)."""
+    return await login(form_data=form_data, db=db)
 
 
 @router.get(

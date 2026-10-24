@@ -204,6 +204,7 @@ def create_app() -> FastAPI:
             "video_deepfake_ready": f"{settings.API_V1_PREFIX}/deepfake/ready",
             "video_deepfake_model_info": f"{settings.API_V1_PREFIX}/deepfake/model-info",
             "emergency_sos": f"{settings.API_V1_PREFIX}/emergency/sos",
+            "emergency_contacts": f"{settings.API_V1_PREFIX}/emergency/contacts",
             "safewalk_create_trip": f"{settings.API_V1_PREFIX}/safewalk/create-trip",
             "safewalk_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}",
             "safewalk_update_location": f"{settings.API_V1_PREFIX}/safewalk/update-location",
