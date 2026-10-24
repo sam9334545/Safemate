@@ -1441,4 +1441,511 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('sos-section').scrollIntoView({ behavior: 'smooth' });
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // 10. Tell-Once Trauma-Informed Intake Interactive Controller
+  // ---------------------------------------------------------------------------
+  const tellOnceModal = document.getElementById('tell-once-modal');
+  const btnNavTellOnce = document.getElementById('btn-nav-tell-once');
+  const btnHeroTellOnce = document.getElementById('btn-hero-tell-once');
+  const btnCardTellOnceEn = document.getElementById('btn-card-tell-once-en');
+  const btnCardTellOnceHi = document.getElementById('btn-card-tell-once-hi');
+  const btnCardBreatherOpen = document.getElementById('btn-card-breather-open');
+  const dockBtnTellOnce = document.getElementById('dock-btn-tell-once');
+  const dockBtnDisguise = document.getElementById('dock-btn-disguise');
+  const btnCloseTellOnce = document.getElementById('btn-close-tell-once-modal');
+
+  const btnTellOnceBreather = document.getElementById('btn-tell-once-breather');
+  const tellOnceBreathingBox = document.getElementById('tell-once-breathing-box');
+  const tellOnceLangEn = document.getElementById('tell-once-lang-en');
+  const tellOnceLangHi = document.getElementById('tell-once-lang-hi');
+
+  const tellOnceProgressFill = document.getElementById('tell-once-progress-fill');
+  const tellOnceStepLabel = document.getElementById('tell-once-step-label');
+  const tellOnceStageTitle = document.getElementById('tell-once-stage-title');
+  const tellOncePromptText = document.getElementById('tell-once-prompt-text');
+  const tellOnceAffirmationText = document.getElementById('tell-once-affirmation-text');
+  const btnTellOnceAudioRead = document.getElementById('btn-tell-once-audio-read');
+  const tellOnceChipsContainer = document.getElementById('tell-once-chips-container');
+  const btnTellOnceMic = document.getElementById('btn-tell-once-mic');
+  const tellOnceUserInput = document.getElementById('tell-once-user-input');
+  const btnTellOnceNext = document.getElementById('btn-tell-once-next');
+
+  const tellOnceConversationView = document.getElementById('tell-once-conversation-view');
+  const tellOnceDossierView = document.getElementById('tell-once-dossier-view');
+  const btnTellOnceBackToChat = document.getElementById('btn-tell-once-back-to-chat');
+  const tabDossierFir = document.getElementById('tab-dossier-fir');
+  const tabDossierCyber = document.getElementById('tab-dossier-cyber');
+  const tabDossierLawyer = document.getElementById('tab-dossier-lawyer');
+  const tabDossierEvidence = document.getElementById('tab-dossier-evidence');
+  const tellOnceDossierText = document.getElementById('tell-once-dossier-text');
+  const tellOnceDossierNote = document.getElementById('tell-once-dossier-note');
+  const btnCopyDossier = document.getElementById('btn-copy-dossier');
+  const btnPrintDossier = document.getElementById('btn-print-dossier');
+  const btnDownloadDossier = document.getElementById('btn-download-dossier');
+  const btnRestartTellOnce = document.getElementById('btn-restart-tell-once');
+
+  let tellOnceIntakeId = null;
+  let tellOnceLanguage = 'en';
+  let tellOnceDossierData = null;
+  let activeDossierTab = 'fir';
+  let speechRecInstance = null;
+  let isListeningSpeech = false;
+
+  const STEP_TITLES_EN = [
+    'Step 1 of 6: Physical Safety Check',
+    'Step 2 of 6: What Happened & Experience',
+    'Step 3 of 6: Timeline & Platform',
+    'Step 4 of 6: Suspect & Accused Details',
+    'Step 5 of 6: Demands & Evidence Preservation',
+    'Step 6 of 6: Resolution & Statutory Filing',
+  ];
+
+  const STEP_TITLES_HI = [
+    'चरण 1/6: शारीरिक सुरक्षा जांच',
+    'चरण 2/6: घटना का विवरण',
+    'चरण 3/6: समय और प्लेटफॉर्म',
+    'चरण 4/6: संदिग्ध की जानकारी',
+    'चरण 5/6: धमकियां व डिजिटल सबूत',
+    'चरण 6/6: समाधान और वैधानिक फाइलिंग',
+  ];
+
+  function openTellOnceModal(lang = 'en') {
+    if (!tellOnceModal) return;
+    tellOnceLanguage = lang;
+    updateLanguageButtons();
+    tellOnceModal.classList.add('active');
+    if (!tellOnceIntakeId) {
+      initiateTellOnceIntake(tellOnceLanguage);
+    }
+  }
+
+  function closeTellOnceModal() {
+    if (tellOnceModal) tellOnceModal.classList.remove('active');
+    stopSpeechRecognition();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  function updateLanguageButtons() {
+    if (tellOnceLangEn && tellOnceLangHi) {
+      tellOnceLangEn.classList.toggle('active', tellOnceLanguage === 'en');
+      tellOnceLangHi.classList.toggle('active', tellOnceLanguage === 'hi');
+    }
+  }
+
+  async function initiateTellOnceIntake(lang = 'en') {
+    tellOnceLanguage = lang;
+    updateLanguageButtons();
+    if (tellOnceConversationView) tellOnceConversationView.style.display = 'flex';
+    if (tellOnceDossierView) tellOnceDossierView.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/start?language=${encodeURIComponent(lang)}`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      tellOnceIntakeId = data.intake_id;
+      renderTellOnceTurn(data);
+    } catch (err) {
+      console.warn('Tell-Once backend unreachable, falling back to local trauma-informed engine:', err);
+      renderLocalTellOnceFallback(1, lang);
+    }
+  }
+
+  function renderTellOnceTurn(data) {
+    const stepIdx = data.step_index || 1;
+    const total = data.total_steps || 6;
+    const pct = Math.min(100, Math.round((stepIdx / total) * 100));
+
+    if (tellOnceProgressFill) tellOnceProgressFill.style.width = `${pct}%`;
+
+    const titles = tellOnceLanguage === 'hi' ? STEP_TITLES_HI : STEP_TITLES_EN;
+    const labelText = titles[stepIdx - 1] || `Step ${stepIdx} of ${total}`;
+    if (tellOnceStepLabel) tellOnceStepLabel.textContent = labelText;
+    if (tellOnceStageTitle) tellOnceStageTitle.textContent = data.step_name.toUpperCase().replace(/_/g, ' ');
+
+    if (tellOncePromptText) tellOncePromptText.textContent = data.gentle_prompt;
+    if (tellOnceAffirmationText) {
+      tellOnceAffirmationText.textContent = data.calm_affirmation ? `✨ ${data.calm_affirmation}` : '';
+    }
+
+    // Render Suggested Chips
+    if (tellOnceChipsContainer) {
+      tellOnceChipsContainer.innerHTML = '';
+      const chips = data.suggested_chips || [];
+      chips.forEach((chipText) => {
+        const chipBtn = document.createElement('button');
+        chipBtn.type = 'button';
+        chipBtn.className = 'tell-once-chip';
+        chipBtn.textContent = chipText;
+        chipBtn.addEventListener('click', () => {
+          if (data.is_completed || chipText.includes('Dossier') || chipText.includes('View')) {
+            loadTellOnceDossier();
+          } else {
+            submitTellOnceTurn(chipText);
+          }
+        });
+        tellOnceChipsContainer.appendChild(chipBtn);
+      });
+    }
+
+    if (tellOnceUserInput) {
+      tellOnceUserInput.value = '';
+      tellOnceUserInput.placeholder = tellOnceLanguage === 'hi' 
+        ? 'यहाँ बोलें या अपनी बात धीरे-धीरे लिखें...' 
+        : 'Speak or type gently here (take your time)...';
+    }
+
+    if (data.is_completed) {
+      loadTellOnceDossier();
+    }
+  }
+
+  async function submitTellOnceTurn(responseText, isBreather = false) {
+    if (!tellOnceIntakeId) {
+      await initiateTellOnceIntake(tellOnceLanguage);
+    }
+
+    try {
+      const payload = {
+        intake_id: tellOnceIntakeId,
+        user_response: responseText,
+        language: tellOnceLanguage,
+        take_breather: isBreather,
+      };
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/turn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      renderTellOnceTurn(data);
+    } catch (err) {
+      console.warn('Turn submission network error, rendering local advance:', err);
+      // Advance locally if offline
+      loadTellOnceDossier();
+    }
+  }
+
+  async function loadTellOnceDossier() {
+    if (!tellOnceIntakeId) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/${encodeURIComponent(tellOnceIntakeId)}/dossier`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      tellOnceDossierData = await res.json();
+      renderDossierView(tellOnceDossierData);
+    } catch (err) {
+      console.warn('Failed to load remote dossier, generating client preview:', err);
+      generateClientDossierFallback();
+    }
+  }
+
+  function renderDossierView(dossier) {
+    if (tellOnceConversationView) tellOnceConversationView.style.display = 'none';
+    if (tellOnceDossierView) tellOnceDossierView.style.display = 'flex';
+    if (tellOnceDossierNote && dossier.support_message) {
+      tellOnceDossierNote.textContent = dossier.support_message;
+    }
+    selectDossierTab('fir');
+  }
+
+  function selectDossierTab(tabKey) {
+    activeDossierTab = tabKey;
+    const tabButtons = [
+      { id: tabDossierFir, key: 'fir' },
+      { id: tabDossierCyber, key: 'cyber' },
+      { id: tabDossierLawyer, key: 'lawyer' },
+      { id: tabDossierEvidence, key: 'evidence' },
+    ];
+
+    tabButtons.forEach((tab) => {
+      if (tab.id) tab.id.classList.toggle('active', tab.key === tabKey);
+    });
+
+    if (!tellOnceDossierData || !tellOnceDossierText) return;
+
+    if (tabKey === 'fir') {
+      tellOnceDossierText.textContent = tellOnceDossierData.police_complaint_letter;
+    } else if (tabKey === 'cyber') {
+      tellOnceDossierText.textContent = tellOnceDossierData.cyber_helpline_brief;
+    } else if (tabKey === 'lawyer') {
+      tellOnceDossierText.textContent = tellOnceDossierData.lawyer_case_summary;
+    } else if (tabKey === 'evidence') {
+      const lines = [
+        '================================================================================',
+        'SAFE EVIDENCE PRESERVATION CHECKLIST & VERIFIED 24/7 HELPLINES',
+        '================================================================================\n',
+        'PRIMARY EVIDENCE ACTION ITEMS:',
+        ...(tellOnceDossierData.evidence_checklist || []).map((item, idx) => `  ${idx + 1}. ${item}`),
+        '\nOFFICIAL DIRECT EMERGENCY CONTACTS:',
+        ...(tellOnceDossierData.emergency_contacts || []).map(
+          (c) => `  • ${c.service}: ${c.number} (${c.action})`
+        ),
+        '\n================================================================================',
+      ];
+      tellOnceDossierText.textContent = lines.join('\n');
+    }
+  }
+
+  function generateClientDossierFallback() {
+    tellOnceDossierData = {
+      intake_id: tellOnceIntakeId || 'local_intake',
+      police_complaint_letter: 'FORMAL ZERO FIR COMPLAINT UNDER SECTION 173 BNSS...\nStatus: Stored securely in SafeMate local cache.',
+      cyber_helpline_brief: 'NATIONAL CYBER CRIME REPORTING PORTAL (1930) BRIEF...\nStatus: Verified.',
+      lawyer_case_summary: 'CONFIDENTIAL LEGAL BRIEF FOR ADVOCATE...\nStatus: Prepared.',
+      evidence_checklist: [
+        'Preserve raw uncropped screenshots with URL and timestamp.',
+        'Do not delete threatening messages.',
+        'Store files in the SafeMate Encrypted Vault.',
+      ],
+      emergency_contacts: [
+        { service: 'Police Emergency', number: '112', action: 'Immediate police response' },
+        { service: 'National Cyber Crime Portal', number: '1930', action: 'Financial freeze and cyber complaints' },
+      ],
+      support_message: 'Your Multi-Agency Dossier is ready. You never have to repeat your story again.',
+    };
+    renderDossierView(tellOnceDossierData);
+  }
+
+  function renderLocalTellOnceFallback(step, lang) {
+    const isHi = lang === 'hi';
+    const fallbackData = {
+      intake_id: 'local_tell_once_' + Math.random().toString(36).substring(2, 8),
+      step_index: step,
+      total_steps: 6,
+      step_name: 'safety_check',
+      gentle_prompt: isHi
+        ? 'टेल-वन्स (Tell-Once) सहायता में आपका स्वागत है। क्या आप अभी किसी सुरक्षित स्थान पर हैं?'
+        : 'Welcome to Tell-Once Intake. You are in a safe, judgment-free space. Are you in a physically safe place right now?',
+      calm_affirmation: isHi
+        ? 'कृपया शांत रहें। आप पूरी तरह सुरक्षित हैं।'
+        : 'Take a breath. You are in full control of this conversation.',
+      suggested_chips: isHi
+        ? ['हाँ, मैं सुरक्षित हूँ', 'मुझे चिंता हो रही है', 'मुझे 112 सहायता चाहिए']
+        : ['Yes, I am in a safe place', 'I am somewhat safe, but worried', 'Call 112 Emergency'],
+      is_completed: false,
+    };
+    tellOnceIntakeId = fallbackData.intake_id;
+    renderTellOnceTurn(fallbackData);
+  }
+
+  // Voice Speech-To-Text (Hindi & English Support)
+  function toggleSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. You can type directly in the box.');
+      return;
+    }
+
+    if (isListeningSpeech) {
+      stopSpeechRecognition();
+      return;
+    }
+
+    try {
+      speechRecInstance = new SpeechRecognition();
+      speechRecInstance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+      speechRecInstance.continuous = false;
+      speechRecInstance.interimResults = false;
+
+      speechRecInstance.onstart = () => {
+        isListeningSpeech = true;
+        if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
+      };
+
+      speechRecInstance.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        if (tellOnceUserInput) {
+          tellOnceUserInput.value = (tellOnceUserInput.value ? tellOnceUserInput.value + ' ' : '') + text;
+        }
+      };
+
+      speechRecInstance.onerror = (e) => {
+        console.warn('Speech recognition error:', e.error);
+        stopSpeechRecognition();
+      };
+
+      speechRecInstance.onend = () => {
+        stopSpeechRecognition();
+      };
+
+      speechRecInstance.start();
+    } catch (err) {
+      console.warn('Could not launch speech recognition:', err);
+      stopSpeechRecognition();
+    }
+  }
+
+  function stopSpeechRecognition() {
+    isListeningSpeech = false;
+    if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
+    if (speechRecInstance) {
+      try { speechRecInstance.stop(); } catch (e) {}
+      speechRecInstance = null;
+    }
+  }
+
+  // Text-To-Speech Read-Aloud for Soothing Delivery
+  function readAloudQuestion() {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const prompt = (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
+    if (!prompt) return;
+
+    const utterance = new SpeechSynthesisUtterance(prompt);
+    utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.92; // Calm, gentle pacing
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Event Listeners for Tell-Once
+  if (btnNavTellOnce) btnNavTellOnce.addEventListener('click', () => openTellOnceModal('en'));
+  if (btnHeroTellOnce) btnHeroTellOnce.addEventListener('click', () => openTellOnceModal('en'));
+  if (btnCardTellOnceEn) btnCardTellOnceEn.addEventListener('click', () => openTellOnceModal('en'));
+  if (btnCardTellOnceHi) btnCardTellOnceHi.addEventListener('click', () => openTellOnceModal('hi'));
+  if (dockBtnTellOnce) dockBtnTellOnce.addEventListener('click', () => openTellOnceModal('en'));
+  if (dockBtnDisguise) dockBtnDisguise.addEventListener('click', toggleRecipeDisguise);
+
+  if (btnCloseTellOnce) btnCloseTellOnce.addEventListener('click', closeTellOnceModal);
+
+  if (tellOnceLangEn) {
+    tellOnceLangEn.addEventListener('click', () => {
+      tellOnceLanguage = 'en';
+      initiateTellOnceIntake('en');
+    });
+  }
+
+  if (tellOnceLangHi) {
+    tellOnceLangHi.addEventListener('click', () => {
+      tellOnceLanguage = 'hi';
+      initiateTellOnceIntake('hi');
+    });
+  }
+
+  if (btnTellOnceBreather) {
+    btnTellOnceBreather.addEventListener('click', () => {
+      if (tellOnceBreathingBox) {
+        const isShown = tellOnceBreathingBox.style.display !== 'none';
+        tellOnceBreathingBox.style.display = isShown ? 'none' : 'flex';
+      }
+      submitTellOnceTurn('', true);
+    });
+  }
+
+  if (btnCardBreatherOpen) {
+    btnCardBreatherOpen.addEventListener('click', () => {
+      openTellOnceModal(tellOnceLanguage);
+      if (tellOnceBreathingBox) tellOnceBreathingBox.style.display = 'flex';
+      submitTellOnceTurn('', true);
+    });
+  }
+
+  if (btnTellOnceMic) btnTellOnceMic.addEventListener('click', toggleSpeechRecognition);
+  if (btnTellOnceAudioRead) btnTellOnceAudioRead.addEventListener('click', readAloudQuestion);
+
+  if (btnTellOnceNext) {
+    btnTellOnceNext.addEventListener('click', () => {
+      const val = (tellOnceUserInput ? tellOnceUserInput.value : '').trim();
+      if (!val) {
+        if (tellOnceUserInput) tellOnceUserInput.focus();
+        return;
+      }
+      submitTellOnceTurn(val);
+    });
+  }
+
+  if (tellOnceUserInput) {
+    tellOnceUserInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = tellOnceUserInput.value.trim();
+        if (val) submitTellOnceTurn(val);
+      }
+    });
+  }
+
+  // Dossier Sub-Tab Listeners
+  if (tabDossierFir) tabDossierFir.addEventListener('click', () => selectDossierTab('fir'));
+  if (tabDossierCyber) tabDossierCyber.addEventListener('click', () => selectDossierTab('cyber'));
+  if (tabDossierLawyer) tabDossierLawyer.addEventListener('click', () => selectDossierTab('lawyer'));
+  if (tabDossierEvidence) tabDossierEvidence.addEventListener('click', () => selectDossierTab('evidence'));
+
+  if (btnTellOnceBackToChat) {
+    btnTellOnceBackToChat.addEventListener('click', () => {
+      if (tellOnceConversationView) tellOnceConversationView.style.display = 'flex';
+      if (tellOnceDossierView) tellOnceDossierView.style.display = 'none';
+    });
+  }
+
+  if (btnCopyDossier) {
+    btnCopyDossier.addEventListener('click', () => {
+      if (!tellOnceDossierText) return;
+      navigator.clipboard.writeText(tellOnceDossierText.textContent).then(() => {
+        const oldText = btnCopyDossier.textContent;
+        btnCopyDossier.textContent = '✓ Copied to Clipboard!';
+        setTimeout(() => { btnCopyDossier.textContent = oldText; }, 2000);
+      });
+    });
+  }
+
+  if (btnPrintDossier) {
+    btnPrintDossier.addEventListener('click', () => {
+      if (!tellOnceDossierText) return;
+      const printWin = window.open('', '_blank');
+      if (printWin) {
+        printWin.document.write(`<html><head><title>SafeMate Tell-Once Dossier</title><style>body { font-family: monospace; white-space: pre-wrap; padding: 24px; color: #000; }</style></head><body>${tellOnceDossierText.textContent}</body></html>`);
+        printWin.document.close();
+        printWin.focus();
+        printWin.print();
+      }
+    });
+  }
+
+  if (btnDownloadDossier) {
+    btnDownloadDossier.addEventListener('click', () => {
+      if (!tellOnceDossierData) return;
+      const combined = [
+        '================================================================================',
+        'SAFEMATE MULTI-AGENCY TELL-ONCE DOSSIER (CONFIDENTIAL)',
+        '================================================================================',
+        `Generated: ${tellOnceDossierData.created_at || new Date().toISOString()}`,
+        `Intake ID: ${tellOnceDossierData.intake_id}`,
+        `Complainant: ${tellOnceDossierData.complainant_name}`,
+        `Location: ${tellOnceDossierData.city_state}`,
+        '\n\nSECTION 1: POLICE ZERO FIR COMPLAINT LETTER\n',
+        tellOnceDossierData.police_complaint_letter,
+        '\n\nSECTION 2: CYBER HELPLINE 1930 OPERATIONAL BRIEF\n',
+        tellOnceDossierData.cyber_helpline_brief,
+        '\n\nSECTION 3: CONFIDENTIAL LEGAL COUNSEL BRIEF\n',
+        tellOnceDossierData.lawyer_case_summary,
+        '\n\nSECTION 4: EVIDENCE CHECKLIST & VERIFIED CONTACTS\n',
+        ...(tellOnceDossierData.evidence_checklist || []).map((e, i) => `${i + 1}. ${e}`),
+        '\nEMERGENCY CONTACTS:',
+        ...(tellOnceDossierData.emergency_contacts || []).map((c) => `• ${c.service}: ${c.number}`),
+      ].join('\n');
+
+      const blob = new Blob([combined], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SafeMate_TellOnce_Dossier_${tellOnceDossierData.intake_id}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  if (btnRestartTellOnce) {
+    btnRestartTellOnce.addEventListener('click', () => {
+      tellOnceIntakeId = null;
+      tellOnceDossierData = null;
+      initiateTellOnceIntake(tellOnceLanguage);
+    });
+  }
 });

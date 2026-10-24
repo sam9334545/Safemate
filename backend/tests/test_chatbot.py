@@ -653,4 +653,137 @@ def test_session_history_tracking_and_wipe(client: TestClient):
     assert res_hist_after.json()["total_messages"] == 0
 
 
+# -----------------------------------------------------------------------------
+# 13. Trauma-Informed Tell-Once Intake Tests
+# -----------------------------------------------------------------------------
+def test_tell_once_start_en_and_hi(client: TestClient):
+    """Verify that Tell-Once intake begins with gentle safety check in English and Hindi."""
+    # English start
+    res_en = client.post("/api/v1/chatbot/tell-once/start?language=en")
+    assert res_en.status_code == 200
+    data_en = res_en.json()
+    assert data_en["step_index"] == 1
+    assert data_en["total_steps"] == 6
+    assert data_en["step_name"] == "safety_check"
+    assert "safe, judgment-free space" in data_en["gentle_prompt"]
+    assert len(data_en["suggested_chips"]) > 0
+    assert data_en["is_completed"] is False
+    assert data_en["language"] == "en"
+
+    # Hindi start
+    res_hi = client.post("/api/v1/chatbot/tell-once/start?language=hi")
+    assert res_hi.status_code == 200
+    data_hi = res_hi.json()
+    assert data_hi["step_index"] == 1
+    assert data_hi["step_name"] == "safety_check"
+    assert "टेल-वन्स" in data_hi["gentle_prompt"]
+    assert len(data_hi["suggested_chips"]) > 0
+    assert data_hi["language"] == "hi"
+
+
+def test_tell_once_progression_and_breather(client: TestClient):
+    """Verify one-question-at-a-time pacing and take-a-breather pause feature."""
+    # Step 1: Start
+    res_start = client.post("/api/v1/chatbot/tell-once/start?language=en")
+    assert res_start.status_code == 200
+    intake_id = res_start.json()["intake_id"]
+
+    # Test Breather
+    res_breathe = client.post(
+        "/api/v1/chatbot/tell-once/turn",
+        json={"intake_id": intake_id, "take_breather": True, "language": "en"},
+    )
+    assert res_breathe.status_code == 200
+    breathe_data = res_breathe.json()
+    assert breathe_data["step_index"] == 1
+    assert "Breathe in slowly" in breathe_data["gentle_prompt"]
+    assert "I feel ready to continue" in breathe_data["suggested_chips"]
+
+    # Step 1 Answer: Physical safety confirmed -> advances to Step 2
+    res_step2 = client.post(
+        "/api/v1/chatbot/tell-once/turn",
+        json={"intake_id": intake_id, "user_response": "Yes, I am in a safe place", "language": "en"},
+    )
+    assert res_step2.status_code == 200
+    step2_data = res_step2.json()
+    assert step2_data["step_index"] == 2
+    assert step2_data["step_name"] == "what_happened"
+    assert "describe what you have been experiencing" in step2_data["gentle_prompt"]
+
+    # Step 2 Answer: Incident details -> advances to Step 3
+    res_step3 = client.post(
+        "/api/v1/chatbot/tell-once/turn",
+        json={
+            "intake_id": intake_id,
+            "user_response": "Someone is blackmailing me with morphed private pictures",
+            "language": "en",
+        },
+    )
+    assert res_step3.status_code == 200
+    step3_data = res_step3.json()
+    assert step3_data["step_index"] == 3
+    assert step3_data["step_name"] == "timeline_and_platform"
+
+
+def test_tell_once_full_flow_and_compile_dossier(client: TestClient):
+    """Verify complete 6-turn intake and 3-in-1 multi-agency dossier compilation."""
+    # Start intake
+    res_start = client.post("/api/v1/chatbot/tell-once/start?language=en")
+    intake_id = res_start.json()["intake_id"]
+
+    # Answer turns 1 to 6
+    answers = [
+        "Yes, I am completely safe right now at home",
+        "An anonymous user is demanding money or they will leak edited intimate photos",
+        "It started two days ago on Instagram and Telegram, in New Delhi",
+        "Handle @shadow_threats_99 with phone number +91 9876543210",
+        "Demanding 50,000 INR via UPI or threat of sharing with college group; I have screenshots",
+        "I want immediate takedown, FIR registration, and arrest; Name is Ananya Sharma, New Delhi",
+    ]
+
+    last_response = None
+    for ans in answers:
+        res = client.post(
+            "/api/v1/chatbot/tell-once/turn",
+            json={"intake_id": intake_id, "user_response": ans, "language": "en"},
+        )
+        assert res.status_code == 200
+        last_response = res.json()
+
+    assert last_response["is_completed"] is True
+    assert "View Multi-Agency Dossier" in last_response["suggested_chips"]
+
+    # Retrieve multi-agency dossier
+    res_dossier = client.get(f"/api/v1/chatbot/tell-once/{intake_id}/dossier")
+    assert res_dossier.status_code == 200
+    dossier = res_dossier.json()
+
+    assert dossier["status"] == "compiled"
+    assert dossier["intake_id"] == intake_id
+    assert dossier["complainant_name"] == "Ananya Sharma"
+    assert "New Delhi" in dossier["city_state"]
+
+    # Check 3 core components
+    # 1. Police Zero FIR
+    assert "ZERO FIR" in dossier["police_complaint_letter"]
+    assert "173" in dossier["police_complaint_letter"] and "BNSS" in dossier["police_complaint_letter"]
+    assert "Section 66E" in dossier["police_complaint_letter"]
+    assert "Ananya Sharma" in dossier["police_complaint_letter"]
+
+    # 2. Cyber Helpline 1930 Brief
+    assert "NATIONAL CYBER CRIME REPORTING PORTAL" in dossier["cyber_helpline_brief"]
+    assert "1930" in dossier["cyber_helpline_brief"]
+    assert "Instagram and Telegram" in dossier["cyber_helpline_brief"] or "Instagram" in dossier["cyber_helpline_brief"]
+    assert "@shadow_threats_99" in dossier["cyber_helpline_brief"]
+
+    # 3. Lawyer Case Summary
+    assert "CONFIDENTIAL LEGAL BRIEF" in dossier["lawyer_case_summary"]
+    assert "BNS 2023 Sec 308" in dossier["lawyer_case_summary"]
+
+    # Evidence checklist and contacts
+    assert len(dossier["evidence_checklist"]) >= 4
+    assert any(c["number"] == "112" for c in dossier["emergency_contacts"])
+    assert any(c["number"] == "1930" for c in dossier["emergency_contacts"])
+
+
 

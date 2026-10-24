@@ -22,7 +22,7 @@
     </a>
 
     <ul class="nav-links">
-      <li><a href="#features" class="nav-link">Features</a></li>
+      <li><a href="#tell-once-section" class="nav-link" style="color:#7c3aed; font-weight:700;">✨ Tell-Once</a></li>
       <li><a href="#sos-section" class="nav-link">Emergency SOS</a></li>
       <li><a href="#safewalk-section" class="nav-link">SafeWalk</a></li>
       <li><a href="#deepfake-section" class="nav-link">Deepfake Scan</a></li>
@@ -31,6 +31,11 @@
     </ul>
 
     <div class="nav-actions">
+      <!-- Tell-Once Quick Launch Button -->
+      <button class="btn-tell-once-nav" id="btn-nav-tell-once" title="Tell-Once Trauma-Informed Intake (Speak or Type Once)">
+        🌸 Tell-Once
+      </button>
+
       <!-- Stealth Panic Switch (Recipe Disguise) -->
       <button class="btn-panic" id="panic-disguise-btn" title="Instantly hide this page with a recipe blog (ESC)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -64,9 +69,15 @@
           With SafeMate, we're empowering women to reclaim their voice and safety, regardless of their circumstances. Whether you are a survivor, ally, or advocate, join us in reshaping the future for women facing abuse—help us build a world where they can finally break the silence.
         </p>
 
-        <div class="hero-actions">
-          <a href="#features" class="btn-primary">Get Started</a>
-          <button class="btn-outline" id="btn-emergency-scroll">Learn Features</button>
+        <div class="hero-actions" style="flex-wrap: wrap;">
+          <button type="button" class="btn-primary" id="btn-hero-tell-once" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); border-color: #6366f1; padding: 12px 22px; font-weight: 700; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);">
+            🌸 Tell-Once Intake (बोलें या लिखें - सिर्फ एक बार)
+          </button>
+          <a href="#features" class="btn-outline">Explore All Tools</a>
+        </div>
+        <div class="hero-tell-once-note">
+          <span>🛡️</span>
+          <span><strong>Tell-Once Intake:</strong> Never repeat trauma. Speak or type gently in Hindi or English to get police, cyber 1930 &amp; legal files.</span>
         </div>
       </div>
     </div>
@@ -102,6 +113,49 @@
   <!-- User-Friendly Features Grid with Real Situation Photography -->
   <div class="section-wrapper">
     <div class="features-grid">
+
+      <!-- Feature 0: Tell-Once Intake (Trauma-Informed Single Interview) -->
+      <div class="feature-card" id="tell-once-section" style="border: 2px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08);">
+        <div class="feature-img-box">
+          <img src="assets/tell_once_counsel.jpg" alt="Compassionate counselor listening to survivor in calm safe space">
+          <span class="feature-badge" style="background:#7c3aed; color:#fff;">✨ Tell-Once Intake • Trauma-Informed</span>
+        </div>
+        <div class="feature-body">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <h3 class="feature-title" style="color:#4c1d95;">Tell-Once Intake (बोलें या लिखें - सिर्फ एक बार)</h3>
+            <span style="background:#ede9fe; color:#6d28d9; padding:2px 8px; border-radius:999px; font-size:0.72rem; font-weight:700;">Zero Retelling</span>
+          </div>
+          <p class="feature-desc">
+            A trauma-informed assistant lets you speak or type in <strong>Hindi or English</strong>, asks one gentle question at a time, and turns your answers into a structured complaint. You <em>never</em> have to retell your story to a helpline, police, and lawyer separately.
+          </p>
+
+          <div class="simple-control-panel">
+            <div style="background:#f5f3ff; border:1px solid #ddd6fe; padding:10px 12px; border-radius:10px; margin-bottom:12px;">
+              <div style="font-size:0.74rem; font-weight:700; color:#5b21b6; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;">
+                📁 3-in-1 Unified Multi-Agency File
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <span style="background:#ffffff; border:1px solid #c4b5fd; color:#4338ca; border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:600;">👮 Police Zero FIR (BNSS 173)</span>
+                <span style="background:#ffffff; border:1px solid #c4b5fd; color:#4338ca; border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:600;">💻 Cyber Helpline 1930 Brief</span>
+                <span style="background:#ffffff; border:1px solid #c4b5fd; color:#4338ca; border-radius:6px; padding:3px 8px; font-size:0.74rem; font-weight:600;">⚖️ Legal Counsel Brief</span>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <button type="button" class="btn-primary" id="btn-card-tell-once-en" style="background:#7c3aed; border-color:#7c3aed; flex:1; padding:10px; font-size:12px; font-weight:700; cursor:pointer;">
+                🌸 Start Intake (English)
+              </button>
+              <button type="button" class="btn-outline" id="btn-card-tell-once-hi" style="border-color:#7c3aed; color:#7c3aed; flex:1; padding:10px; font-size:12px; font-weight:700; cursor:pointer;">
+                🇮🇳 शुरू करें (हिंदी)
+              </button>
+            </div>
+
+            <button type="button" class="btn-outline" id="btn-card-breather-open" style="width:100%; padding:8px; font-size:12px; color:#6d28d9; border-color:#c4b5fd; background:#fdf4ff; cursor:pointer; font-weight:600;">
+              🌿 Need a Calm Pause? Box Breathing Space
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Feature 1: Emergency SOS & Trusted Contacts (Real Photo: Woman holding phone on street) -->
       <div class="feature-card" id="sos-section">
@@ -706,6 +760,169 @@
       </div>
     </div>
   </div>
+
+  <!-- ========================================================
+       TELL-ONCE INTAKE MODAL (TRAUMA-INFORMED SINGLE INTERVIEW)
+       ======================================================== -->
+  <div class="modal-overlay" id="tell-once-modal" style="z-index: 99997;">
+    <div class="tell-once-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="tell-once-modal-header">
+        <div>
+          <div class="tell-once-header-title">
+            <span>🌸</span>
+            <span>Tell-Once Intake</span>
+          </div>
+          <div class="tell-once-header-sub" id="tell-once-header-sub">
+            A trauma-informed assistant • Tell your story once, never repeat it.
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Bilingual Language Toggle -->
+          <div class="tell-once-lang-toggle">
+            <button type="button" class="tell-once-lang-btn active" id="tell-once-lang-en">English</button>
+            <button type="button" class="tell-once-lang-btn" id="tell-once-lang-hi">हिंदी</button>
+          </div>
+          <button type="button" id="btn-close-tell-once-modal" style="background:none; border:none; color:#c7d2fe; font-size:20px; cursor:pointer;" title="Close Modal">✕</button>
+        </div>
+      </div>
+
+      <!-- Stepper Progress Bar -->
+      <div class="tell-once-stepper-wrap">
+        <div class="tell-once-progress-track">
+          <div class="tell-once-progress-fill" id="tell-once-progress-fill"></div>
+        </div>
+        <div class="tell-once-step-label" id="tell-once-step-label">Step 1 of 6: Safety Check</div>
+      </div>
+
+      <!-- Calming Breather Bar -->
+      <div class="tell-once-breather-bar">
+        <span style="font-size:0.75rem; color:#6b21a8; font-weight:600;">Feeling overwhelmed? Take all the time you need.</span>
+        <button type="button" class="btn-tell-once-breather" id="btn-tell-once-breather">
+          <span>🌿</span>
+          <span id="btn-breather-text">Take a Breather (गहरी सांस लें)</span>
+        </button>
+      </div>
+
+      <!-- Animated Box Breathing Visualizer (Collapsible) -->
+      <div class="breathing-box-overlay" id="tell-once-breathing-box" style="display:none;">
+        <div class="breathing-circle"></div>
+        <div class="breathing-guidance-text" id="breathing-guidance-text">
+          <strong>Calm Box Breathing:</strong> Inhale gently for 4 seconds as the circle expands... hold for 4 seconds... and release slowly. You are completely safe and in total control.
+        </div>
+      </div>
+
+      <!-- Modal Body (Question Flow) -->
+      <div class="tell-once-body" id="tell-once-conversation-view">
+        <div class="tell-once-question-bubble" id="tell-once-question-box">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <span style="font-size:0.72rem; color:#6d28d9; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;" id="tell-once-stage-title">GENTLE INTAKE QUESTION</span>
+            <button type="button" id="btn-tell-once-audio-read" class="bubble-action-btn" title="Listen to question aloud">
+              🔊 Listen
+            </button>
+          </div>
+          <div class="tell-once-prompt-text" id="tell-once-prompt-text">
+            Welcome to Tell-Once Intake. You are in a safe, judgment-free space. First: Are you in a physically safe space right now?
+          </div>
+          <div class="tell-once-affirmation-text" id="tell-once-affirmation-text">
+            ✨ Take a breath. You are in full control of this conversation.
+          </div>
+        </div>
+
+        <!-- Suggested Answer Chips -->
+        <div class="tell-once-chips-row" id="tell-once-chips-container">
+          <button type="button" class="tell-once-chip">Yes, I am in a safe place</button>
+          <button type="button" class="tell-once-chip">I am somewhat safe, but worried</button>
+          <button type="button" class="tell-once-chip">No, I am in immediate danger (Call 112)</button>
+        </div>
+
+        <!-- Survivor Spoken / Typed Input Bar -->
+        <div class="tell-once-input-bar">
+          <button type="button" class="tell-once-mic-btn" id="btn-tell-once-mic" title="Speak your reply in English or Hindi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
+          <input type="text" class="tell-once-input-field" id="tell-once-user-input" placeholder="Speak or type gently here (English or हिंदी)...">
+          <button type="button" class="tell-once-next-btn" id="btn-tell-once-next">
+            <span>Next</span>
+            <span>➜</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dossier View (Shown When Complete or Requested) -->
+      <div class="tell-once-body" id="tell-once-dossier-view" style="display:none;">
+        <div style="background:#ecfdf5; border-left:4px solid #10b981; padding:12px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="color:#065f46; font-size:0.92rem; display:block;">🎉 Multi-Agency Tell-Once Dossier Compiled!</strong>
+            <span style="font-size:0.78rem; color:#047857;" id="tell-once-dossier-note">
+              You never have to repeat your story again. Present this unified dossier directly to police, helplines, or legal counsel.
+            </span>
+          </div>
+          <button type="button" id="btn-tell-once-back-to-chat" class="btn-outline" style="font-size:11px; padding:4px 10px; cursor:pointer;">
+            💬 Back to Chat
+          </button>
+        </div>
+
+        <div class="tell-once-dossier-card">
+          <!-- Dossier Sub-Tabs -->
+          <div class="tell-once-dossier-nav">
+            <button type="button" class="tell-once-dossier-tab-btn active" id="tab-dossier-fir">👮 1. Police Zero FIR</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-cyber">💻 2. Cyber Helpline 1930</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-lawyer">⚖️ 3. Legal Counsel Brief</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-evidence">📁 4. Evidence Checklist &amp; Contacts</button>
+          </div>
+
+          <!-- Active Text Content Pane -->
+          <div class="tell-once-dossier-content-pane" id="tell-once-dossier-text"></div>
+        </div>
+
+        <!-- Dossier Actions Row -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-primary" id="btn-copy-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
+              📋 Copy Current File
+            </button>
+            <button type="button" class="btn-outline" id="btn-print-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
+              🖨️ Print Dossier
+            </button>
+            <button type="button" class="btn-outline" id="btn-download-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
+              💾 Download (.txt)
+            </button>
+          </div>
+
+          <button type="button" class="btn-outline" id="btn-restart-tell-once" style="color:#64748b; font-size:11px; padding:6px 10px; cursor:pointer;">
+            🔄 Start New Intake Session
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       FLOATING EMERGENCY QUICK-DOCK (User-Friendly Safety Bar)
+       ======================================================== -->
+  <aside class="emergency-quick-dock" aria-label="Emergency quick dock">
+    <a href="tel:112" class="dock-pill-call" title="Direct Police Dispatch (112)">
+      <span>📞</span>
+      <span>112</span>
+    </a>
+    <button type="button" class="dock-pill-tellonce" id="dock-btn-tell-once" title="Tell-Once Trauma-Informed Intake">
+      <span>🌸</span>
+      <span>Tell-Once</span>
+    </button>
+    <button type="button" class="dock-pill-panic" id="dock-btn-disguise" title="Hide page instantly (Recipe Disguise)">
+      <span>🛡️</span>
+      <span>Disguise</span>
+    </button>
+  </aside>
 
   <script src="app.js"></script>
 </body>

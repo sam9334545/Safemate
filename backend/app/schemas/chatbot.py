@@ -250,3 +250,48 @@ class ChatExportResponse(BaseModel):
     formatted_report: str
     helplines_summary: List[str]
 
+
+# -----------------------------------------------------------------------------
+# Tell-Once Trauma-Informed Intake Schemas
+# -----------------------------------------------------------------------------
+class TellOnceTurnRequest(BaseModel):
+    """User response in the single-intake trauma-informed interview."""
+
+    intake_id: Optional[str] = Field(None, max_length=100, description="Intake session ID")
+    user_response: Optional[str] = Field(None, max_length=2000, description="User spoken or typed reply")
+    language: Optional[str] = Field("en", max_length=10, description="'en' or 'hi'")
+    take_breather: Optional[bool] = Field(False, description="Whether user requested a calm pause")
+
+
+class TellOnceTurnResponse(BaseModel):
+    """Next gentle question in the one-at-a-time intake flow."""
+
+    intake_id: str
+    step_index: int = Field(..., description="1-indexed step number")
+    total_steps: int = Field(6, description="Total intake steps")
+    step_name: str
+    gentle_prompt: str
+    calm_affirmation: Optional[str] = None
+    audio_summary: Optional[str] = None
+    suggested_chips: List[str] = Field(default_factory=list)
+    is_completed: bool = False
+    language: str = "en"
+
+
+class TellOnceDossierResponse(BaseModel):
+    """Complete Multi-Agency Tell-Once Dossier generated from single intake."""
+
+    intake_id: str
+    status: str = "compiled"
+    created_at: str
+    language: str
+    complainant_name: str
+    incident_type: str
+    city_state: str
+    police_complaint_letter: str
+    cyber_helpline_brief: str
+    lawyer_case_summary: str
+    evidence_checklist: List[str]
+    emergency_contacts: List[Dict[str, str]]
+    support_message: str
+

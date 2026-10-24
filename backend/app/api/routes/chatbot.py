@@ -28,8 +28,12 @@ from app.schemas.chatbot import (
     ComplaintDraftRequest,
     ComplaintDraftResponse,
     SafetyResourceResponse,
+    TellOnceDossierResponse,
+    TellOnceTurnRequest,
+    TellOnceTurnResponse,
 )
 from app.services.chatbot_service import chatbot_service
+from app.services.tell_once_service import tell_once_service
 
 logger = logging.getLogger(__name__)
 
@@ -285,3 +289,45 @@ async def get_chatbot_ui():
         <p>Chatbot API is operational. Visit <a href="/docs">/docs</a> for API specifications.</p>
         </body></html>"""
     )
+
+
+# -----------------------------------------------------------------------------
+# Tell-Once Trauma-Informed Intake Endpoints
+# -----------------------------------------------------------------------------
+@router.post(
+    "/tell-once/start",
+    response_model=TellOnceTurnResponse,
+    summary="Start Trauma-Informed Tell-Once Intake",
+    description="Initializes a gentle, trauma-informed intake session where the survivor only tells their story once in Hindi or English.",
+)
+async def start_tell_once(
+    language: str = Query("en", description="Preferred language: 'en' or 'hi'"),
+) -> TellOnceTurnResponse:
+    """Initialize single intake flow with gentle safety check."""
+    return tell_once_service.start_intake(language=language)
+
+
+@router.post(
+    "/tell-once/turn",
+    response_model=TellOnceTurnResponse,
+    summary="Advance Tell-Once Intake Turn",
+    description="Submits the survivor's response or breather request for the current intake question and advances to the next gentle prompt.",
+)
+async def advance_tell_once_turn(
+    payload: TellOnceTurnRequest,
+) -> TellOnceTurnResponse:
+    """Process current turn answers or breathe pause request."""
+    return await tell_once_service.process_turn(payload)
+
+
+@router.get(
+    "/tell-once/{intake_id}/dossier",
+    response_model=TellOnceDossierResponse,
+    summary="Compile Multi-Agency Tell-Once Dossier",
+    description="Generates the 3-in-1 dossier: Police Zero FIR (BNSS 173), Cyber 1930 Helpline brief, and Lawyer case brief from the single intake session.",
+)
+async def get_tell_once_dossier(
+    intake_id: str,
+) -> TellOnceDossierResponse:
+    """Synthesize multi-agency legal & crisis response dossier."""
+    return tell_once_service.compile_dossier(intake_id)
