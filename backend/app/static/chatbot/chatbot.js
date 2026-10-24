@@ -254,6 +254,41 @@
       `;
     }
 
+    // Mode badge if rag or safe_fallback
+    if (data.answer_mode === "rag") {
+      html += `<div class="mode-badge rag-badge"><span class="badge-icon">🛡️</span> Grounded in Verified Legal Knowledge</div>`;
+    } else if (data.answer_mode === "safe_fallback" && data.sources && data.sources.length > 0) {
+      html += `<div class="mode-badge fallback-badge"><span class="badge-icon">📖</span> Curated Official Reference (Safe Fallback)</div>`;
+    }
+
+    // Sources list (Verified RAG Citations)
+    if (data.sources && data.sources.length > 0) {
+      html += `<div class="sources-section">`;
+      html += `<div class="sources-heading">📚 Verified Citations & References (${data.sources.length}):</div>`;
+      data.sources.forEach((s) => {
+        const secText = s.section ? `<span class="source-section">§ ${escapeHtml(s.section)}</span>` : "";
+        const dateText = s.last_verified ? `<span class="source-date">Verified: ${escapeHtml(s.last_verified)}</span>` : "";
+        html += `
+          <div class="source-card">
+            <div class="source-header">
+              <span class="source-title">${escapeHtml(s.title)}</span>
+              ${secText}
+            </div>
+            <div class="source-meta">
+              <span class="source-org">🏛️ ${escapeHtml(s.source_organization)}</span>
+              ${dateText}
+            </div>
+            <div class="source-actions">
+              <a href="${escapeHtml(s.source_url)}" class="btn-source-url" target="_blank" rel="noopener noreferrer">
+                Official Reference ↗
+              </a>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
     // Resources list
     if (data.resources && data.resources.length > 0) {
       html += `<div class="resources-section">`;

@@ -6,6 +6,9 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
+from app.chatbot.rag.schemas import ChatbotSourceCitation
+
+
 class ChatbotHealthResponse(BaseModel):
     """Health and readiness response for the Safety Assistant."""
 
@@ -94,6 +97,7 @@ class ChatbotStartResponse(BaseModel):
     safemate_feature_name: Optional[str] = None
     safemate_feature_note: Optional[str] = None
     is_emergency_priority: bool = False
+    sources: List[ChatbotSourceCitation] = Field(default_factory=list)
 
 
 class ChatbotMessageRequest(BaseModel):
@@ -124,6 +128,15 @@ class ChatbotMessageResponse(BaseModel):
     safemate_feature_link: Optional[str] = None
     safemate_feature_name: Optional[str] = None
     safemate_feature_note: Optional[str] = None
+    sources: List[ChatbotSourceCitation] = Field(
+        default_factory=list, description="Verified knowledge sources retrieved for this response"
+    )
+    answer_mode: Optional[str] = Field(
+        "guided", description="Answer generation mode: guided, rag, emergency, or safe_fallback"
+    )
+    fallback_used: Optional[bool] = Field(
+        False, description="Whether fallback mechanism was used"
+    )
 
 
 class ChatbotFeedbackRequest(BaseModel):

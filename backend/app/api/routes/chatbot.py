@@ -5,10 +5,11 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Optional
-from fastapi import APIRouter, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import HTMLResponse
 
+from app.models import UserModel
+from app.utils.auth import get_optional_current_user
 from app.schemas.chatbot import (
     ChatbotFeedbackRequest,
     ChatbotFeedbackResponse,
@@ -61,8 +62,13 @@ async def list_safety_flows() -> ChatbotFlowListResponse:
     response_model=ChatbotStartResponse,
     summary="Start a specific guided safety flow",
 )
-async def start_safety_flow(request: ChatbotStartRequest) -> ChatbotStartResponse:
+async def start_safety_flow(
+    request: ChatbotStartRequest,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> ChatbotStartResponse:
     """Initialize a structured flow by flow_id and return its entry step."""
+    if current_user and not request.session_id:
+        request.session_id = f"user_{current_user.id}"
     try:
         return chatbot_service.start_flow(request)
     except ValueError as e:
@@ -80,12 +86,15 @@ async def start_safety_flow(request: ChatbotStartRequest) -> ChatbotStartRespons
 )
 async def send_chatbot_message(
     request: ChatbotMessageRequest,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
 ) -> ChatbotMessageResponse:
     """Submit a structured choice or text question to the safety assistant.
     
     Safety Guarantee: Immediate physical danger triggers deterministic emergency
-    guidance regardless of ongoing flow or model state.
+    guidance regardless of ongoing flow, authentication state, or model state.
     """
+    if current_user and not request.session_id:
+        request.session_id = f"user_{current_user.id}"
     return await chatbot_service.process_message(request)
 
 

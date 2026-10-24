@@ -25,12 +25,14 @@ from app.schemas.chatbot import (
     ChatbotMessageRequest,
     ChatbotMessageResponse,
     ChatbotResourceListResponse,
+    ChatbotSourceCitation,
     ChatbotStartRequest,
     ChatbotStartResponse,
     FlowChoiceResponse,
     FlowMetadataResponse,
     SafetyResourceResponse,
 )
+from app.chatbot.rag.engine import RAGEngine, get_rag_engine
 from app.services.llm_provider import BaseLLMProvider, get_llm_provider
 
 # -----------------------------------------------------------------------------
@@ -62,24 +64,30 @@ EMERGENCY_TRIGGER_PATTERNS = [
 ]
 
 SENSITIVE_SECRET_PATTERNS = [
-    r"\bpassword\b",
-    r"\botp\b",
-    r"\bpin code\b",
-    r"\bcvv\b",
-    r"\bprivate photo\b",
-    r"\bnude\b",
-    r"\bexplicit video\b",
+    r"\bpasswords?\b",
+    r"\botps?\b",
+    r"\bpin codes?\b",
+    r"\bpins?\b",
+    r"\bcvvs?\b",
+    r"\bprivate photos?\b",
+    r"\bnudes?\b",
+    r"\bexplicit videos?\b",
 ]
 
 
 class ChatbotService:
     """Service orchestrating safety guidance, emergency interventions, and flow transitions."""
 
-    def __init__(self, llm_provider: Optional[BaseLLMProvider] = None):
+    def __init__(
+        self,
+        llm_provider: Optional[BaseLLMProvider] = None,
+        rag_engine: Optional[RAGEngine] = None,
+    ):
         self._emergency_regex = re.compile(
             "|".join(EMERGENCY_TRIGGER_PATTERNS), re.IGNORECASE
         )
         self.llm_provider = llm_provider or get_llm_provider()
+        self.rag_engine = rag_engine or get_rag_engine()
 
     def check_immediate_danger(self, message: str) -> bool:
         """Deterministically check if message contains immediate physical threat keywords."""
@@ -191,7 +199,7 @@ class ChatbotService:
             )
 
         # ---------------------------------------------------------------------
-        # 3. FREE-TEXT INTENT MATCHING & OPTIONAL GROQ LLM LAYER
+        # 3. FREE-TEXT INTENT MATCHING, RAG RETRIEVAL & LLM / FALLBACK LAYER
         # ---------------------------------------------------------------------
         if user_text:
             # Sensitive disclosures (passwords/OTPs) are intercepted deterministically
@@ -199,9 +207,36 @@ class ChatbotService:
             if sensitive_guard:
                 return sensitive_guard
 
-            # If Groq LLM is configured, request assistive answer
+            # RAG Retrieval: Check knowledge base for verified evidence
+            rag_result = self.rag_engine.retrieve(user_text, jurisdiction=country)
+            evidence_block = (
+                self.rag_engine.format_evidence_block(rag_result.chunks)
+                if rag_result.is_sufficient
+                else None
+            )
+            citations = (
+                self.rag_engine.extract_citations(rag_result.chunks)
+                if rag_result.is_sufficient
+                else []
+            )
+
+            # If LLM is configured, request assistive answer (grounded in RAG evidence when sufficient)
             if self.llm_provider and self.llm_provider.is_configured:
-                llm_response = await self.llm_provider.generate_response(user_text)
+                try:
+                    llm_response = await self.llm_provider.generate_response(
+                        user_text, evidence=evidence_block
+                    )
+                except TypeError:
+                    # Backward compatibility for mocks or providers taking only (user_query)
+                    try:
+                        llm_response = await self.llm_provider.generate_response(user_text)
+                    except Exception as e:
+                        logger.warning(f"LLM provider failed: {e}")
+                        llm_response = None
+                except Exception as e:
+                    logger.warning(f"LLM provider failed: {e}")
+                    llm_response = None
+
                 if llm_response:
                     return ChatbotMessageResponse(
                         session_id=session_id,
@@ -224,10 +259,51 @@ class ChatbotService:
                             ["erss_112_in", "women_helpline_181_in", "cybercrime_portal_in"],
                             country,
                         ),
-                        disclaimer="AI-assisted guidance is for general information. For emergency safety, call 112 directly.",
+                        sources=citations,
+                        answer_mode="rag" if rag_result.is_sufficient else "safe_fallback",
+                        fallback_used=False,
+                        disclaimer=(
+                            "AI-assisted guidance grounded in verified legal and safety resources. Not formal legal counsel."
+                            if rag_result.is_sufficient
+                            else "AI-assisted guidance is for general information. For emergency safety, call 112 directly."
+                        ),
                     )
 
-            # Fallback to curated guided flow matching
+            # If LLM is unconfigured or failed, but RAG evidence is sufficient:
+            # Curated safe fallback using retrieved verified knowledge
+            if rag_result.is_sufficient and rag_result.chunks:
+                top_chunk = rag_result.chunks[0]
+                return ChatbotMessageResponse(
+                    session_id=session_id,
+                    title=f"Verified Guidance: {top_chunk.title}",
+                    text=(
+                        f"Based on verified official guidance from {top_chunk.source_organization}:\n\n"
+                        f"{top_chunk.text}"
+                    ),
+                    choices=[
+                        FlowChoiceResponse(
+                            choice_id="choice_to_options",
+                            label="Explore Safety Options",
+                            target_flow_id="understand_options",
+                        ),
+                        FlowChoiceResponse(
+                            choice_id="choice_opt_emergency",
+                            label="Emergency Help (112)",
+                            target_flow_id="immediate_danger",
+                            is_emergency=True,
+                        ),
+                    ],
+                    resources=self._resolve_resources(
+                        ["erss_112_in", "women_helpline_181_in", "cybercrime_portal_in"],
+                        country,
+                    ),
+                    sources=citations,
+                    answer_mode="safe_fallback",
+                    fallback_used=True,
+                    disclaimer="Information retrieved directly from verified official sources. Not formal legal counsel.",
+                )
+
+            # Fallback to curated guided flow matching when knowledge evidence is insufficient
             return self._handle_free_text_query(user_text, session_id, country)
 
         # ---------------------------------------------------------------------
@@ -372,6 +448,7 @@ class ChatbotService:
             safemate_feature_link="/api/v1/emergency/sos",
             safemate_feature_name="Emergency SOS Endpoint",
             safemate_feature_note="Requires configured contacts on backend; always prioritize calling 112 first.",
+            answer_mode="emergency",
         )
 
     def _handle_choice_selection(

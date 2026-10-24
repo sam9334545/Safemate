@@ -1,0 +1,18 @@
+[
+  {
+    "document_id": "doc_pending_unverified_law_draft",
+    "title": "Unverified Proposed Digital Draft Law",
+    "topic": "cybercrime",
+    "jurisdiction": "IN",
+    "source_organization": "Unverified Community Forum",
+    "source_url": "https://example.org/unverified-draft",
+    "source_type": "draft",
+    "section": "Draft Clause 99",
+    "text": "This is a draft proposal text that has not been enacted or officially verified by legal counsel. It must be rejected by the RAG corpus ingestion engine.",
+    "last_verified": "2026-10-24",
+    "verification_status": "pending_review",
+    "effective_date": null,
+    "review_notes": "Awaiting official gazette notification; do not index.",
+    "version": "0.1"
+  }
+]

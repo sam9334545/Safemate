@@ -664,6 +664,132 @@ html, body {
   color: var(--text-muted);
 }
 
+/* RAG Mode Badges & Citations Section */
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  width: fit-content;
+}
+
+.rag-badge {
+  background-color: #EEF2FF;
+  color: #3730A3;
+  border: 1px solid #C7D2FE;
+}
+
+.fallback-badge {
+  background-color: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.sources-section {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sources-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.source-card {
+  background-color: var(--bg-card);
+  border: 1px solid #E0E7FF;
+  border-left: 3px solid #4F46E5;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.source-card:hover {
+  border-color: #6366F1;
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.source-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.source-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.source-section {
+  font-size: 0.75rem;
+  background-color: #EEF2FF;
+  color: #4338CA;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.source-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.source-org {
+  font-weight: 500;
+}
+
+.source-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.source-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.btn-source-url {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4F46E5;
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid #C7D2FE;
+  border-radius: var(--radius-sm);
+  background-color: #F5F7FF;
+  transition: all 0.15s ease;
+}
+
+.btn-source-url:hover {
+  background-color: #EEF2FF;
+  border-color: #6366F1;
+}
+
 /* Responsive queries */
 @media (max-width: 640px) {
   .cards-grid {
@@ -685,3 +811,4 @@ html, body {
     padding: 14px 16px;
   }
 }
+

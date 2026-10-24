@@ -95,3 +95,31 @@ async def get_current_user(
             detail="Inactive user account",
         )
     return user
+
+
+# Optional OAuth2 scheme that does not raise 401 when token is omitted
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_PREFIX}/auth/login",
+    auto_error=False,
+)
+
+
+async def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db),
+) -> Optional[UserModel]:
+    """Extract and validate JWT user if Authorization header is provided, else returns None."""
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if not email:
+            return None
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if user and user.is_active:
+            return user
+    except Exception:
+        return None
+    return None
+
