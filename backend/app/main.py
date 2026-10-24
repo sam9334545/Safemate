@@ -185,6 +185,11 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(watermark.router)
 
+    # Mount static assets for chatbot UI
+    static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
     # Mount frontend web application static files if directory exists
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
     if frontend_dir.exists():
@@ -231,6 +236,9 @@ def create_app() -> FastAPI:
             "chatbot_flows": f"{settings.API_V1_PREFIX}/chatbot/flows",
             "chatbot_start": f"{settings.API_V1_PREFIX}/chatbot/start",
             "chatbot_message": f"{settings.API_V1_PREFIX}/chatbot/message",
+            "chatbot_draft_complaint": f"{settings.API_V1_PREFIX}/chatbot/draft-complaint",
+            "chatbot_history": f"{settings.API_V1_PREFIX}/chatbot/history/{{session_id}}",
+            "chatbot_export": f"{settings.API_V1_PREFIX}/chatbot/export/{{session_id}}",
             "auth_register": f"{settings.API_V1_PREFIX}/auth/register",
             "auth_login": f"{settings.API_V1_PREFIX}/auth/login",
             "auth_login_json": f"{settings.API_V1_PREFIX}/auth/login-json",

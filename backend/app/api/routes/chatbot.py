@@ -14,6 +14,8 @@ from app.models import UserModel
 from app.utils.auth import get_optional_current_user
 from app.chatbot.knowledge.resources import get_emergency_resources
 from app.schemas.chatbot import (
+    ChatExportResponse,
+    ChatHistoryResponse,
     ChatbotFeedbackRequest,
     ChatbotFeedbackResponse,
     ChatbotFlowListResponse,
@@ -23,6 +25,8 @@ from app.schemas.chatbot import (
     ChatbotResourceListResponse,
     ChatbotStartRequest,
     ChatbotStartResponse,
+    ComplaintDraftRequest,
+    ComplaintDraftResponse,
     SafetyResourceResponse,
 )
 from app.services.chatbot_service import chatbot_service
@@ -209,6 +213,65 @@ async def submit_feedback(
 ) -> ChatbotFeedbackResponse:
     """Submit optional feedback regarding outdated or confusing safety guidance."""
     return chatbot_service.record_feedback(request)
+
+
+@router.post(
+    "/draft-complaint",
+    response_model=ComplaintDraftResponse,
+    summary="Draft Structured Legal Complaint / Zero FIR",
+    description="Generate a formal, ready-to-file police complaint / Zero FIR letter citing exact penal provisions (IT Act 66E/67/67A, BNS 78/79/351, CrPC 154 / BNSS 173).",
+)
+async def draft_complaint(
+    request: ComplaintDraftRequest,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> ComplaintDraftResponse:
+    """Generate a formal statutory Zero FIR / cyber crime complaint draft."""
+    if current_user and (not request.complainant_name or request.complainant_name.startswith("Concerned Citizen")):
+        request.complainant_name = current_user.full_name or current_user.email
+    return chatbot_service.generate_complaint_draft(request)
+
+
+@router.get(
+    "/history/{session_id}",
+    response_model=ChatHistoryResponse,
+    summary="Retrieve Chat Session Message History",
+    description="Fetch sequential interaction history recorded for a given session ID.",
+)
+async def get_chat_history(
+    session_id: str,
+) -> ChatHistoryResponse:
+    """Return past message turns for multi-turn assistant context."""
+    return chatbot_service.get_history(session_id)
+
+
+@router.delete(
+    "/history/{session_id}",
+    summary="Clear Chat Session History (Privacy Wipe)",
+    description="Instantly delete session message history for emergency privacy protection.",
+)
+async def clear_chat_history(
+    session_id: str,
+) -> Dict[str, Any]:
+    """Wipe session history immediately upon user request or panic trigger."""
+    cleared = chatbot_service.clear_history(session_id)
+    return {
+        "status": "cleared" if cleared else "not_found",
+        "session_id": session_id,
+        "message": "Chat session history wiped successfully." if cleared else "Session history was already empty.",
+    }
+
+
+@router.get(
+    "/export/{session_id}",
+    response_model=ChatExportResponse,
+    summary="Export Safety Consultation Incident Report",
+    description="Generate a structured, printable report of the session advice, evidence preservation tips, and emergency helplines.",
+)
+async def export_chat_report(
+    session_id: str,
+) -> ChatExportResponse:
+    """Export formatted consultation summary for police, legal counsel, or personal records."""
+    return chatbot_service.export_report(session_id)
 
 
 @router.get("/ui", response_class=HTMLResponse, summary="Safemate Chatbot Web Interface")

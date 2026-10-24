@@ -356,22 +356,62 @@
           </p>
 
           <div class="simple-chat-box">
+            <!-- Header Controls: Country & Language & Modal Triggers -->
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; color:#fff; padding:8px 12px; font-size:0.75rem; border-top-left-radius:12px; border-top-right-radius:12px;">
+              <div style="display:flex; gap:6px; align-items:center;">
+                <label style="color:#94a3b8; font-weight:600;">Country:</label>
+                <select id="chat-country-select" style="background:#1e293b; color:#fff; border:1px solid #334155; border-radius:6px; padding:3px 6px; font-size:0.72rem; cursor:pointer;">
+                  <option value="IN" selected>🇮🇳 India (112 / 1930)</option>
+                  <option value="US">🇺🇸 United States (911)</option>
+                  <option value="GB">🇬🇧 United Kingdom (999)</option>
+                  <option value="CA">🇨🇦 Canada (911)</option>
+                  <option value="AU">🇦🇺 Australia (000)</option>
+                  <option value="GLOBAL">🌐 International</option>
+                </select>
+                <select id="chat-language-select" style="background:#1e293b; color:#fff; border:1px solid #334155; border-radius:6px; padding:3px 6px; font-size:0.72rem; cursor:pointer;">
+                  <option value="en" selected>English</option>
+                  <option value="hi">हिंदी (Hindi)</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" id="btn-open-fir-modal" style="background:#0284c7; color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:600;">
+                  ⚖️ Draft Zero FIR
+                </button>
+                <button type="button" id="btn-export-chat-report" style="background:#334155; color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer;" title="Export Safety Consultation Report">
+                  📄 Export
+                </button>
+                <button type="button" id="btn-clear-chat-log" style="background:#dc2626; color:#fff; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer;" title="Panic Clear Chat (Wipe Memory)">
+                  🧹 Wipe
+                </button>
+              </div>
+            </div>
+
             <!-- Quick Suggestion Action Chips -->
             <div class="chat-chips-scroll">
-              <button class="chat-chip" data-topic="hotlines">📞 Hotlines</button>
-              <button class="chat-chip" data-topic="restraining">🛡️ Restraining Orders</button>
-              <button class="chat-chip" data-topic="cyber">⚖️ Cyber Harassment</button>
+              <button class="chat-chip" data-topic="hotlines">📞 Hotlines (112)</button>
+              <button class="chat-chip" data-topic="zerofir">⚖️ Zero FIR Rights</button>
+              <button class="chat-chip" data-topic="cyber">🛡️ Cyber Blackmail (1930)</button>
+              <button class="chat-chip" data-topic="ncii">📸 Morphed Photo Leak</button>
               <button class="chat-chip" data-topic="evidence">🔒 Preserving Evidence</button>
+              <button class="chat-chip" data-topic="hindi">🇮🇳 हिंदी में मदद</button>
             </div>
 
             <div class="simple-chat-log" id="simple-chat-log">
               <div class="chat-bubble-ai">
-                Hi, I'm your SafeMate confidential legal companion. Tap any topic above or ask any question about your safety, protection orders, or emergency contacts.
+                Hi, I'm your SafeMate confidential legal and safety companion. Tap any topic above or ask any question about your safety, protection orders, emergency helplines, or drafting a police Zero FIR complaint.
               </div>
             </div>
 
             <div class="simple-chat-bar">
-              <input type="text" id="simple-chat-input" placeholder="Ask a confidential question...">
+              <input type="text" id="simple-chat-input" placeholder="Ask a confidential question or type in Hindi...">
+              <button id="btn-chat-mic" type="button" title="Voice Input (Speak to Chatbot)" style="background:#475569;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
               <button id="simple-chat-send" title="Send question">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -589,6 +629,80 @@
       </div>
       <div style="font-size:0.7rem; color:#64748b; text-align:center; margin-top:14px;">
         Tip: Press ESC or click ✕ to return to SafeMate
+      </div>
+    </div>
+  </div>
+
+  <!-- Zero FIR & Legal Complaint Generator Modal -->
+  <div class="modal-overlay" id="complaint-modal" style="z-index: 99998;">
+    <div class="complaint-modal-card">
+      <div class="complaint-modal-header">
+        <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+          ⚖️ Zero FIR &amp; Cyber Crime Complaint Generator
+        </div>
+        <button type="button" id="btn-close-complaint-modal" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;" title="Close Modal">✕</button>
+      </div>
+
+      <div class="complaint-modal-body">
+        <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:10px 12px; border-radius:6px; font-size:0.8rem; color:#1e40af;">
+          <strong>Legal Right:</strong> Under Bharatiya Nagarik Suraksha Sanhita (BNSS) Section 173 (formerly CrPC 154), any police station in India is legally obligated to register a <strong>Zero FIR</strong> regardless of territorial jurisdiction.
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="complaint-input-group">
+            <label>Incident Type</label>
+            <select id="fir-incident-type">
+              <option value="cyber_blackmail">Cyber Blackmail &amp; Extortion</option>
+              <option value="ncii_morph_leak">Non-Consensual Images / Morphing (NCII)</option>
+              <option value="stalking_harassment">Cyberstalking &amp; Online Harassment</option>
+              <option value="fake_profile">Fake Profile &amp; Impersonation</option>
+              <option value="physical_threat">Physical Threats &amp; Domestic Violence</option>
+            </select>
+          </div>
+
+          <div class="complaint-input-group">
+            <label>Complainant Name (Confidential)</label>
+            <input type="text" id="fir-complainant-name" placeholder="Concerned Citizen (or your name)">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="complaint-input-group">
+            <label>Platform / Location</label>
+            <input type="text" id="fir-platform" placeholder="Instagram, WhatsApp, Telegram, etc.">
+          </div>
+
+          <div class="complaint-input-group">
+            <label>City &amp; State</label>
+            <input type="text" id="fir-city-state" placeholder="e.g. New Delhi, India">
+          </div>
+        </div>
+
+        <div class="complaint-input-group">
+          <label>Suspect / Accused Information (if known)</label>
+          <input type="text" id="fir-accused" placeholder="User handle @stalker_xyz, phone +91-XXXXXXXXXX, or Unknown">
+        </div>
+
+        <div class="complaint-input-group">
+          <label>Brief Statement of Facts</label>
+          <textarea id="fir-summary" rows="3" placeholder="Describe chronologically what occurred (e.g. received threatening messages demanding monetary extortion to stop circulating morphed photos)..."></textarea>
+        </div>
+
+        <button type="button" class="btn-primary" id="btn-generate-fir" style="padding:10px; font-size:13px; font-weight:700;">
+          📜 Generate Formal Zero FIR Letter
+        </button>
+
+        <div id="fir-output-container" style="display:none; margin-top:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="color:#0f172a; font-size:0.85rem;" id="fir-output-title">Formal Statutory Complaint Draft:</strong>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn-outline" id="btn-copy-fir" style="padding:4px 10px; font-size:11px; cursor:pointer;">📋 Copy</button>
+              <button type="button" class="btn-outline" id="btn-print-fir" style="padding:4px 10px; font-size:11px; cursor:pointer;">🖨️ Print</button>
+            </div>
+          </div>
+          <div class="complaint-draft-output" id="fir-output-letter"></div>
+          <div id="fir-instructions-list" style="margin-top:10px; font-size:0.78rem; color:#475569;"></div>
+        </div>
       </div>
     </div>
   </div>

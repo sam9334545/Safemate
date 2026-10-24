@@ -3,7 +3,7 @@
 import re
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from app.chatbot.knowledge.flows import (
     FlowChoice,
@@ -19,6 +19,8 @@ from app.chatbot.knowledge.resources import (
     get_resources_by_country,
 )
 from app.schemas.chatbot import (
+    ChatExportResponse,
+    ChatHistoryResponse,
     ChatbotFeedbackRequest,
     ChatbotFeedbackResponse,
     ChatbotHealthResponse,
@@ -28,6 +30,9 @@ from app.schemas.chatbot import (
     ChatbotSourceCitation,
     ChatbotStartRequest,
     ChatbotStartResponse,
+    ChatMessageItem,
+    ComplaintDraftRequest,
+    ComplaintDraftResponse,
     FlowChoiceResponse,
     FlowMetadataResponse,
     SafetyResourceResponse,
@@ -74,6 +79,14 @@ SENSITIVE_SECRET_PATTERNS = [
     r"\bexplicit videos?\b",
 ]
 
+HINDI_TRIGGER_KEYWORDS = [
+    "madad", "bachao", "dhamki", "shikayat",
+    "pareshan", "picha kar raha", "fir darj",
+    "cyber thana", "suraksha", "dar lag raha", "kya karu", "kaise report kare",
+    "ganda photo", "morphed photo", "video viral", "thana", "shoshan",
+    "chhedchhad", "help karo", "phas gaya", "phas gayi", "chori"
+]
+
 
 class ChatbotService:
     """Service orchestrating safety guidance, emergency interventions, and flow transitions."""
@@ -88,6 +101,148 @@ class ChatbotService:
         )
         self.llm_provider = llm_provider or get_llm_provider()
         self.rag_engine = rag_engine or get_rag_engine()
+        self.session_histories: Dict[str, List[Dict[str, Any]]] = {}
+
+    def is_hindi_query(self, text: str, language: Optional[str] = None) -> bool:
+        """Detect if message is in Hindi (Devanagari script) or Hinglish safety query."""
+        if language and language.lower().startswith("hi"):
+            return True
+        if not text:
+            return False
+        # Devanagari Unicode Block
+        if re.search(r"[\u0900-\u097f]", text):
+            return True
+        lower = text.lower()
+        return any(re.search(rf"\b{re.escape(k)}\b", lower) for k in HINDI_TRIGGER_KEYWORDS)
+
+    def _build_hindi_safety_response(
+        self, session_id: str, country: str, query: str
+    ) -> ChatbotMessageResponse:
+        """Generate structured, compassionate safety response in Hindi."""
+        return ChatbotMessageResponse(
+            session_id=session_id,
+            title="सेफ़मेट सुरक्षा एवं कानूनी सहायता (Safemate Safety & Legal Assistance)",
+            text=(
+                f"आपकी सुरक्षा सर्वोपरि है। हम आपकी स्थिति को समझते हैं (प्रश्न: \"{query[:80]}\")。\n\n"
+                "कृपया शांत रहें और घबराएं नहीं। सेफ़मेट आपको तत्काल सहायता और सही कानूनी कदम उठाने में मदद करेगा:\n\n"
+                "1. यदि आप किसी तात्कालिक शारीरिक खतरे में हैं, तो सीधे 112 डायल करें।\n"
+                "2. साइबर ब्लैकमेल, फ़ोटो लीक या ऑनलाइन उत्पीड़न के लिए 1930 साइबर हेल्पलाइन पर कॉल करें या cybercrime.gov.in पर रिपोर्ट करें।\n"
+                "3. भारत में आप किसी भी नजदीकी पुलिस स्टेशन में 'Zero FIR' दर्ज करा सकते हैं, चाहे घटना कहीं भी हुई हो।"
+            ),
+            numbered_steps=[
+                "तात्कालिक आपातकाल में तुरंत 112 डायल करें (ERSS - Police, Fire, Ambulance)।",
+                "साइबर उत्पीड़न, ब्लैकमेल या मोर्फ़ फोटो के लिए 1930 पर कॉल करें या cybercrime.gov.in पर ऑनलाइन कंप्लेंट दर्ज करें।",
+                "सभी चैट, कॉल रिकॉर्ड, प्रोफाइल लिंक और संदेशों के स्क्रीनशॉट सुरक्षित रखें (सबूत कभी डिलीट न करें)।",
+                "ब्लैकमेलर को कोई पैसे न दें और तुरंत बातचीत बंद करें।",
+                "भारतीय नागरिक सुरक्षा संहिता (BNSS) की धारा 173 (पूर्व CrPC 154) के तहत Zero FIR दर्ज कराने का आपका पूर्ण कानूनी अधिकार है।"
+            ],
+            disclaimer="यह जानकारी आधिकारिक सरकारी नियमों एवं कानूनी प्रावधानों पर आधारित है। आपातकाल में सीधे 112 डायल करें।",
+            choices=[
+                FlowChoiceResponse(
+                    choice_id="choice_call_112",
+                    label="🚨 112 आपातकालीन सहायता (Call 112)",
+                    description="तुरंत पुलिस हेल्पलाइन से जुड़ें",
+                    is_emergency=True,
+                ),
+                FlowChoiceResponse(
+                    choice_id="choice_cyber_hindi",
+                    label="💻 साइबर अपराध 1930 हेल्पलाइन",
+                    description="साइबर फ्रॉड और ब्लैकमेल रिपोर्टिंग",
+                    target_flow_id="report_cybercrime_india",
+                ),
+                FlowChoiceResponse(
+                    choice_id="choice_blackmail_hindi",
+                    label="🛡️ ब्लैकमेल और धमकी से बचाव",
+                    description="ब्लैकमेल से निपटने के सुरक्षित कदम",
+                    target_flow_id="blackmail_threats",
+                ),
+                FlowChoiceResponse(
+                    choice_id="choice_evidence_hindi",
+                    label="📁 डिजिटल सबूत सुरक्षित रखें",
+                    description="स्क्रीनशॉट और चैट बैकअप",
+                    target_flow_id="preserve_evidence",
+                ),
+                FlowChoiceResponse(
+                    choice_id="choice_options_hindi",
+                    label="⚖️ अपने कानूनी अधिकार जानें (Zero FIR)",
+                    description="कानूनी विकल्प और शिकायत पत्र",
+                    target_flow_id="understand_options",
+                ),
+            ],
+            resources=self._resolve_resources(
+                ["erss_112_in", "women_helpline_181_in", "cybercrime_portal_in"],
+                country,
+            ),
+            language="hi",
+            audio_summary="आप सुरक्षित स्थान पर रहें। आपातकाल के लिए 112 और साइबर शिकायत के लिए 1930 पर कॉल करें। स्क्रीन पर दिए गए कदम फॉलो करें।",
+        )
+
+    def _record_turn(
+        self,
+        session_id: str,
+        sender: str,
+        text: str,
+        title: Optional[str] = None,
+        is_emergency: bool = False,
+    ) -> None:
+        """Append a message turn to the in-memory session history."""
+        if not session_id:
+            return
+        if session_id not in self.session_histories:
+            self.session_histories[session_id] = []
+
+        turn = {
+            "sender": sender,
+            "text": text,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "title": title,
+            "is_emergency": is_emergency,
+        }
+        self.session_histories[session_id].append(turn)
+        if len(self.session_histories[session_id]) > 50:
+            self.session_histories[session_id] = self.session_histories[session_id][-50:]
+
+    def _wrap_and_record(
+        self,
+        response: ChatbotMessageResponse,
+        user_text: str = "",
+        language: str = "en",
+    ) -> ChatbotMessageResponse:
+        """Enrich response with language, audio readout summary, and record session turn."""
+        response.language = language or "en"
+
+        if not response.audio_summary:
+            if response.is_emergency_priority:
+                response.audio_summary = (
+                    "Emergency alert: Please get to a safe place immediately and call 112 for police or emergency dispatch."
+                )
+            elif response.language == "hi":
+                response.audio_summary = (
+                    "आप सुरक्षित स्थान पर रहें। आपातकाल के लिए 112 और साइबर शिकायत के लिए 1930 डायल करें।"
+                )
+            else:
+                raw_text = response.text.replace("\n", " ").strip()
+                sentences = re.split(r"(?<=[.!?])\s+", raw_text)
+                first_part = " ".join(sentences[:2]) if sentences else raw_text
+                if len(first_part) > 160:
+                    first_part = first_part[:157] + "..."
+                response.audio_summary = first_part
+
+        if user_text:
+            self._record_turn(
+                session_id=response.session_id,
+                sender="user",
+                text=user_text,
+                is_emergency=False,
+            )
+        self._record_turn(
+            session_id=response.session_id,
+            sender="assistant",
+            text=response.text,
+            title=response.title,
+            is_emergency=response.is_emergency_priority,
+        )
+        return response
 
     def check_immediate_danger(self, message: str) -> bool:
         """Deterministically check if message contains immediate physical threat keywords."""
@@ -158,7 +313,7 @@ class ChatbotService:
             for choice in initial_step.choices
         ]
 
-        return ChatbotStartResponse(
+        start_response = ChatbotStartResponse(
             session_id=session_id,
             flow_id=flow.flow_id,
             step_id=initial_step.step_id,
@@ -173,40 +328,61 @@ class ChatbotService:
             safemate_feature_note=initial_step.safemate_feature_note,
             is_emergency_priority=(flow.flow_id == "immediate_danger"),
         )
+        self._record_turn(
+            session_id=session_id,
+            sender="assistant",
+            text=initial_step.guidance,
+            title=initial_step.title,
+            is_emergency=(flow.flow_id == "immediate_danger"),
+        )
+        return start_response
 
     async def process_message(self, request: ChatbotMessageRequest) -> ChatbotMessageResponse:
         """Process incoming user interaction (choice chip selection or free-text query)."""
         session_id = request.session_id or f"session_{uuid.uuid4().hex[:12]}"
         country = request.country or "IN"
         user_text = (request.message or "").strip()
+        language = (request.language or "en").strip().lower()
 
         # ---------------------------------------------------------------------
         # 1. IMMEDIATE DANGER INTERRUPT: Deterministic check overrides all
         # ---------------------------------------------------------------------
         if self.check_immediate_danger(user_text):
-            return self._build_immediate_danger_response(session_id, country)
+            resp = self._build_immediate_danger_response(session_id, country)
+            return self._wrap_and_record(resp, user_text, language)
 
         # ---------------------------------------------------------------------
-        # 2. CHOICE CHIP SELECTION
+        # 2. SENSITIVE SECRETS & NCII DISCLOSURE SAFEGUARD
+        # ---------------------------------------------------------------------
+        if user_text:
+            sensitive_guard = self._check_sensitive_secrets(user_text, session_id, country)
+            if sensitive_guard:
+                return self._wrap_and_record(sensitive_guard, user_text, language)
+
+        # ---------------------------------------------------------------------
+        # 3. HINDI / REGIONAL QUERY DETECTION & EMPATHETIC GUIDANCE
+        # ---------------------------------------------------------------------
+        if self.is_hindi_query(user_text, language):
+            resp = self._build_hindi_safety_response(session_id, country, user_text)
+            return self._wrap_and_record(resp, user_text, "hi")
+
+        # ---------------------------------------------------------------------
+        # 4. CHOICE CHIP SELECTION
         # ---------------------------------------------------------------------
         if request.choice_id:
-            return self._handle_choice_selection(
+            resp = self._handle_choice_selection(
                 choice_id=request.choice_id,
                 current_flow_id=request.flow_id,
                 current_step_id=request.step_id,
                 session_id=session_id,
                 country=country,
             )
+            return self._wrap_and_record(resp, user_text, language)
 
         # ---------------------------------------------------------------------
-        # 3. FREE-TEXT INTENT MATCHING, RAG RETRIEVAL & LLM / FALLBACK LAYER
+        # 5. FREE-TEXT INTENT MATCHING, RAG RETRIEVAL & LLM / FALLBACK LAYER
         # ---------------------------------------------------------------------
         if user_text:
-            # Sensitive disclosures (passwords/OTPs) are intercepted deterministically
-            sensitive_guard = self._check_sensitive_secrets(user_text, session_id, country)
-            if sensitive_guard:
-                return sensitive_guard
-
             # RAG Retrieval: Check knowledge base for verified evidence
             rag_result = self.rag_engine.retrieve(user_text, jurisdiction=country)
             evidence_block = (
@@ -238,7 +414,7 @@ class ChatbotService:
                     llm_response = None
 
                 if llm_response:
-                    return ChatbotMessageResponse(
+                    llm_msg_resp = ChatbotMessageResponse(
                         session_id=session_id,
                         title="Safemate Safety Guidance",
                         text=llm_response,
@@ -268,12 +444,13 @@ class ChatbotService:
                             else "AI-assisted guidance is for general information. For emergency safety, call 112 directly."
                         ),
                     )
+                    return self._wrap_and_record(llm_msg_resp, user_text, language)
 
             # If LLM is unconfigured or failed, but RAG evidence is sufficient:
             # Curated safe fallback using retrieved verified knowledge
             if rag_result.is_sufficient and rag_result.chunks:
                 top_chunk = rag_result.chunks[0]
-                return ChatbotMessageResponse(
+                rag_msg_resp = ChatbotMessageResponse(
                     session_id=session_id,
                     title=f"Verified Guidance: {top_chunk.title}",
                     text=(
@@ -302,18 +479,21 @@ class ChatbotService:
                     fallback_used=True,
                     disclaimer="Information retrieved directly from verified official sources. Not formal legal counsel.",
                 )
+                return self._wrap_and_record(rag_msg_resp, user_text, language)
 
             # Fallback to curated guided flow matching when knowledge evidence is insufficient
-            return self._handle_free_text_query(user_text, session_id, country)
+            flow_resp = self._handle_free_text_query(user_text, session_id, country)
+            return self._wrap_and_record(flow_resp, user_text, language)
 
         # ---------------------------------------------------------------------
-        # 4. FALLBACK / EMPTY REQUEST
+        # 5. FALLBACK / EMPTY REQUEST
         # ---------------------------------------------------------------------
-        return self._build_menu_response(
+        menu_resp = self._build_menu_response(
             session_id=session_id,
             country=country,
             notice="Please choose a guided situation or type a question to receive safety options.",
         )
+        return self._wrap_and_record(menu_resp, user_text, language)
 
     def _check_sensitive_secrets(
         self, query: str, session_id: str, country: str
@@ -714,6 +894,230 @@ class ChatbotService:
                 country,
             ),
             disclaimer="Safemate provides verified resources and digital safety guidance. In an emergency, always call 112 directly.",
+        )
+
+    def generate_complaint_draft(
+        self, request: ComplaintDraftRequest
+    ) -> ComplaintDraftResponse:
+        """Draft a formal, legally structured Zero FIR / Cyber Complaint letter."""
+        itype = request.incident_type.lower().strip()
+        complainant = request.complainant_name or "Concerned Citizen (Confidential)"
+        inc_date = request.incident_date or "Recent date (as per recorded electronic timestamp)"
+        platform = request.platform_or_location or "Online Platform / Electronic Communications"
+        accused = request.accused_details or "Unknown suspect(s) / digital identifiers pending ISP disclosure"
+        summary = request.incident_summary.strip()
+        city_state = request.city_state or "New Delhi, India"
+        today_str = datetime.now(timezone.utc).strftime("%d %B %Y")
+
+        sections: List[str] = []
+        if "blackmail" in itype or "extort" in itype:
+            title = "Formal Complaint for Cyber Blackmail, Extortion, and Criminal Intimidation"
+            sections.extend([
+                "IT Act, 2000 - Section 66E: Violation of bodily privacy and transmitting non-consensual images",
+                "IT Act, 2000 - Section 67: Publishing or transmitting obscene material in electronic form",
+                "IT Act, 2000 - Section 67A: Publishing or transmitting sexually explicit material",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 308: Extortion and putting person in fear of injury",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 351: Criminal Intimidation",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 79: Acts/words intended to insult modesty of a woman",
+                "BNSS Section 173 / CrPC Section 154: Mandatory registration of Zero FIR",
+            ])
+        elif "ncii" in itype or "morph" in itype or "image" in itype or "leak" in itype:
+            title = "Formal Complaint for Non-Consensual Image Abuse, Morphing, and Privacy Violation"
+            sections.extend([
+                "IT Act, 2000 - Section 66E: Capture, publication or transmission of private images without consent",
+                "IT Act, 2000 - Section 67A: Transmission of sexually explicit material via computer resources",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 79: Outraging and insulting modesty of a woman",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 336: Forgery and fabrication of electronic records",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 351: Criminal Intimidation",
+                "BNSS Section 173 / CrPC Section 154: Mandatory registration of Zero FIR without jurisdictional denial",
+            ])
+        elif "stalk" in itype or "harass" in itype:
+            title = "Formal Complaint for Cyberstalking, Harassment, and Criminal Intimidation"
+            sections.extend([
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 78: Stalking (electronic monitoring or following)",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 79: Word, gesture or act intended to insult modesty",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 351: Criminal Intimidation",
+                "IT Act, 2000 - Section 66E & Section 67: Harassment via electronic communications",
+                "BNSS Section 173 / CrPC Section 154: Mandatory Zero FIR Registration",
+            ])
+        elif "fake" in itype or "impersonat" in itype or "profile" in itype:
+            title = "Formal Complaint for Identity Theft, Impersonation, and Forgery"
+            sections.extend([
+                "IT Act, 2000 - Section 66C: Identity theft using electronic signature or password/attributes",
+                "IT Act, 2000 - Section 66D: Cheating by personation using computer resource",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 336: Forgery of electronic profile and media",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 356: Defamation and damage to reputation",
+                "BNSS Section 173 / CrPC Section 154: Zero FIR Registration",
+            ])
+        elif "physical" in itype or "domestic" in itype or "threat" in itype:
+            title = "Formal Complaint for Physical Threats, Domestic Violence, and Safety Protection"
+            sections.extend([
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 351: Criminal Intimidation",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 115: Voluntarily causing hurt",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 85: Cruelty by husband or relatives (where applicable)",
+                "Protection of Women from Domestic Violence Act (PWDVA), 2005 - Sections 12 & 18",
+                "BNSS Section 173 / CrPC Section 154: Mandatory FIR registration for cognizable offenses",
+            ])
+        else:
+            title = "Formal Complaint and Request for Registration of Zero FIR"
+            sections.extend([
+                "IT Act, 2000 - Section 66E & Section 67: Offenses via digital platforms",
+                "Bharatiya Nyaya Sanhita (BNS), 2023 - Section 78, 79 & 351: Stalking and Criminal Intimidation",
+                "BNSS Section 173 / CrPC Section 154: Mandatory Zero FIR Registration",
+            ])
+
+        if request.sections_requested:
+            for s in request.sections_requested:
+                if s not in sections:
+                    sections.append(s)
+
+        sections_formatted = "\n".join([f"   - {sec}" for sec in sections])
+
+        complaint_letter = f"""To,
+The Station House Officer (SHO) / Officer-in-Charge,
+Cyber Crime Police Station / Local Police Station,
+Jurisdiction: {city_state}
+
+SUBJECT: FORMAL COMPLAINT AND REQUEST FOR IMMEDIATE REGISTRATION OF ZERO FIR UNDER SECTION 173 OF BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS), 2023 / SECTION 154 CrPC
+
+Respected Sir/Madam,
+
+I, {complainant}, resident of {city_state}, hereby submit this formal complaint regarding serious offenses committed against me, and respectfully request the registration of a Zero FIR and prompt investigation.
+
+1. PARTICULARS OF THE INCIDENT:
+   - Date & Time of Occurrence: {inc_date}
+   - Platform / Medium / Location: {platform}
+   - Accused / Suspect Information: {accused}
+
+2. STATEMENT OF FACTS:
+   {summary}
+
+3. PERTINENT STATUTORY PROVISIONS APPLICABLE:
+   The aforesaid acts constitute cognizable offenses under the Indian penal and cyber statutory framework, specifically:
+{sections_formatted}
+
+4. MANDATORY REGISTRATION OF ZERO FIR:
+   In accordance with the binding ruling of the Hon'ble Supreme Court of India in Lalita Kumari v. Govt. of U.P. [(2014) 2 SCC 1] and Section 173(1) of the Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 (formerly Section 154 CrPC), registration of an FIR is mandatory upon receiving information disclosing a cognizable offense. In the event this Police Station does not hold territorial jurisdiction over the occurrence, this complaint must be registered forthwith as a "Zero FIR" and subsequently transferred to the appropriate jurisdiction without delay.
+
+5. PRESERVATION OF DIGITAL EVIDENCE (SECTION 94 BNSS / SECTION 91 CrPC):
+   It is respectfully prayed that law enforcement issue immediate preservation notices to the intermediaries ({platform}) to preserve IP logs, registration identifiers, MAC addresses, device metadata, and chat transcripts before they can be altered or erased.
+
+6. PRAYER FOR RELIEF:
+   In light of the facts stated above, it is earnestly prayed that:
+   a) An FIR / Zero FIR be registered immediately against the suspect(s) under the cited provisions.
+   b) Immediate steps be taken to safeguard the complainant from ongoing intimidation and extortion.
+   c) Direct intermediaries to remove, block, or hash unauthorized media or fake accounts.
+   d) Provide the undersigned with a duly signed and stamped acknowledgment copy with the General Diary (GD) / Daily Diary (DD) number.
+
+Yours sincerely,
+
+___________________________
+Signature of Complainant
+Name: {complainant}
+Location: {city_state}
+Date: {today_str}
+"""
+
+        instructions = [
+            "Print two (2) physical copies of this complaint letter.",
+            "Submit one copy to the duty officer / SHO and obtain an acknowledgment stamp with GD/DD number on the second copy for your records.",
+            "Do not delete any original messages, call recordings, or social media links; export full chat backups and keep timestamped screenshots.",
+            "Also file an online complaint at https://cybercrime.gov.in or call national helpline 1930 within 24 hours.",
+            "If any police station hesitates due to territorial boundary, remind them of mandatory Zero FIR rights under BNSS Section 173 / CrPC Section 154.",
+        ]
+
+        helplines = [
+            "National Emergency: 112 (Police, Fire, Ambulance - 24/7)",
+            "National Cyber Crime Helpline: 1930 (MHA Portal - cybercrime.gov.in)",
+            "National Commission for Women (NCW) WhatsApp Helpline: 7217735372",
+            "Women in Distress Helpline: 181 / 1091",
+        ]
+
+        disclaimer = (
+            "This complaint draft is structured in accordance with Indian procedural law (BNSS 2023 / CrPC 1973) "
+            "and the Information Technology Act, 2000. It is an automated template and does not constitute formal attorney representation."
+        )
+
+        return ComplaintDraftResponse(
+            status="success",
+            incident_type=request.incident_type,
+            title=title,
+            applicable_sections=sections,
+            complaint_letter=complaint_letter,
+            instructions=instructions,
+            helplines=helplines,
+            disclaimer=disclaimer,
+        )
+
+    def get_history(self, session_id: str) -> ChatHistoryResponse:
+        """Retrieve recorded multi-turn message history for a session."""
+        turns = self.session_histories.get(session_id, [])
+        items = [
+            ChatMessageItem(
+                sender=t["sender"],
+                text=t["text"],
+                timestamp=t["timestamp"],
+                title=t.get("title"),
+                is_emergency=t.get("is_emergency", False),
+            )
+            for t in turns
+        ]
+        return ChatHistoryResponse(
+            session_id=session_id,
+            total_messages=len(items),
+            messages=items,
+        )
+
+    def clear_history(self, session_id: str) -> bool:
+        """Clear conversation history for privacy / panic wipe."""
+        if session_id in self.session_histories:
+            del self.session_histories[session_id]
+            return True
+        return False
+
+    def export_report(self, session_id: str) -> ChatExportResponse:
+        """Export session dialogue and verified guidance as a formatted incident report."""
+        turns = self.session_histories.get(session_id, [])
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        report_lines = [
+            "=" * 60,
+            "SAFEMATE SAFETY & LEGAL INCIDENT CONSULTATION REPORT",
+            "=" * 60,
+            f"Session ID: {session_id}",
+            f"Generated At: {now_str}",
+            f"Total Interaction Turns: {len(turns)}",
+            "-" * 60,
+            "CONVERSATION TRANSCRIPT & ADVICE LOG:",
+        ]
+        for idx, t in enumerate(turns, 1):
+            sender_label = "USER" if t["sender"] == "user" else "SAFEMATE ASSISTANT"
+            report_lines.append(f"\n[{idx}] {sender_label} ({t['timestamp']}):")
+            if t.get("title"):
+                report_lines.append(f"Subject: {t['title']}")
+            report_lines.append(t["text"])
+
+        report_lines.extend([
+            "\n" + "-" * 60,
+            "CRITICAL EMERGENCY CONTACTS & HELPLINES:",
+            "- Pan-India Emergency: 112",
+            "- National Cyber Crime Reporting Helpline: 1930 (cybercrime.gov.in)",
+            "- Women in Distress Helpline: 181 / 1091",
+            "- National Commission for Women (NCW): 7827170170",
+            "=" * 60,
+            "DISCLAIMER: This document records automated guidance and resource references",
+            "provided by Safemate. It does not replace advice from a licensed advocate or legal officer.",
+        ])
+
+        return ChatExportResponse(
+            session_id=session_id,
+            generated_at=now_str,
+            total_messages=len(turns),
+            formatted_report="\n".join(report_lines),
+            helplines_summary=[
+                "National Emergency: 112",
+                "Cybercrime Portal: 1930",
+                "Women in Distress: 181 / 1091",
+            ],
         )
 
 

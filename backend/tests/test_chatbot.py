@@ -504,4 +504,153 @@ def test_emergency_override_circuit_breaker(client: TestClient):
     assert any(r["phone_number"] == "112" for r in data["emergency_resources"])
 
 
+# -----------------------------------------------------------------------------
+# 10. Hindi / Multilingual Support & Audio Summary Tests
+# -----------------------------------------------------------------------------
+def test_hindi_query_devanagari_and_hinglish(client: TestClient):
+    """Verify chatbot responds with empathetic Hindi guidance for Devanagari and Hinglish queries."""
+    # 1. Devanagari script query
+    res_dev = client.post(
+        "/api/v1/chatbot/message",
+        json={"message": "मुझे पुलिस की मदद चाहिए, कोई ब्लैकमेल कर रहा है", "session_id": "test_hi_1"},
+    )
+    assert res_dev.status_code == 200
+    data_dev = res_dev.json()
+    assert data_dev["language"] == "hi"
+    assert "सेफ़मेट" in data_dev["title"]
+    assert "112" in data_dev["text"]
+    assert "1930" in data_dev["text"]
+    assert data_dev["audio_summary"] is not None
+    assert len(data_dev["audio_summary"]) > 0
+
+    # 2. Hinglish query with explicit language code
+    res_hing = client.post(
+        "/api/v1/chatbot/message",
+        json={"message": "madad chahiye photo leak karne ki dhamki", "language": "hi", "session_id": "test_hi_2"},
+    )
+    assert res_hing.status_code == 200
+    data_hing = res_hing.json()
+    assert data_hing["language"] == "hi"
+    assert any("112" in c["label"] for c in data_hing["choices"])
+
+
+def test_audio_summary_generation_for_speech_readout(client: TestClient):
+    """Ensure every response generates a concise, clean audio readout summary."""
+    res = client.post(
+        "/api/v1/chatbot/message",
+        json={"message": "How do I preserve evidence of online harassment?", "session_id": "test_audio_1"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["audio_summary"] is not None
+    assert len(data["audio_summary"]) > 10
+    assert len(data["audio_summary"]) <= 200
+
+
+# -----------------------------------------------------------------------------
+# 11. Zero FIR & Legal Complaint Generator Tests
+# -----------------------------------------------------------------------------
+def test_draft_complaint_cyber_blackmail(client: TestClient):
+    """Verify generation of formal Zero FIR / Cyber Complaint for blackmail."""
+    payload = {
+        "incident_type": "cyber_blackmail",
+        "complainant_name": "Priya Sharma",
+        "incident_date": "24 October 2026, 9:00 PM",
+        "platform_or_location": "Instagram and WhatsApp",
+        "accused_details": "@anonymous_extort_99 / Phone +91-9876543210",
+        "incident_summary": "Accused demanded extortion money of INR 50,000 threatening to circulate morphed photographs.",
+        "city_state": "Bengaluru, Karnataka",
+    }
+    res = client.post("/api/v1/chatbot/draft-complaint", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert "Blackmail" in data["title"]
+    assert any("66E" in s for s in data["applicable_sections"])
+    assert any("67A" in s for s in data["applicable_sections"])
+    assert any("173" in s or "154" in s for s in data["applicable_sections"])
+
+    letter = data["complaint_letter"]
+    assert "Priya Sharma" in letter
+    assert "Bengaluru, Karnataka" in letter
+    assert "ZERO FIR" in letter
+    assert "Lalita Kumari" in letter
+    assert len(data["instructions"]) >= 3
+    assert len(data["helplines"]) >= 3
+
+
+def test_draft_complaint_ncii_morph_leak(client: TestClient):
+    """Verify Zero FIR draft for intimate image abuse / morphing."""
+    payload = {
+        "incident_type": "ncii_morph_leak",
+        "incident_summary": "Discovered AI generated synthetic morphed images circulated on a Telegram group.",
+    }
+    res = client.post("/api/v1/chatbot/draft-complaint", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "Non-Consensual Image Abuse" in data["title"]
+    assert any("67A" in s for s in data["applicable_sections"])
+    assert "Concerned Citizen (Confidential)" in data["complaint_letter"]
+
+
+def test_draft_complaint_stalking_harassment(client: TestClient):
+    """Verify Zero FIR draft for stalking and cyber harassment."""
+    payload = {
+        "incident_type": "stalking_harassment",
+        "incident_summary": "Repeated persistent unwanted electronic following and threatening phone calls.",
+    }
+    res = client.post("/api/v1/chatbot/draft-complaint", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "Cyberstalking" in data["title"]
+    assert any("78" in s for s in data["applicable_sections"])
+
+
+# -----------------------------------------------------------------------------
+# 12. Session History & Privacy Export Tests
+# -----------------------------------------------------------------------------
+def test_session_history_tracking_and_wipe(client: TestClient):
+    """Verify multi-turn history accumulation, retrieval, and instant privacy wipe."""
+    session_id = "test_turn_session_789"
+
+    # Start a flow
+    res_start = client.post("/api/v1/chatbot/start", json={"flow_id": "preserve_evidence", "session_id": session_id})
+    assert res_start.status_code == 200
+
+    # Send a message
+    res_msg = client.post(
+        "/api/v1/chatbot/message",
+        json={"message": "Can I take screenshots of Instagram chats?", "session_id": session_id},
+    )
+    assert res_msg.status_code == 200
+
+    # Retrieve history
+    res_hist = client.get(f"/api/v1/chatbot/history/{session_id}")
+    assert res_hist.status_code == 200
+    hist_data = res_hist.json()
+    assert hist_data["session_id"] == session_id
+    assert hist_data["total_messages"] >= 2
+    senders = [m["sender"] for m in hist_data["messages"]]
+    assert "user" in senders
+    assert "assistant" in senders
+
+    # Export report
+    res_exp = client.get(f"/api/v1/chatbot/export/{session_id}")
+    assert res_exp.status_code == 200
+    exp_data = res_exp.json()
+    assert "SAFEMATE SAFETY & LEGAL INCIDENT CONSULTATION REPORT" in exp_data["formatted_report"]
+    assert "112" in exp_data["formatted_report"]
+    assert "1930" in exp_data["formatted_report"]
+
+    # Privacy Wipe
+    res_del = client.delete(f"/api/v1/chatbot/history/{session_id}")
+    assert res_del.status_code == 200
+    assert res_del.json()["status"] == "cleared"
+
+    # Verify cleared
+    res_hist_after = client.get(f"/api/v1/chatbot/history/{session_id}")
+    assert res_hist_after.status_code == 200
+    assert res_hist_after.json()["total_messages"] == 0
+
+
 

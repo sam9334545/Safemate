@@ -109,6 +109,7 @@ class ChatbotMessageRequest(BaseModel):
     choice_id: Optional[str] = Field(None, max_length=100, description="Selected option chip ID")
     message: Optional[str] = Field(None, max_length=1000, description="Optional free-text query")
     country: Optional[str] = Field("IN", max_length=10, description="Country code")
+    language: Optional[str] = Field("en", max_length=10, description="Language code ('en', 'hi', 'mr', 'ta', 'te', 'bn')")
 
 
 class ChatbotMessageResponse(BaseModel):
@@ -137,6 +138,8 @@ class ChatbotMessageResponse(BaseModel):
     fallback_used: Optional[bool] = Field(
         False, description="Whether fallback mechanism was used"
     )
+    language: Optional[str] = Field("en", description="Language code of the response")
+    audio_summary: Optional[str] = Field(None, description="Concise text suitable for audio voice readout")
 
 
 class ChatbotFeedbackRequest(BaseModel):
@@ -153,3 +156,97 @@ class ChatbotFeedbackResponse(BaseModel):
 
     status: str = "received"
     message: str = "Thank you for your feedback. We review safety guidance to ensure accuracy."
+
+
+# -----------------------------------------------------------------------------
+# Legal Assistance & FIR Drafter Schemas
+# -----------------------------------------------------------------------------
+class ComplaintDraftRequest(BaseModel):
+    """Payload to generate a customized legal Zero FIR / Cyber Crime Complaint letter."""
+
+    incident_type: str = Field(
+        ...,
+        description="Type of incident: 'cyber_blackmail', 'stalking_harassment', 'ncii_morph_leak', 'fake_profile', 'physical_threat', 'domestic_violence'",
+        examples=["cyber_blackmail"],
+    )
+    complainant_name: Optional[str] = Field(
+        default="Concerned Citizen (Confidential)",
+        description="Name of complainant (or 'Anonymous')",
+        examples=["Priya Sharma"],
+    )
+    incident_date: Optional[str] = Field(
+        default=None,
+        description="Date and approximate time of the incident",
+        examples=["24 October 2026, approx 8:30 PM"],
+    )
+    platform_or_location: Optional[str] = Field(
+        default="Instagram & WhatsApp",
+        description="Platform where cyber harassment occurred or physical address",
+        examples=["Instagram & Telegram"],
+    )
+    accused_details: Optional[str] = Field(
+        default="Unknown user handle @stalker_xyz / mobile +91-XXXXXXXXXX",
+        description="Known information about the perpetrator",
+        examples=["User handle @stalker_xyz / Phone +91-9876543210"],
+    )
+    incident_summary: str = Field(
+        ...,
+        min_length=5,
+        max_length=2000,
+        description="Factual summary of what occurred",
+        examples=["Received threatening messages demanding monetary extortion to prevent circulating morphed photographs."],
+    )
+    sections_requested: Optional[List[str]] = Field(
+        default_factory=list,
+        description="Specific legal provisions to explicitly cite",
+    )
+    city_state: Optional[str] = Field(
+        default="New Delhi, India",
+        description="Jurisdiction city and state",
+        examples=["Bengaluru, Karnataka"],
+    )
+
+
+class ComplaintDraftResponse(BaseModel):
+    """Formal structured complaint / Zero FIR draft response."""
+
+    status: str = "success"
+    incident_type: str
+    title: str
+    applicable_sections: List[str]
+    complaint_letter: str
+    instructions: List[str]
+    helplines: List[str]
+    disclaimer: str
+
+
+# -----------------------------------------------------------------------------
+# Conversation History & Session Management Schemas
+# -----------------------------------------------------------------------------
+class ChatMessageItem(BaseModel):
+    """Single turn message item in session history."""
+
+    sender: str = Field(..., description="'user' or 'assistant'")
+    text: str = Field(..., description="Message text")
+    timestamp: str = Field(..., description="ISO 8601 timestamp")
+    title: Optional[str] = None
+    is_emergency: bool = False
+
+
+class ChatHistoryResponse(BaseModel):
+    """Thread history for a given conversation session."""
+
+    session_id: str
+    total_messages: int
+    messages: List[ChatMessageItem]
+
+
+class ChatExportResponse(BaseModel):
+    """Structured export of conversation history for legal or support reference."""
+
+    session_id: str
+    generated_at: str
+    total_messages: int
+    formatted_report: str
+    helplines_summary: List[str]
+

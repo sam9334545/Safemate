@@ -907,19 +907,128 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // 7. Interactive Legal & Safety Chatbot (RAG Backend Connection)
+  // ---------------------------------------------------------------------------
+  // 7. Interactive Legal & Safety Chatbot (Multilingual RAG + Voice + Zero FIR)
   // ---------------------------------------------------------------------------
   const chatLog = document.getElementById('simple-chat-log');
   const chatInput = document.getElementById('simple-chat-input');
   const chatSend = document.getElementById('simple-chat-send');
   const chatChips = document.querySelectorAll('.chat-chip');
+  const chatCountrySelect = document.getElementById('chat-country-select');
+  const chatLanguageSelect = document.getElementById('chat-language-select');
+  const btnOpenFirModal = document.getElementById('btn-open-fir-modal');
+  const btnExportChatReport = document.getElementById('btn-export-chat-report');
+  const btnClearChatLog = document.getElementById('btn-clear-chat-log');
+  const btnChatMic = document.getElementById('btn-chat-mic');
 
-  function appendAiBubble(htmlContent) {
+  const complaintModal = document.getElementById('complaint-modal');
+  const btnCloseComplaintModal = document.getElementById('btn-close-complaint-modal');
+  const btnGenerateFir = document.getElementById('btn-generate-fir');
+  const firOutputContainer = document.getElementById('fir-output-container');
+  const firOutputLetter = document.getElementById('fir-output-letter');
+  const firInstructionsList = document.getElementById('fir-instructions-list');
+  const btnCopyFir = document.getElementById('btn-copy-fir');
+  const btnPrintFir = document.getElementById('btn-print-fir');
+
+  let chatSessionId = 'session_' + (currentUserId || 'guest_' + Math.random().toString(36).substring(2, 9));
+
+  function appendAiBubble(htmlContent, rawSpeechText = null) {
     const aiBubble = document.createElement('div');
     aiBubble.className = 'chat-bubble-ai';
     aiBubble.innerHTML = htmlContent;
+
+    // Action buttons toolbar on AI bubble
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'bubble-actions-row';
+
+    const speakBtn = document.createElement('button');
+    speakBtn.type = 'button';
+    speakBtn.className = 'bubble-action-btn';
+    speakBtn.innerHTML = '🔊 Read Aloud';
+    speakBtn.title = 'Listen to this safety guidance';
+    speakBtn.addEventListener('click', () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const cleanText = rawSpeechText || aiBubble.innerText.replace(/[\n\r]+/g, ' ').replace(/🔊.*📋 Copy/, '').trim();
+        const utter = new SpeechSynthesisUtterance(cleanText.substring(0, 320));
+        const lang = chatLanguageSelect ? chatLanguageSelect.value : 'en';
+        utter.lang = (lang === 'hi' ? 'hi-IN' : 'en-US');
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      } else {
+        alert('Text-to-speech is not supported on this browser.');
+      }
+    });
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'bubble-action-btn';
+    copyBtn.innerHTML = '📋 Copy';
+    copyBtn.title = 'Copy guidance to clipboard';
+    copyBtn.addEventListener('click', () => {
+      const textToCopy = aiBubble.innerText.replace(/🔊.*📋 Copy/, '').trim();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy);
+      }
+      copyBtn.innerHTML = '✓ Copied';
+      setTimeout(() => { copyBtn.innerHTML = '📋 Copy'; }, 2000);
+    });
+
+    actionsRow.appendChild(speakBtn);
+    actionsRow.appendChild(copyBtn);
+    aiBubble.appendChild(actionsRow);
+
     chatLog.appendChild(aiBubble);
     chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Voice Speech-to-Text Microphone
+  let speechRecognition = null;
+  let isListening = false;
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRec && btnChatMic) {
+    speechRecognition = new SpeechRec();
+    speechRecognition.continuous = false;
+    speechRecognition.interimResults = false;
+
+    btnChatMic.addEventListener('click', () => {
+      if (!isListening) {
+        try {
+          const lang = chatLanguageSelect ? chatLanguageSelect.value : 'en';
+          speechRecognition.lang = (lang === 'hi' ? 'hi-IN' : 'en-US');
+          speechRecognition.start();
+          isListening = true;
+          btnChatMic.classList.add('listening');
+        } catch (e) {
+          isListening = false;
+          btnChatMic.classList.remove('listening');
+        }
+      } else {
+        speechRecognition.stop();
+        isListening = false;
+        btnChatMic.classList.remove('listening');
+      }
+    });
+
+    speechRecognition.onresult = (e) => {
+      isListening = false;
+      btnChatMic.classList.remove('listening');
+      const transcript = e.results[0][0].transcript;
+      if (chatInput && transcript) {
+        chatInput.value = transcript;
+        sendUserChat();
+      }
+    };
+
+    speechRecognition.onerror = () => {
+      isListening = false;
+      btnChatMic.classList.remove('listening');
+    };
+
+    speechRecognition.onend = () => {
+      isListening = false;
+      btnChatMic.classList.remove('listening');
+    };
   }
 
   async function handleChatQuery(queryText, topicKey = null) {
@@ -931,9 +1040,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const thinkingBubble = document.createElement('div');
     thinkingBubble.className = 'chat-bubble-ai';
-    thinkingBubble.innerHTML = `<span style="color:#64748b; font-size:0.85rem;">Consulting verified safety and legal knowledge base...</span>`;
+    thinkingBubble.innerHTML = `<span style="color:#64748b; font-size:0.85rem;">Consulting verified safety, statutory provisions, and hotlines...</span>`;
     chatLog.appendChild(thinkingBubble);
     chatLog.scrollTop = chatLog.scrollHeight;
+
+    const country = chatCountrySelect ? chatCountrySelect.value : 'IN';
+    const language = chatLanguageSelect ? chatLanguageSelect.value : 'en';
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/message`, {
@@ -941,7 +1053,9 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: queryText,
-          session_id: `session_${currentUserId}`
+          session_id: chatSessionId,
+          country: country,
+          language: language
         })
       });
 
@@ -973,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render verified helplines
         if (data.resources && data.resources.length > 0) {
           outputHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; margin-top:8px; font-size:0.8rem;">`;
-          outputHtml += `<strong>Verified 24/7 Helplines & Portals:</strong><br>`;
+          outputHtml += `<strong>Verified 24/7 Helplines &amp; Portals:</strong><br>`;
           data.resources.forEach(r => {
             const cleanPh = sanitizePhone(r.phone_number);
             const telPart = r.phone_number ? `<a href="tel:${cleanPh}" style="color:#dc2626; font-weight:700; text-decoration:none;">📞 ${r.phone_number}</a>` : '';
@@ -999,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
           outputHtml += `</div>`;
         }
 
-        appendAiBubble(outputHtml || "SafeMate is here to support you confidentially. What questions do you have regarding your legal rights or physical safety?");
+        appendAiBubble(outputHtml || "SafeMate is here to support you confidentially. What questions do you have regarding your legal rights or physical safety?", data.audio_summary || data.text);
 
         // Attach listeners to new inline chips
         chatLog.querySelectorAll('.inline-chip').forEach(btn => {
@@ -1019,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         • <strong>National Emergency (Police):</strong> <a href="tel:112" style="color:#dc2626; font-weight:700;">112</a><br>
         • <strong>Women Safety Helpline:</strong> <a href="tel:1091" style="color:#dc2626; font-weight:700;">1091 / 181</a><br>
         • <strong>National Cyber Crime Portal:</strong> <a href="tel:1930" style="color:#0284c7; font-weight:700;">1930</a> (cybercrime.gov.in)<br>
-        • <strong>Key Legal Rights:</strong> Zero FIR (can be filed at any police station regardless of jurisdiction), Sections 66E, 67A IT Act, BNS Section 78 (stalking).
+        • <strong>Key Legal Rights:</strong> Zero FIR (mandatorily filed at any police station regardless of jurisdiction under BNSS Section 173 / CrPC 154), Sections 66E, 67A IT Act, BNS Section 78 (stalking).
       `);
       chatLog.scrollTop = chatLog.scrollHeight;
     }
@@ -1030,9 +1144,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const topic = chip.getAttribute('data-topic');
       let query = chip.textContent;
       if (topic === 'hotlines') query = "What are the immediate 24/7 emergency helplines?";
-      if (topic === 'restraining') query = "How do I obtain an emergency protection order or file a Zero FIR?";
-      if (topic === 'cyber') query = "How do I report online blackmail and fake profile impersonation?";
-      if (topic === 'evidence') query = "How do I preserve digital evidence for cybercrime complaints?";
+      if (topic === 'zerofir') query = "What is a Zero FIR under BNSS Section 173 and how can I file one at any police station?";
+      if (topic === 'cyber') query = "How do I report online blackmail and fake profile impersonation to the police and 1930 portal?";
+      if (topic === 'ncii') query = "Someone is threatening to leak morphed photos of me without consent. What are my legal protections?";
+      if (topic === 'evidence') query = "How do I preserve digital evidence, chats, and screenshots for a cybercrime complaint?";
+      if (topic === 'hindi') {
+        if (chatLanguageSelect) chatLanguageSelect.value = 'hi';
+        query = "मुझे साइबर अपराध और ब्लैकमेल से सुरक्षा चाहिए, कृपया हिंदी में बताएं कि क्या करूं।";
+      }
       handleChatQuery(query);
     });
   });
@@ -1048,6 +1167,140 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chatInput) {
     chatInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendUserChat();
+    });
+  }
+
+  // Clear / Panic Wipe Conversation History
+  if (btnClearChatLog) {
+    btnClearChatLog.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to wipe your current chat session history for emergency privacy?')) return;
+      try {
+        await fetch(`${API_BASE_URL}/api/v1/chatbot/history/${chatSessionId}`, { method: 'DELETE' });
+      } catch (e) {}
+      chatLog.innerHTML = `
+        <div class="chat-bubble-ai">
+          Hi, I'm your SafeMate confidential legal and safety companion. Session history wiped cleanly. Tap any topic above or ask any question.
+        </div>
+      `;
+    });
+  }
+
+  // Export Safety Consultation Report
+  if (btnExportChatReport) {
+    btnExportChatReport.addEventListener('click', async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/export/${chatSessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const blob = new Blob([data.formatted_report], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Safemate_Safety_Report_${Date.now()}.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } else {
+          alert('No recorded conversation history to export yet.');
+        }
+      } catch (err) {
+        alert('Could not export consultation report.');
+      }
+    });
+  }
+
+  // Zero FIR Modal Workflow
+  if (btnOpenFirModal && complaintModal) {
+    btnOpenFirModal.addEventListener('click', () => {
+      complaintModal.classList.add('active');
+    });
+  }
+
+  if (btnCloseComplaintModal && complaintModal) {
+    btnCloseComplaintModal.addEventListener('click', () => {
+      complaintModal.classList.remove('active');
+    });
+  }
+
+  if (btnGenerateFir) {
+    btnGenerateFir.addEventListener('click', async () => {
+      const itype = document.getElementById('fir-incident-type')?.value || 'cyber_blackmail';
+      const name = (document.getElementById('fir-complainant-name')?.value || '').trim() || 'Concerned Citizen (Confidential)';
+      const platform = (document.getElementById('fir-platform')?.value || '').trim() || 'Instagram & WhatsApp';
+      const cityState = (document.getElementById('fir-city-state')?.value || '').trim() || 'New Delhi, India';
+      const accused = (document.getElementById('fir-accused')?.value || '').trim() || 'Unknown suspect(s) / pending ISP disclosure';
+      const summary = (document.getElementById('fir-summary')?.value || '').trim();
+
+      if (!summary) {
+        alert('Please enter a brief statement of facts to generate your formal complaint letter.');
+        return;
+      }
+
+      btnGenerateFir.disabled = true;
+      btnGenerateFir.textContent = '⏳ Generating Formal Complaint Draft...';
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/draft-complaint`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            incident_type: itype,
+            complainant_name: name,
+            platform_or_location: platform,
+            city_state: cityState,
+            accused_details: accused,
+            incident_summary: summary
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (firOutputContainer && firOutputLetter) {
+            firOutputContainer.style.display = 'block';
+            firOutputLetter.textContent = data.complaint_letter;
+            if (firInstructionsList) {
+              firInstructionsList.innerHTML = `
+                <strong>Next Legal Steps:</strong>
+                <ol style="margin-left:20px; margin-top:4px; line-height:1.5;">
+                  ${data.instructions.map(i => `<li>${i}</li>`).join('')}
+                </ol>
+              `;
+            }
+          }
+        } else {
+          alert('Could not generate complaint draft. Please check your inputs.');
+        }
+      } catch (err) {
+        alert('Error connecting to legal complaint generator.');
+      } finally {
+        btnGenerateFir.disabled = false;
+        btnGenerateFir.textContent = '📜 Generate Formal Zero FIR Letter';
+      }
+    });
+  }
+
+  if (btnCopyFir && firOutputLetter) {
+    btnCopyFir.addEventListener('click', () => {
+      navigator.clipboard?.writeText(firOutputLetter.textContent);
+      btnCopyFir.textContent = '✓ Copied!';
+      setTimeout(() => { btnCopyFir.textContent = '📋 Copy'; }, 2000);
+    });
+  }
+
+  if (btnPrintFir && firOutputLetter) {
+    btnPrintFir.addEventListener('click', () => {
+      const printWin = window.open('', '_blank');
+      printWin.document.write(`
+        <html>
+          <head><title>Police Complaint / Zero FIR Draft</title></head>
+          <body style="font-family:serif; line-height:1.6; padding:40px; white-space:pre-wrap;">
+            ${firOutputLetter.textContent}
+          </body>
+        </html>
+      `);
+      printWin.document.close();
+      printWin.print();
     });
   }
 
