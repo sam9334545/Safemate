@@ -59,6 +59,16 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "INFO"
 
+    # Optional Groq API LLM Layer
+    GROQ_API_KEY: Optional[str] = None
+    GROQ_MODEL: str = "llama-3.1-8b-instant"
+    GROQ_TIMEOUT_SECONDS: float = 8.0
+
+    # Optional Google Gemini API LLM Layer (Fallback or Primary)
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_TIMEOUT_SECONDS: float = 8.0
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:

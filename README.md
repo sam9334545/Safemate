@@ -43,7 +43,22 @@ Safemate analyses sampled video frames and visible facial features to screen for
   - `potential_manipulation_detected` (Score $\ge 0.70$)
   - `no_manipulation_detected_by_model` (Score $\le 0.35$)
   - `inconclusive` ($0.35 < \text{Score} < 0.70$)
-  - `no_face_detected` (No visible human face located across sampled frames)
+### 3. Safemate Interactive Safety & Legal Chatbot (Feature 4, `/chatbot`)
+Provides structured, privacy-first guidance for users navigating sensitive safety dilemmas, cyber harassment, online blackmail, non-consensual image sharing, fake accounts, or physical stalking.
+- **Web Interface:** Embedded, accessible, responsive interface served directly at `/chatbot` (or `/api/v1/chatbot/ui`).
+- **Safety Engine:** Deterministic emergency interrupt prioritizing personal safety and immediate calling (112, 181, 1091) before non-urgent steps.
+- **9 Structured Guided Flows:**
+  1. `immediate_danger`: Immediate physical threat, being followed, or urgent crisis.
+  2. `online_harassment`: Cyberstalking, trolling, abusive messages, or threats.
+  3. `blackmail_threats`: Extortion, sextortion, or monetary coercion.
+  4. `intimate_image_abuse`: Unauthorized photo/video sharing, deepfake morphing, StopNCII.org integration.
+  5. `impersonation_fake_profile`: Cloned accounts or identity theft take-downs.
+  6. `physical_harassment`: Street stalking, eve-teasing, or POSH workplace safety.
+  7. `report_cybercrime_india`: Step-by-step walkthrough for `cybercrime.gov.in` and helpline 1930.
+  8. `preserve_evidence`: Screenshot and digital evidence preservation best practices & Safemate Evidence Vault.
+  9. `understand_options`: Legal rights under Indian law (Zero FIR, IT Act, BNS) and support pathways.
+- **Verified Resources:** Pre-verified official Indian and global helplines (ERSS 112, WHL 181, 1091, 1930, NCW, StopNCII.org, Take It Down).
+- **Privacy & Integrity:** Stateless session handling, zero conversation storage, no forced logins, and transparent disclosures that Safemate does not self-dispatch emergency services.
 
 ---
 
@@ -51,15 +66,17 @@ Safemate analyses sampled video frames and visible facial features to screen for
 
 ```
 Safemate/
-├── backend/                  # FastAPI Screening Backend Service
+├── backend/                  # FastAPI Screening & Safety Backend Service
 │   ├── app/
-│   │   ├── api/routes/       # Route handlers: health, model-info, detect, deepfake
+│   │   ├── api/routes/       # Route handlers: health, model-info, detect, deepfake, chatbot, emergency, safewalk, evidence
+│   │   ├── chatbot/          # Chatbot knowledge base (curated flows and verified resources)
 │   │   ├── core/             # Configuration settings, CORS, and logging
-│   │   ├── schemas/          # Pydantic schemas (detection, deepfake, errors)
-│   │   ├── services/         # Image & video inference service engines
+│   │   ├── schemas/          # Pydantic schemas (detection, deepfake, chatbot, emergency, etc.)
+│   │   ├── services/         # Image & video inference, and chatbot service engines
+│   │   ├── static/chatbot/   # Accessible HTML/CSS/JS frontend for Safety Assistant
 │   │   ├── utils/            # Request ID correlation helpers
 │   │   └── main.py           # Application entry point & model lifespan
-│   ├── tests/                # Automated pytest suite (51 unit & integration tests)
+│   ├── tests/                # Automated pytest suite (111 unit & integration tests)
 │   ├── .env.example          # Environment configuration template
 │   ├── pytest.ini            # Pytest configuration
 │   ├── requirements.txt       # Production Python dependencies
@@ -112,8 +129,8 @@ python -m pytest
 ```
 
 **Test Outcome:**
-- **51 passed, 1 deselected in ~1.8s**
-- Rigorous coverage across both screening features, file constraints, corrupt streams, face-less videos, model cold starts, inference failures, request ID propagation, and temporary file cleanup guarantees.
+- **111 passed, 1 deselected, 7 warnings in ~4.3s**
+- Rigorous coverage across still-image screening, video deepfake screening, Emergency SOS, SafeWalk, Evidence upload, and all Feature 4 Interactive Chatbot flows, deterministic safety overrides, and privacy protections.
 
 ---
 

@@ -9,7 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.routes import deepfake, detect, emergency, evidence, health, model_info, safewalk
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+from app.api.routes import chatbot, deepfake, detect, emergency, evidence, health, model_info, safewalk
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
@@ -161,6 +164,17 @@ def create_app() -> FastAPI:
     app.include_router(emergency.router)
     app.include_router(safewalk.router)
     app.include_router(evidence.router)
+    app.include_router(chatbot.router)
+
+    # 5. Static Files & Chatbot UI
+    static_dir = Path(__file__).resolve().parent / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+    @app.get("/chatbot", tags=["Safety & Legal Chatbot"])
+    def chatbot_redirect():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/api/v1/chatbot/ui")
 
     @app.get("/", tags=["Root"])
     def root():
@@ -180,6 +194,12 @@ def create_app() -> FastAPI:
             "safewalk_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}",
             "safewalk_update_location": f"{settings.API_V1_PREFIX}/safewalk/update-location",
             "evidence_upload": f"{settings.API_V1_PREFIX}/evidence/upload",
+            "chatbot_ui": "/chatbot",
+            "chatbot_health": f"{settings.API_V1_PREFIX}/chatbot/health",
+            "chatbot_resources": f"{settings.API_V1_PREFIX}/chatbot/resources",
+            "chatbot_flows": f"{settings.API_V1_PREFIX}/chatbot/flows",
+            "chatbot_start": f"{settings.API_V1_PREFIX}/chatbot/start",
+            "chatbot_message": f"{settings.API_V1_PREFIX}/chatbot/message",
         }
 
     return app

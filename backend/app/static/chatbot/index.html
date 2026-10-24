@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Safemate Safety Assistant — Practical Steps, Safety & Legal Guidance</title>
+  <meta name="description" content="Safemate Safety Assistant: Empathetic, privacy-first guidance for emergency danger, cyber harassment, blackmail, non-consensual images, and verified reporting in India.">
+  <link rel="stylesheet" href="/static/chatbot/chatbot.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="brand-area">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">Safemate Safety Assistant</h1>
+            <p class="brand-subtitle">Clear next steps, safety resources, and reporting guidance</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="btnEmergencyHeader" class="btn-emergency" type="button" aria-label="Emergency Help Dial 112">
+            <span>🚨</span>
+            <span class="btn-text">Emergency Help (112)</span>
+          </button>
+          <button id="btnReset" class="btn-reset" type="button" title="Start a new conversation">
+            <span>↺</span>
+            <span>Reset</span>
+          </button>
+        </div>
+      </div>
+      <div class="header-sub-bar">
+        <span class="privacy-badge">🔒 Private by Design • No Login Required • Anonymous Guidance</span>
+        <button id="btnOpenFeedback" class="btn-reset" style="padding:2px 8px;font-size:0.75rem;" type="button">Report Outdated Info</button>
+      </div>
+    </header>
+
+    <!-- Main Chat Window -->
+    <main class="chat-main" id="chatMain">
+      <!-- Welcome Hero State -->
+      <section class="welcome-hero" id="welcomeHero">
+        <h2>You're in the right place to explore your options.</h2>
+        <p>Choose a situation below, and I'll guide you through practical next steps. You don't have to share personal information, and you can skip any step at any time.</p>
+        <div class="quick-topics-heading">Select a situation to begin:</div>
+        <div class="cards-grid" id="cardsGrid">
+          <!-- Cards populated dynamically via JavaScript / API -->
+        </div>
+      </section>
+
+      <!-- Messages Thread -->
+      <div class="messages-container" id="messagesContainer">
+        <!-- Interactive messages rendered dynamically -->
+      </div>
+    </main>
+
+    <!-- Footer Composer -->
+    <footer class="app-footer">
+      <form class="composer-form" id="composerForm">
+        <input 
+          type="text" 
+          id="composerInput" 
+          class="composer-input" 
+          placeholder="Ask a question or describe your concern..." 
+          autocomplete="off"
+          maxlength="1000"
+          aria-label="Ask a question"
+        >
+        <button type="submit" id="btnSend" class="btn-send">Send</button>
+      </form>
+      <div class="composer-hint">
+        Never share passwords, OTPs, or explicit images. For active physical threats, dial <strong>112</strong> immediately.
+      </div>
+    </footer>
+  </div>
+
+  <!-- Emergency Help Modal -->
+  <div class="modal-overlay" id="emergencyModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">🚨 Verified Emergency Helplines (India)</h3>
+        <button class="btn-close-modal" id="btnCloseModal" aria-label="Close dialog">&times;</button>
+      </div>
+      <p style="font-size:0.9rem;color:var(--text-muted);">
+        If you are in danger right now, call directly from your phone. Safemate cannot dispatch emergency services automatically.
+      </p>
+      <div class="resources-section">
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-name">National Emergency Support (ERSS 112)</span>
+            <span class="resource-badge" style="background:#FCE8E6;color:#C5221F;">24x7 Pan-India</span>
+          </div>
+          <div class="resource-desc">Immediate police, medical, fire, and rescue assistance across all states.</div>
+          <div class="resource-actions">
+            <a href="tel:112" class="btn-emergency" style="font-size:0.9rem;">📞 Call 112 Now</a>
+          </div>
+        </div>
+
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-name">Women Helpline (WHL 181)</span>
+            <span class="resource-badge">24x7 Toll-Free</span>
+          </div>
+          <div class="resource-desc">Crisis intervention, domestic distress, counseling, and referral to Sakhi One-Stop Centres.</div>
+          <div class="resource-actions">
+            <a href="tel:181" class="btn-tel" style="font-size:0.88rem;">📞 Call 181</a>
+          </div>
+        </div>
+
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-name">Women in Distress Police Helpline (1091)</span>
+            <span class="resource-badge">Police Women Wing</span>
+          </div>
+          <div class="resource-desc">Direct police assistance for stalking, harassment, or real-world distress.</div>
+          <div class="resource-actions">
+            <a href="tel:1091" class="btn-tel" style="font-size:0.88rem;">📞 Call 1091</a>
+          </div>
+        </div>
+
+        <div class="resource-card">
+          <div class="resource-header">
+            <span class="resource-name">Cyber Financial Extortion / Fraud (1930)</span>
+            <span class="resource-badge">I4C / MHA</span>
+          </div>
+          <div class="resource-desc">Immediate freeze of extorted bank/UPI funds within golden hour.</div>
+          <div class="resource-actions">
+            <a href="tel:1930" class="btn-tel" style="font-size:0.88rem;">📞 Call 1930</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="modal-overlay" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="feedbackTitle" style="color:var(--color-primary);">Report Outdated or Confusing Guidance</h3>
+        <button class="btn-close-modal" id="btnCloseFeedback" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="feedbackForm" style="display:flex;flex-direction:column;gap:12px;">
+        <label style="font-size:0.85rem;font-weight:600;color:var(--text-main);">
+          Issue Type:
+          <select id="feedbackRating" style="width:100%;margin-top:4px;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border-color);">
+            <option value="outdated">Resource or phone number is outdated</option>
+            <option value="confusing">Guidance steps were confusing</option>
+            <option value="incorrect">Information seems inaccurate</option>
+            <option value="helpful">Helpful feedback / appreciation</option>
+          </select>
+        </label>
+        <label style="font-size:0.85rem;font-weight:600;color:var(--text-main);">
+          Details (Please do not include personal or sensitive data):
+          <textarea id="feedbackComment" rows="4" maxlength="500" placeholder="Describe what can be improved..." style="width:100%;margin-top:4px;padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border-color);font-family:inherit;"></textarea>
+        </label>
+        <button type="submit" class="btn-send" style="align-self:flex-end;">Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/chatbot/chatbot.js"></script>
+</body>
+</html>

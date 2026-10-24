@@ -31,6 +31,14 @@ Safemate provides two isolated screening features under the `/api/v1` namespace:
   7. **Guaranteed Cleanup:** Automatically removes the temporary video file in a `finally` block immediately after extraction. No user videos or facial crops are ever retained.
 - **Output:** Structured outcome (`potential_manipulation_detected`, `no_manipulation_detected_by_model`, `inconclusive`, or `no_face_detected`).
 
+### C. Interactive Safety & Legal Chatbot (Feature 4)
+- **Web UI:** `/chatbot` (or `/api/v1/chatbot/ui`)
+- **API Prefix:** `/api/v1/chatbot`
+- **Core Technology:** Deterministic safety guidance engine with 9 structured flows, emergency priority interrupts, verified helplines, intent mapping, and an optional multi-tier cascading LLM layer (Groq `llama-3.1-8b-instant` primary → Google Gemini `gemini-1.5-flash` fallback → local curated safety engine).
+- **Privacy Guarantee:** Privacy-first, stateless design. No login or identity required. No conversation transcripts or sensitive personal narratives are logged or permanently stored.
+- **Immediate-Danger Priority:** Any message indicating active physical danger, assault, or being followed interrupts the dialogue and presents emergency contacts (112, 181, 1091) immediately without demanding logins, coordinates, or explanations.
+- **No False Claims:** Safemate explicitly discloses that it does not automatically dispatch police or submit cybercrime complaints on its own; it provides official direct links and verified phone numbers for user action.
+
 ---
 
 ## 2. API Contract Reference
@@ -42,6 +50,7 @@ Base URL prefix: `/api/v1`
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/` | Service root and discovery directory |
+| `GET` | `/chatbot` | Interactive Safety Assistant web interface |
 | `GET` | `/api/v1/health` | Liveness check (verifies process is running) |
 | `GET` | `/api/v1/health/ready` | Still-image model readiness check |
 | `GET` | `/api/v1/model-info` | Still-image model metadata and limitations |
@@ -49,6 +58,17 @@ Base URL prefix: `/api/v1`
 | `GET` | `/api/v1/deepfake/ready` | Video deepfake model readiness check |
 | `GET` | `/api/v1/deepfake/model-info` | Video deepfake model metadata and limitations |
 | `POST` | `/api/v1/deepfake/detect` | Screen video for facial manipulation / deepfakes |
+| `POST` | `/api/v1/emergency/sos` | Safemate Emergency SOS panic button |
+| `POST` | `/api/v1/safewalk/create-trip` | Create active SafeWalk monitoring trip |
+| `GET` | `/api/v1/safewalk/trip/{token}` | Retrieve SafeWalk trip session details |
+| `POST` | `/api/v1/safewalk/update-location` | Update SafeWalk location ping |
+| `POST` | `/api/v1/evidence/upload` | Upload and catalog incident evidence |
+| `GET` | `/api/v1/chatbot/health` | Chatbot service readiness & catalog check |
+| `GET` | `/api/v1/chatbot/resources` | List verified resources filtered by country |
+| `GET` | `/api/v1/chatbot/flows` | List available structured safety flows |
+| `POST` | `/api/v1/chatbot/start` | Launch a guided safety flow by ID |
+| `POST` | `/api/v1/chatbot/message` | Submit choice chip or text query to assistant |
+| `POST` | `/api/v1/chatbot/feedback` | Submit guidance review / outdated report |
 
 ---
 
@@ -333,11 +353,31 @@ curl -X POST "http://localhost:8000/api/v1/deepfake/detect?num_frames=20" \
   -F "file=@sample_video.mp4;type=video/mp4"
 ```
 
+### Test Chatbot Guidance (PowerShell)
+```powershell
+# 1. Start a guided flow (e.g., immediate_danger or report_cybercrime_india)
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/chatbot/start" -Method Post `
+  -ContentType "application/json" `
+  -Body '{"flow_id": "report_cybercrime_india", "country": "IN"}'
+
+# 2. Submit interaction or query
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/chatbot/message" -Method Post `
+  -ContentType "application/json" `
+  -Body '{"message": "I need help with someone sharing my private photos", "country": "IN"}'
+```
+
+### Test Chatbot Guidance (cURL)
+```bash
+curl -X POST "http://localhost:8000/api/v1/chatbot/message" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Someone is blackmailing me online", "country": "IN"}'
+```
+
 ---
 
 ## 5. Automated Tests
 
-The backend includes a comprehensive pytest suite with 51 deterministic unit and integration tests executing in under 2 seconds.
+The backend includes a comprehensive pytest suite with 111 deterministic unit and integration tests executing in under 5 seconds.
 
 ```powershell
 cd backend
@@ -346,17 +386,23 @@ python -m pytest
 
 Output:
 ```text
-====================== 51 passed, 1 deselected in 1.80s =======================
+===================== 111 passed, 1 deselected, 7 warnings in 4.38s =====================
 ```
 
 The test suite validates:
-- Liveness, readiness, and model-info contracts for both image and video services.
-- Multipart uploading, boundary parsing, and format validation.
-- Oversized file rejection, corrupted media recovery, and duration/dimension limits.
-- Graceful handling of videos with no detectable faces (`status: no_face_detected`).
-- Controlled error handling (503 on unready, 500 on inference failure).
-- Ephemeral temporary file cleanup guarantees across successes and exceptions.
-- Client correlation ID (`X-Request-ID`) propagation.
+- **Image & Video AI Screening:** Liveness, readiness, and model-info contracts for both image and video services.
+- **Multipart Uploading & Limits:** Boundary parsing, dimension/duration limits, and oversized media rejection.
+- **Privacy Guarantees:** Ephemeral in-memory image screening and guaranteed temporary video file cleanup.
+- **Feature 4 Safety Assistant:**
+  - Health and flow metadata discovery.
+  - Starting all 9 supported flows independently (`immediate_danger`, `online_harassment`, `blackmail_threats`, `intimate_image_abuse`, `impersonation_fake_profile`, `physical_harassment`, `report_cybercrime_india`, `preserve_evidence`, `understand_options`).
+  - Next-step and cross-flow transitions.
+  - Deterministic immediate danger interception overriding non-emergency conversation.
+  - Verified emergency helplines delivered without authentication.
+  - Security safeguards against asking for passwords, OTPs, or intimate photo uploads.
+  - Error and bounds validation (>1000 characters rejected).
+  - Feedback submission and standalone web interface rendering.
+- **Emergency SOS & SafeWalk:** Panic button alert dispatch, tracking token validation, and overdue trip alerts.
 
 ---
 
