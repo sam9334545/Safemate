@@ -70,3 +70,12 @@ Thumbs.db
 tmp/
 temp/
 scratch/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Vault uploaded media files
+app/secure_storage/*
+!app/secure_storage/.gitkeep

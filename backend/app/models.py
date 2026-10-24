@@ -2,8 +2,27 @@
 
 from __future__ import annotations
 
-from sqlalchemy import Column, Float, Integer, String, Text
+from sqlalchemy import Boolean, Column, Float, Integer, String, Text
 from app.database import Base
+
+
+class UserModel(Base):
+    """Persistent database model for authenticated users."""
+
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    created_at = Column(String(64), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<UserModel(id={self.id}, email='{self.email}', is_active={self.is_active})>"
+
+
+# Semantic alias
+User = UserModel
 
 
 class SafeWalkTrip(Base):

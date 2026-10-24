@@ -6,12 +6,33 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.database import SessionLocal
-from app.models import SafeWalkTrip
+from app.models import SafeWalkTrip, UserModel
+from app.utils.auth import create_access_token
 
 
 @pytest.fixture
 def client():
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_headers():
+    """Fixture ensuring an authenticated user exists and returns Bearer token headers."""
+    email = "test_safewalk_user@safemate.org"
+    with SessionLocal() as db:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if not user:
+            user = UserModel(
+                email=email,
+                hashed_password="hashed_test_password",
+                created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                is_active=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+    token = create_access_token(data={"sub": email, "user_id": user.id})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def test_safewalk_routes_in_openapi(client):
@@ -31,14 +52,14 @@ def test_safewalk_routes_in_openapi(client):
         assert "SafeWalk Escort" in paths[path][method]["tags"]
 
 
-def test_create_trip_successful(client):
+def test_create_trip_successful(client, auth_headers):
     """Test successful trip session creation with valid user, destination, and duration."""
     payload = {
         "user_id": "usr_aegis_001",
         "destination": "North Campus Science Library",
         "duration_minutes": 30,
     }
-    response = client.post("/api/v1/safewalk/create-trip", json=payload)
+    response = client.post("/api/v1/safewalk/create-trip", json=payload, headers=auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -58,16 +79,16 @@ def test_create_trip_successful(client):
         assert trip.destination == "North Campus Science Library"
 
 
-def test_get_trip_session(client):
+def test_get_trip_session(client, auth_headers):
     """Test retrieving an active trip by its token path parameter."""
     create_res = client.post("/api/v1/safewalk/create-trip", json={
         "user_id": "usr_test_walker",
         "destination": "South Hall Dorm",
         "duration_minutes": 15,
-    })
+    }, headers=auth_headers)
     token = create_res.json()["trip_token"]
 
-    # Retrieve via GET /api/v1/safewalk/trip/{token}
+    # Retrieve via GET /api/v1/safewalk/trip/{token} (public/guardian access)
     get_res = client.get(f"/api/v1/safewalk/trip/{token}")
     assert get_res.status_code == 200
     trip_data = get_res.json()
@@ -86,14 +107,14 @@ def test_get_nonexistent_trip_returns_404(client):
     assert "Trip token not found or expired" in response.json().get("detail", "")
 
 
-def test_update_location_success(client):
+def test_update_location_success(client, auth_headers):
     """Test updating live GPS coordinates during an active walk."""
     # 1. Create a trip
     create_res = client.post("/api/v1/safewalk/create-trip", json={
         "user_id": "usr_live_walker",
         "destination": "East Gate Plaza",
         "duration_minutes": 20,
-    })
+    }, headers=auth_headers)
     token = create_res.json()["trip_token"]
 
     # 2. Update location
@@ -120,13 +141,13 @@ def test_update_location_success(client):
     assert trip_data["last_updated_at"] is not None
 
 
-def test_update_location_overdue_flagging(client):
+def test_update_location_overdue_flagging(client, auth_headers):
     """Test that a trip exceeding expected duration is flagged as 'overdue'."""
     create_res = client.post("/api/v1/safewalk/create-trip", json={
         "user_id": "usr_late_walker",
         "destination": "West Pavilion",
         "duration_minutes": 5,
-    })
+    }, headers=auth_headers)
     token = create_res.json()["trip_token"]
 
     # Simulate past arrival timestamp in database
@@ -173,13 +194,13 @@ def test_update_location_validation_error(client):
     assert response.status_code == 422
 
 
-def test_create_trip_validation_zero_or_negative_duration(client):
+def test_create_trip_validation_zero_or_negative_duration(client, auth_headers):
     """Test duration_minutes must be positive integer."""
     res_zero = client.post("/api/v1/safewalk/create-trip", json={
         "user_id": "usr_aegis_001",
         "destination": "Library",
         "duration_minutes": 0,
-    })
+    }, headers=auth_headers)
     assert res_zero.status_code == 422
 
 

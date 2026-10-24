@@ -11,7 +11,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import SafeWalkTrip
+from app.models import SafeWalkTrip, UserModel
+from app.utils.auth import get_current_user
 from app.schemas.safewalk import (
     LocationUpdateRequest,
     LocationUpdateResponse,
@@ -66,6 +67,7 @@ def check_and_update_overdue(trip: SafeWalkTrip, db: Session) -> str:
 async def create_trip(
     payload: TripCreateRequest,
     db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ) -> TripCreateResponse:
     """Generate a SafeWalk trip token and store the active tracking session in database."""
     # 1. Generate unique temporary trip token verified against database

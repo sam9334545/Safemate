@@ -1,5 +1,6 @@
 """Unit and integration tests for the Disguised Evidence Vault route."""
 
+import datetime
 import hashlib
 import io
 import pytest
@@ -8,12 +9,33 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.api.routes.evidence import SECURE_STORAGE_DIR
 from app.database import SessionLocal
-from app.models import EvidenceRecord
+from app.models import EvidenceRecord, UserModel
+from app.utils.auth import create_access_token
 
 
 @pytest.fixture
 def client():
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_headers():
+    """Fixture ensuring an authenticated user exists and returns Bearer token headers."""
+    email = "test_evidence_user@safemate.org"
+    with SessionLocal() as db:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if not user:
+            user = UserModel(
+                email=email,
+                hashed_password="hashed_test_password",
+                created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                is_active=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+    token = create_access_token(data={"sub": email, "user_id": user.id})
+    return {"Authorization": f"Bearer {token}"}
 
 
 def test_evidence_route_in_openapi(client):
@@ -25,7 +47,7 @@ def test_evidence_route_in_openapi(client):
     assert "Disguised Evidence Vault" in post_op["tags"]
 
 
-def test_upload_evidence_photo_success(client):
+def test_upload_evidence_photo_success(client, auth_headers):
     """Test successful multipart upload of image evidence with coordinates and note."""
     file_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDRmock_photo_bytes_12345"
     expected_sha256 = hashlib.sha256(file_bytes).hexdigest()
@@ -40,7 +62,7 @@ def test_upload_evidence_photo_success(client):
         "file": ("incident_photo.png", io.BytesIO(file_bytes), "image/png"),
     }
 
-    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -69,7 +91,21 @@ def test_upload_evidence_photo_success(client):
         stored_file.unlink()
 
 
-def test_upload_evidence_audio_without_note(client):
+def test_upload_evidence_unauthenticated_returns_401(client):
+    """Test uploading evidence without Bearer token returns 401 Unauthorized."""
+    files = {
+        "file": ("incident.png", io.BytesIO(b"data"), "image/png"),
+    }
+    form_data = {
+        "user_id": "usr_unauth",
+        "latitude": "37.774929",
+        "longitude": "-122.419416",
+    }
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    assert response.status_code == 401
+
+
+def test_upload_evidence_audio_without_note(client, auth_headers):
     """Test successful multipart upload of audio recording without optional note."""
     audio_bytes = b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00mock_audio_stream"
     expected_sha256 = hashlib.sha256(audio_bytes).hexdigest()
@@ -83,7 +119,7 @@ def test_upload_evidence_audio_without_note(client):
         "file": ("disguised_memo.wav", io.BytesIO(audio_bytes), "audio/wav"),
     }
 
-    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
     assert response.status_code == 200
 
     data = response.json()
@@ -100,7 +136,7 @@ def test_upload_evidence_audio_without_note(client):
         stored_audio.unlink()
 
 
-def test_upload_empty_file_returns_400(client):
+def test_upload_empty_file_returns_400(client, auth_headers):
     """Test uploading an empty binary file raises HTTP 400."""
     form_data = {
         "user_id": "usr_safemate_001",
@@ -111,12 +147,12 @@ def test_upload_empty_file_returns_400(client):
         "file": ("empty.png", io.BytesIO(b""), "image/png"),
     }
 
-    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
     assert response.status_code == 400
     assert "empty" in response.json().get("detail", "").lower()
 
 
-def test_upload_invalid_coordinates_returns_422(client):
+def test_upload_invalid_coordinates_returns_422(client, auth_headers):
     """Test invalid latitude coordinate produces validation error (HTTP 422)."""
     files = {
         "file": ("sample.png", io.BytesIO(b"dummy_content"), "image/png"),
@@ -127,11 +163,11 @@ def test_upload_invalid_coordinates_returns_422(client):
         "longitude": "-122.419416",
     }
 
-    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
     assert response.status_code == 422
 
 
-def test_upload_missing_user_id_returns_422(client):
+def test_upload_missing_user_id_returns_422(client, auth_headers):
     """Test omitted user_id returns validation error (HTTP 422)."""
     files = {
         "file": ("sample.png", io.BytesIO(b"dummy_content"), "image/png"),
@@ -141,7 +177,7 @@ def test_upload_missing_user_id_returns_422(client):
         "longitude": "-122.419416",
     }
 
-    response = client.post("/api/v1/evidence/upload", data=form_data, files=files)
+    response = client.post("/api/v1/evidence/upload", data=form_data, files=files, headers=auth_headers)
     assert response.status_code == 422
 
 

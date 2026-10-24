@@ -14,7 +14,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import EvidenceRecord
+from app.models import EvidenceRecord, UserModel
+from app.utils.auth import get_current_user
 from app.schemas.evidence import (
     EvidenceRecordDetail,
     EvidenceUploadResponse,
@@ -81,6 +82,7 @@ async def upload_evidence(
         examples=["Heard unusual footsteps behind dormitory block 3."],
     ),
     db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ) -> EvidenceUploadResponse:
     """Process, hash, and securely store an evidence file with database persistence."""
     # 1. Read file contents into memory
