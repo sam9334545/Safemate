@@ -440,31 +440,85 @@ document.addEventListener('DOMContentLoaded', () => {
     chatLog.scrollTop = chatLog.scrollHeight;
   }
 
-  function handleQuery(queryText, topicKey) {
+  async function handleQuery(queryText, topicKey) {
     const userBubble = document.createElement('div');
     userBubble.className = 'chat-bubble-user';
     userBubble.textContent = queryText;
     chatLog.appendChild(userBubble);
     chatLog.scrollTop = chatLog.scrollHeight;
 
-    setTimeout(() => {
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'chat-bubble-ai';
+    typingBubble.innerHTML = '<em style="color:#64748b;">Consulting verified safety & legal guidance...</em>';
+    chatLog.appendChild(typingBubble);
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/chatbot/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: queryText, country: 'IN' })
+      });
+
+      if (!res.ok) throw new Error('API error: ' + res.status);
+      const data = await res.json();
+
+      let html = '';
+      if (data.is_emergency_priority) {
+        html += '<div style="background:#fee2e2; border-left:4px solid #ef4444; padding:8px 12px; border-radius:4px; margin-bottom:8px; font-weight:700; color:#b91c1c;">🚨 IMMEDIATE EMERGENCY DIRECTIVE</div>';
+      }
+
+      if (data.title) {
+        html += `<strong style="font-size:1.02rem; color:#0f172a; display:block; margin-bottom:6px;">${data.title}</strong>`;
+      }
+
+      const bodyText = (data.text || data.guidance || '').replace(/\n/g, '<br>');
+      html += `<div>${bodyText}</div>`;
+
+      if (data.numbered_steps && data.numbered_steps.length > 0) {
+        html += '<div style="margin-top:8px; padding-left:14px;"><ol style="margin:4px 0; padding-left:14px;">';
+        data.numbered_steps.forEach(s => {
+          html += `<li style="margin-bottom:4px;">${s}</li>`;
+        });
+        html += '</ol></div>';
+      }
+
+      if (data.resources && data.resources.length > 0) {
+        html += '<div style="margin-top:10px; border-top:1px solid #e2e8f0; padding-top:8px;"><strong style="font-size:0.85rem; color:#475569;">Verified Helplines & Portals:</strong><div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">';
+        data.resources.forEach(r => {
+          const telLink = r.phone_number ? `<a href="tel:${r.phone_number}" style="display:inline-block; padding:4px 10px; background:#ef4444; color:#fff; border-radius:4px; text-decoration:none; font-weight:600; font-size:12px;">📞 ${r.phone_number} (${r.display_name})</a>` : '';
+          const urlLink = r.action_url ? `<a href="${r.action_url}" target="_blank" style="display:inline-block; padding:4px 10px; background:#0284c7; color:#fff; border-radius:4px; text-decoration:none; font-size:12px;">🌐 Portal ↗</a>` : '';
+          html += `<div style="margin-bottom:4px;">${telLink} ${urlLink}</div>`;
+        });
+        html += '</div></div>';
+      }
+
+      if (data.sources && data.sources.length > 0) {
+        html += '<div style="margin-top:8px; font-size:0.75rem; color:#64748b;"><em>📚 Grounded in Verified Sources: ' + data.sources.map(s => s.title).join(', ') + '</em></div>';
+      }
+
+      typingBubble.innerHTML = html;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    } catch (err) {
+      // Graceful offline fallback
       if (topicKey && legalAnswers[topicKey]) {
-        appendAiResponse(legalAnswers[topicKey]);
+        typingBubble.innerHTML = legalAnswers[topicKey];
       } else {
         const lower = queryText.toLowerCase();
         if (lower.includes('deepfake') || lower.includes('leak') || lower.includes('photo') || lower.includes('blackmail')) {
-          appendAiResponse(legalAnswers.cyber);
+          typingBubble.innerHTML = legalAnswers.cyber;
         } else if (lower.includes('restraining') || lower.includes('order') || lower.includes('court') || lower.includes('lawyer')) {
-          appendAiResponse(legalAnswers.restraining);
+          typingBubble.innerHTML = legalAnswers.restraining;
         } else if (lower.includes('hotline') || lower.includes('number') || lower.includes('call') || lower.includes('police')) {
-          appendAiResponse(legalAnswers.hotlines);
+          typingBubble.innerHTML = legalAnswers.hotlines;
         } else if (lower.includes('evidence') || lower.includes('proof') || lower.includes('record')) {
-          appendAiResponse(legalAnswers.evidence);
+          typingBubble.innerHTML = legalAnswers.evidence;
         } else {
-          appendAiResponse("You are in a completely secure, encrypted space. SafeMate stores zero browsing traces. How can I guide you regarding protection orders, hotlines, or preserving digital evidence?");
+          typingBubble.innerHTML = "You are in a completely secure, encrypted space. SafeMate stores zero browsing traces. How can I guide you regarding protection orders, hotlines, or preserving digital evidence?";
         }
       }
-    }, 400);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
   }
 
   chatChips.forEach(chip => {

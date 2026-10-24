@@ -61,7 +61,7 @@ class Settings(BaseSettings):
 
     # Optional Groq API LLM Layer
     GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = "llama-3.1-8b-instant"
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
     GROQ_TIMEOUT_SECONDS: float = 8.0
 
     # Optional Google Gemini API LLM Layer (Fallback or Primary)
