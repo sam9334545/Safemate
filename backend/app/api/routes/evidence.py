@@ -10,8 +10,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import uuid
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
 
+from app.database import get_db
+from app.models import EvidenceRecord
 from app.schemas.evidence import (
     EvidenceRecordDetail,
     EvidenceUploadResponse,
@@ -28,9 +31,6 @@ router = APIRouter(prefix="/api/v1/evidence", tags=["Disguised Evidence Vault"])
 # Stored inside the private app directory (app/secure_storage/), outside public access
 SECURE_STORAGE_DIR = Path(__file__).resolve().parent.parent.parent / "secure_storage"
 
-# In-memory evidence ledger for audit and verification
-EVIDENCE_LEDGER: Dict[str, Dict[str, Any]] = {}
-
 # Trusted safety circle contacts alerted during evidence dispatch
 DEFAULT_TRUSTED_CONTACTS = [
     "Maya Lin (Sister & Primary Emergency Contact)",
@@ -46,8 +46,8 @@ DEFAULT_TRUSTED_CONTACTS = [
     description=(
         "Securely receives encrypted or disguised evidence files (audio clips, photos, video). "
         "Calculates cryptographic SHA-256 checksum for chain-of-custody integrity, stores the binary "
-        "file in a private local vault directory, logs structured confirmation, and simulates "
-        "dispatch to trusted emergency contacts."
+        "file in a private local vault directory, persists metadata into PostgreSQL database, "
+        "logs structured confirmation, and simulates dispatch to trusted emergency contacts."
     ),
 )
 async def upload_evidence(
@@ -80,8 +80,9 @@ async def upload_evidence(
         description="Optional disguised note, transcription, or emergency description",
         examples=["Heard unusual footsteps behind dormitory block 3."],
     ),
+    db: Session = Depends(get_db),
 ) -> EvidenceUploadResponse:
-    """Process, hash, and securely store an evidence file with chain-of-custody tracking."""
+    """Process, hash, and securely store an evidence file with database persistence."""
     # 1. Read file contents into memory
     content = await file.read()
     if not content:
@@ -110,22 +111,25 @@ async def upload_evidence(
     google_maps_url = f"https://maps.google.com/?q={latitude},{longitude}"
     simulated_dispatch_status = "CONFIRMED_DELIVERED_TO_TRUSTED_CONTACTS"
 
-    # 5. Record metadata into internal ledger
-    record_entry = {
-        "evidence_id": evidence_id,
-        "user_id": user_id,
-        "file_name": original_filename,
-        "file_size": file_size,
-        "sha256_checksum": sha256_hash,
-        "latitude": latitude,
-        "longitude": longitude,
-        "note": note,
-        "timestamp": timestamp,
-        "simulated_dispatch_status": simulated_dispatch_status,
-        "google_maps_url": google_maps_url,
-        "contacts_alerted": list(DEFAULT_TRUSTED_CONTACTS),
-    }
-    EVIDENCE_LEDGER[evidence_id] = record_entry
+    # 5. Persist record into PostgreSQL/SQLAlchemy database
+    new_record = EvidenceRecord(
+        evidence_id=evidence_id,
+        user_id=user_id,
+        file_name=original_filename,
+        file_path=str(target_path),
+        file_size=file_size,
+        sha256_checksum=sha256_hash,
+        latitude=latitude,
+        longitude=longitude,
+        note=note,
+        timestamp=timestamp,
+        simulated_dispatch_status=simulated_dispatch_status,
+        google_maps_url=google_maps_url,
+        contacts_alerted=json.dumps(DEFAULT_TRUSTED_CONTACTS),
+    )
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
 
     # 6. Structured JSON logging confirmation
     log_payload = {
@@ -167,30 +171,58 @@ async def upload_evidence(
     "/records",
     response_model=List[EvidenceRecordDetail],
     summary="List Evidence Vault Metadata Records",
-    description="Inspection endpoint returning securely recorded evidence metadata records.",
+    description="Inspection endpoint returning database-persisted evidence metadata records.",
 )
-async def list_evidence_records() -> List[EvidenceRecordDetail]:
-    """Retrieve metadata list of secured evidence records."""
-    return [EvidenceRecordDetail(**entry) for entry in EVIDENCE_LEDGER.values()]
+async def list_evidence_records(db: Session = Depends(get_db)) -> List[EvidenceRecordDetail]:
+    """Retrieve metadata list of secured evidence records from database."""
+    records = db.query(EvidenceRecord).all()
+    return [
+        EvidenceRecordDetail(
+            evidence_id=entry.evidence_id,
+            user_id=entry.user_id,
+            file_name=entry.file_name,
+            file_size=entry.file_size,
+            sha256_checksum=entry.sha256_checksum,
+            latitude=entry.latitude,
+            longitude=entry.longitude,
+            note=entry.note,
+            timestamp=entry.timestamp,
+            simulated_dispatch_status=entry.simulated_dispatch_status,
+            google_maps_url=entry.google_maps_url,
+        )
+        for entry in records
+    ]
 
 
 @router.get(
     "/verify/{evidence_id}",
     summary="Verify Evidence Integrity Checksum",
-    description="Verifies the on-disk SHA-256 checksum of an evidence record against the original hash.",
+    description="Verifies the on-disk SHA-256 checksum of an evidence record against the database hash.",
 )
-async def verify_evidence_integrity(evidence_id: str) -> Dict[str, Any]:
-    """Verify chain-of-custody checksum for a specific evidence record."""
-    entry = EVIDENCE_LEDGER.get(evidence_id)
+async def verify_evidence_integrity(
+    evidence_id: str,
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Verify chain-of-custody checksum for a specific evidence record from database."""
+    entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
     if not entry:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Evidence record '{evidence_id}' was not found.",
+            detail=f"Evidence record '{evidence_id}' was not found in database.",
         )
+
+    target_path = Path(entry.file_path)
+    file_exists = target_path.exists()
+    calculated_hash = (
+        hashlib.sha256(target_path.read_bytes()).hexdigest() if file_exists else None
+    )
+    is_valid = file_exists and (calculated_hash == entry.sha256_checksum)
+
     return {
         "evidence_id": evidence_id,
-        "file_name": entry["file_name"],
-        "stored_sha256": entry["sha256_checksum"],
-        "integrity_verified": True,
-        "timestamp": entry["timestamp"],
+        "file_name": entry.file_name,
+        "stored_sha256": entry.sha256_checksum,
+        "calculated_sha256": calculated_hash,
+        "integrity_verified": is_valid,
+        "timestamp": entry.timestamp,
     }

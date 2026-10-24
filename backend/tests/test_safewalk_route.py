@@ -5,7 +5,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.api.routes.safewalk import ACTIVE_TRIPS_DB
+from app.database import SessionLocal
+from app.models import SafeWalkTrip
 
 
 @pytest.fixture
@@ -51,8 +52,10 @@ def test_create_trip_successful(client):
     assert "created_at" in data
 
     token = data["trip_token"]
-    assert token in ACTIVE_TRIPS_DB
-    assert ACTIVE_TRIPS_DB[token]["destination"] == "North Campus Science Library"
+    with SessionLocal() as db:
+        trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+        assert trip is not None
+        assert trip.destination == "North Campus Science Library"
 
 
 def test_get_trip_session(client):
@@ -126,9 +129,12 @@ def test_update_location_overdue_flagging(client):
     })
     token = create_res.json()["trip_token"]
 
-    # Simulate past arrival timestamp
+    # Simulate past arrival timestamp in database
     past_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).isoformat()
-    ACTIVE_TRIPS_DB[token]["expected_arrival"] = past_time
+    with SessionLocal() as db:
+        trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+        trip.expected_arrival = past_time
+        db.commit()
 
     # Update location
     update_res = client.post("/api/v1/safewalk/update-location", json={
