@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.routes import deepfake, detect, emergency, health, model_info, safewalk
+from app.api.routes import deepfake, detect, emergency, evidence, health, model_info, safewalk
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
@@ -160,6 +160,7 @@ def create_app() -> FastAPI:
     app.include_router(deepfake.router, prefix=settings.API_V1_PREFIX)
     app.include_router(emergency.router)
     app.include_router(safewalk.router)
+    app.include_router(evidence.router)
 
     @app.get("/", tags=["Root"])
     def root():
@@ -178,6 +179,7 @@ def create_app() -> FastAPI:
             "safewalk_create_trip": f"{settings.API_V1_PREFIX}/safewalk/create-trip",
             "safewalk_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}",
             "safewalk_update_location": f"{settings.API_V1_PREFIX}/safewalk/update-location",
+            "evidence_upload": f"{settings.API_V1_PREFIX}/evidence/upload",
         }
 
     return app
