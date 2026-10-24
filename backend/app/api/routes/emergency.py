@@ -19,6 +19,8 @@ from app.schemas.emergency import (
     ContactCreate,
     ContactDeleteResponse,
     ContactResponse,
+    DirectCallRequest,
+    DirectCallResponse,
     DispatchedAlertInfo,
     SOSRequest,
     SOSResponse,
@@ -427,4 +429,81 @@ async def trigger_sos(
         google_maps_url=google_maps_url,
         distress_message=distress_message,
         contacts=dispatched_alert_records,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Direct Emergency Telephony Voice Call Endpoint
+# ---------------------------------------------------------------------------
+@router.post(
+    "/call",
+    response_model=DirectCallResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Trigger Direct Telephony Voice Call",
+    description=(
+        "Dispatches an emergency voice phone call via Twilio Voice if configured in environment, "
+        "and returns native device tel: protocol link for instant hardware calling."
+    ),
+)
+async def trigger_direct_call(
+    payload: DirectCallRequest,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
+) -> DirectCallResponse:
+    """Initiate a real emergency voice phone call."""
+    user_id = str(current_user.id) if current_user else (payload.user_id or "usr_safemate_user")
+    phone = payload.phone_number.strip()
+    clean_phone = "".join(ch for ch in phone if ch.isdigit() or ch == "+")
+    tel_link = f"tel:{clean_phone}"
+
+    spoken_message = payload.message or (
+        f"Emergency distress call from SafeMate user {user_id}. "
+        "Immediate assistance is requested. Please check your messages for location."
+    )
+
+    twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    twilio_token = os.getenv("TWILIO_AUTH_TOKEN")
+    twilio_from = os.getenv("TWILIO_FROM_NUMBER")
+
+    call_sid = None
+    delivery_status = "DEVICE_DIALER_READY"
+    channel = "device_tel_protocol"
+
+    if twilio_sid and twilio_token and twilio_from:
+        try:
+            twilio_endpoint = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_sid}/Calls.json"
+            twiml = f"<Response><Say voice='alice'>{spoken_message}</Say></Response>"
+            async with httpx.AsyncClient(timeout=5.0) as http_client:
+                res = await http_client.post(
+                    twilio_endpoint,
+                    data={
+                        "From": twilio_from,
+                        "To": clean_phone,
+                        "Twiml": twiml,
+                    },
+                    auth=(twilio_sid, twilio_token),
+                )
+                if res.status_code in (200, 201):
+                    call_data = res.json()
+                    call_sid = call_data.get("sid")
+                    delivery_status = "CALL_INITIATED"
+                    channel = "twilio_voice"
+                else:
+                    logger.warning(f"Twilio Voice returned HTTP {res.status_code}: {res.text}")
+                    delivery_status = "SIMULATED_VOICE_CALL"
+        except Exception as err:
+            logger.warning(f"Twilio Voice call error: {err}")
+            delivery_status = "SIMULATED_VOICE_CALL"
+
+    logger.info(
+        f"Emergency Call Initiated for user '{user_id}' to '{mask_phone_number(clean_phone)}' "
+        f"via {channel} (status: {delivery_status})"
+    )
+
+    return DirectCallResponse(
+        status=delivery_status,
+        phone_number=clean_phone,
+        channel=channel,
+        message=f"Direct call initiated to {payload.contact_name or 'Emergency Contact'} ({clean_phone}).",
+        call_sid=call_sid,
+        tel_link=tel_link,
     )

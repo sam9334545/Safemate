@@ -107,28 +107,58 @@
       <div class="feature-card" id="sos-section">
         <div class="feature-img-box">
           <img src="assets/real_sos.jpg" alt="Woman holding phone for emergency SOS">
-          <span class="feature-badge">Emergency SOS</span>
+          <span class="feature-badge">Emergency SOS &amp; Real Calling</span>
         </div>
         <div class="feature-body">
-          <h3 class="feature-title">Emergency SOS &amp; Trusted Contacts</h3>
+          <h3 class="feature-title">Emergency SOS &amp; Instant Real Calling</h3>
           <p class="feature-desc">
-            When you feel unsafe, broadcast a live distress alert with your satellite GPS coordinates to your trusted contacts via SMS or WhatsApp with a single tap.
+            Directly connect to national emergency dispatchers or your trusted safety circle. Broadcasts verified GPS coordinates with real-time phone dialing.
           </p>
 
           <div class="simple-control-panel">
-            <div class="simple-control-row">
-              <span style="font-size:0.85rem; font-weight:600; color:#0f172a;">Armed Contacts: Mom, Sister</span>
-              <button class="btn-primary" id="btn-send-sos" style="padding:10px 20px; font-size:13px; background:#e52543;">
-                Send Distress Beacon (GPS)
+            <!-- Active Contact Bar & Editor Toggle -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0;">
+              <div>
+                <span style="font-size:0.72rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; display:block; font-weight:600;">Active Emergency Contact</span>
+                <strong id="sos-active-contact-display" style="font-size:0.88rem; color:#0f172a;">Mom (+91-9876543210)</strong>
+              </div>
+              <button type="button" id="btn-toggle-contact-edit" class="btn-outline" style="padding:4px 10px; font-size:11px; cursor:pointer;">
+                ⚙️ Configure
               </button>
             </div>
-            <div id="sos-status-box" class="status-callout" style="display:none;"></div>
+
+            <!-- Expandable Contact Editor -->
+            <div id="sos-contact-editor" style="display:none; background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #cbd5e1;">
+              <div style="font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:6px;">Set Real Emergency Contact</div>
+              <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Mom, Maya, Sister)" style="width:100%; padding:7px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:6px; box-sizing:border-box;">
+              <input type="tel" id="input-emergency-phone" placeholder="Contact Phone Number (e.g. +91-9876543210)" style="width:100%; padding:7px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:8px; box-sizing:border-box;">
+              <button type="button" id="btn-save-contact" class="btn-primary" style="width:100%; padding:8px; font-size:12px; cursor:pointer;">
+                💾 Save Emergency Contact
+              </button>
+            </div>
+
+            <!-- Direct Real Call Buttons -->
+            <div style="display:flex; gap:8px; margin-bottom:8px;">
+              <a id="btn-call-112" href="tel:112" class="btn-primary" style="background:#dc2626; border-color:#dc2626; padding:10px 12px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; flex:1; text-align:center; font-weight:700;">
+                📞 Call 112
+              </a>
+              <a id="btn-call-contact" href="tel:+919876543210" class="btn-outline" style="padding:10px 12px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; flex:1; text-align:center; font-weight:700; border-color:#0284c7; color:#0284c7;">
+                📞 Call Contact
+              </a>
+            </div>
+
+            <!-- Full Emergency SOS Panic Trigger -->
+            <button type="button" class="btn-primary" id="btn-send-sos" style="width:100%; padding:11px 16px; font-size:13px; background:#991b1b; border-color:#991b1b; cursor:pointer; font-weight:700;">
+              🚨 Trigger Full SOS (Broadcast GPS + Call)
+            </button>
+
+            <div id="sos-status-box" class="status-callout" style="display:none; margin-top:12px;"></div>
           </div>
         </div>
       </div>
 
       <!-- Feature 2: SafeWalk Escort & Live Map (Real Photo: Woman walking safely at twilight) -->
-      <div class="feature-card" id="safewalk-section">
+      id="safewalk-section">
         <div class="feature-img-box">
           <img src="assets/real_safewalk.jpg" alt="Woman walking safely along city street">
           <span class="feature-badge">SafeWalk Escort</span>
@@ -162,23 +192,26 @@
         <div class="feature-body">
           <h3 class="feature-title">AI Deepfake &amp; Manipulation Detector</h3>
           <p class="feature-desc">
-            Verify whether screenshots or shared photos have been synthetically altered or face-swapped using our pre-trained computer vision forensics detector.
+            Verify whether screenshots or shared photos have been synthetically altered or face-swapped using our neural forensics screening engine.
           </p>
 
           <div class="simple-control-panel">
-            <div class="simple-control-row">
-              <span style="font-size:0.85rem; color:#475569;">Analyze suspicious image</span>
-              <button class="btn-primary" id="btn-scan-deepfake" style="padding:10px 20px; font-size:13px;">
-                Scan for AI Tampering
-              </button>
-            </div>
-            <div id="deepfake-status-box" class="status-callout" style="display:none;"></div>
+            <input type="file" id="deepfake-file-input" accept="image/*,video/*" style="display:none;">
+            <button type="button" class="btn-outline" id="btn-select-deepfake-file" style="width:100%; padding:9px 12px; font-size:13px; margin-bottom:8px; cursor:pointer;">
+              📁 Select Photo or Video to Screen
+            </button>
+            <div id="deepfake-selected-filename" style="font-size:0.8rem; color:#0284c7; margin-bottom:8px; display:none; font-weight:600;"></div>
+
+            <button type="button" class="btn-primary" id="btn-scan-deepfake" style="width:100%; padding:10px 16px; font-size:13px; cursor:pointer;">
+              🔍 Screen for Synthetic Manipulation
+            </button>
+            <div id="deepfake-status-box" class="status-callout" style="display:none; margin-top:10px;"></div>
           </div>
         </div>
       </div>
 
-      <!-- Feature 4: Leak Tracer (Real Photo: Hands holding smartphone sending private photo) -->
-      <div class="feature-card" id="leak-section">
+      <!-- Feature 4: Leak Tracer -->
+      id="leak-section">
           <div class="feature-img-box">
             <img src="assets/real_phone_message.jpg" alt="Real photo of hands holding smartphone sending private photo">
             <span class="feature-badge">Forensic Watermarking</span>
@@ -448,24 +481,39 @@
 
   <!-- Simulated Escape Call Modal -->
   <div class="modal-overlay" id="fake-call-modal">
-    <div class="call-card">
-      <div style="font-size: 0.72rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;">Incoming Call</div>
-      <div class="call-avatar">👩</div>
-      <div class="call-title">Mom</div>
-      <div class="call-sub" id="call-status">Mobile • Calling...</div>
-      
-      <div class="call-btns">
-        <button class="btn-circle btn-circle-red" id="btn-call-decline" title="Decline">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-        <button class="btn-circle btn-circle-green" id="btn-call-accept" title="Accept">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-          </svg>
-        </button>
+    <div class="call-card" style="max-width:340px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:0.75rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Emergency Rescue Call</span>
+        <button type="button" id="btn-close-call-modal" style="background:none; border:none; color:#9ca3af; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="call-avatar" style="margin:4px auto 10px auto;">📞</div>
+      <div class="call-title" id="escape-caller-title">Mom</div>
+      <div class="call-sub" id="call-status">Mobile • Incoming Alert...</div>
+
+      <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
+        <!-- Real Outgoing Call Option -->
+        <a id="btn-real-escape-call" href="tel:+919876543210" class="btn-primary" style="background:#dc2626; border-color:#dc2626; text-decoration:none; text-align:center; padding:10px; font-size:13px; font-weight:700; border-radius:8px;">
+          📞 Make REAL Emergency Call Now
+        </a>
+
+        <!-- Simulated In-App Rescue Controls -->
+        <div style="background:#1e293b; padding:10px; border-radius:8px; text-align:center;">
+          <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:8px;">Or simulate incoming ring to excuse yourself safely:</div>
+          <div class="call-btns" style="margin-top:0; justify-content:center; gap:24px;">
+            <button class="btn-circle btn-circle-red" id="btn-call-decline" title="Decline / Dismiss">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <button class="btn-circle btn-circle-green" id="btn-call-accept" title="Answer Simulated Call">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

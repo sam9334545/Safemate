@@ -157,3 +157,24 @@ class SOSResponse(BaseModel):
         default_factory=list,
         description="List of trusted contacts who received the emergency dispatch",
     )
+
+
+# ---------------------------------------------------------------------------
+# Direct Voice Call Schemas
+# ---------------------------------------------------------------------------
+class DirectCallRequest(BaseModel):
+    """Request to initiate a voice call to an emergency contact."""
+    phone_number: str = Field(..., description="Destination phone number in E.164 format or standard dial format")
+    contact_name: Optional[str] = Field("Emergency Contact", description="Contact name")
+    message: Optional[str] = Field(None, description="Spoken alert message")
+    user_id: Optional[str] = Field("usr_safemate_user", description="Identifier of the user")
+
+
+class DirectCallResponse(BaseModel):
+    """Response from direct call trigger endpoint."""
+    status: str = Field(..., description="Status of call dispatch (e.g. INITIATED, SIMULATED, DEVICE_TEL_READY)")
+    phone_number: str = Field(..., description="Target phone number")
+    channel: str = Field(..., description="Delivery channel (e.g. twilio_voice, device_tel_protocol)")
+    message: str = Field(..., description="Status explanation or spoken alert note")
+    call_sid: Optional[str] = Field(None, description="Twilio Call SID if telephony provider is configured")
+    tel_link: str = Field(..., description="Native device dialer link (tel: protocol)")
