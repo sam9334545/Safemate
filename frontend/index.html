@@ -959,7 +959,13 @@
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <!-- Interactive Voice Ask & Answer Mode Toggle -->
+          <button type="button" class="tell-once-voice-toggle-btn active" id="btn-toggle-voice-mode" title="Toggle automatic voice asking and answering">
+            <span>🎙️</span>
+            <span id="voice-toggle-label">Voice Mode: ON</span>
+          </button>
+
           <!-- Bilingual Language Toggle -->
           <div class="tell-once-lang-toggle">
             <button type="button" class="tell-once-lang-btn active" id="tell-once-lang-en">English</button>
@@ -996,6 +1002,20 @@
 
       <!-- Modal Body (Question Flow) -->
       <div class="tell-once-body" id="tell-once-conversation-view">
+        <!-- Live Voice Interactive Status Banner -->
+        <div class="voice-live-status-bar" id="voice-live-status-bar" style="display:none;">
+          <div class="voice-status-indicator">
+            <div class="voice-pulse-ring speaking" id="voice-pulse-ring">
+              <span id="voice-status-emoji">🔊</span>
+            </div>
+            <div class="voice-status-copy">
+              <div class="voice-status-headline" id="voice-status-headline">SafeMate is asking the question...</div>
+              <div class="voice-status-sub" id="voice-status-sub">Listening will begin automatically when question finishes</div>
+            </div>
+          </div>
+          <button type="button" class="btn-voice-pause" id="btn-voice-pause">Pause Voice</button>
+        </div>
+
         <div class="tell-once-question-bubble" id="tell-once-question-box">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
             <span style="font-size:0.72rem; color:#6d28d9; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;" id="tell-once-stage-title">GENTLE INTAKE QUESTION</span>
@@ -1038,25 +1058,31 @@
 
       <!-- Dossier View (Shown When Complete or Requested) -->
       <div class="tell-once-body" id="tell-once-dossier-view" style="display:none;">
-        <div style="background:#ecfdf5; border-left:4px solid #10b981; padding:12px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:#ecfdf5; border-left:4px solid #10b981; padding:12px 16px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <strong style="color:#065f46; font-size:0.92rem; display:block;">🎉 Multi-Agency Tell-Once Dossier Compiled!</strong>
-            <span style="font-size:0.78rem; color:#047857;" id="tell-once-dossier-note">
+            <strong style="color:#065f46; font-size:0.95rem; display:block;">🎉 Multi-Agency Tell-Once Dossier Compiled!</strong>
+            <span style="font-size:0.8rem; color:#047857;" id="tell-once-dossier-note">
               You never have to repeat your story again. Present this unified dossier directly to police, helplines, or legal counsel.
             </span>
           </div>
-          <button type="button" id="btn-tell-once-back-to-chat" class="btn-outline" style="font-size:11px; padding:4px 10px; cursor:pointer;">
-            💬 Back to Chat
+          <button type="button" id="btn-tell-once-back-to-chat" class="btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700;">
+            💬 Back to Interview
           </button>
         </div>
 
         <div class="tell-once-dossier-card">
-          <!-- Dossier Sub-Tabs -->
+          <!-- Dossier Sub-Tabs (Clean Segmented Pills) -->
           <div class="tell-once-dossier-nav">
             <button type="button" class="tell-once-dossier-tab-btn active" id="tab-dossier-fir">👮 1. Police Zero FIR</button>
             <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-cyber">💻 2. Cyber Helpline 1930</button>
             <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-lawyer">⚖️ 3. Legal Counsel Brief</button>
             <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-evidence">📁 4. Evidence Checklist &amp; Contacts</button>
+          </div>
+
+          <!-- Document Header Badge -->
+          <div class="tell-once-dossier-doc-header" id="tell-once-doc-badge">
+            <span id="tell-once-doc-badge-title">⚖️ FORMAL ZERO FIR COMPLAINT • SECTION 173 BNSS / SEC 154 CrPC</span>
+            <span style="font-size:0.7rem; color:#9d174d;">🔒 VERIFIED SHA-256 DIGITAL EVIDENCE</span>
           </div>
 
           <!-- Active Text Content Pane -->

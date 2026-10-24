@@ -1183,6 +1183,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Voice Interaction for Legal & Safety Chatbot
+  if (btnChatMic) {
+    let isChatMicActive = false;
+    let chatSpeechRec = null;
+
+    btnChatMic.addEventListener('click', () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Voice input is not supported in this browser. Please type directly in the chat box.');
+        return;
+      }
+
+      if (isChatMicActive) {
+        if (chatSpeechRec) {
+          try { chatSpeechRec.stop(); } catch (err) {}
+        }
+        isChatMicActive = false;
+        btnChatMic.style.background = '#475569';
+        if (chatInput) chatInput.placeholder = 'Ask a confidential question or type in Hindi...';
+        return;
+      }
+
+      try {
+        chatSpeechRec = new SpeechRecognition();
+        const currentLang = chatLanguageSelect ? chatLanguageSelect.value : 'en';
+        chatSpeechRec.lang = currentLang === 'hi' ? 'hi-IN' : 'en-IN';
+        chatSpeechRec.continuous = false;
+        chatSpeechRec.interimResults = false;
+
+        chatSpeechRec.onstart = () => {
+          isChatMicActive = true;
+          btnChatMic.style.background = '#dc2626';
+          if (chatInput) chatInput.placeholder = currentLang === 'hi' ? '🎙️ बोलिए... आपकी आवाज सुनी जा रही है...' : '🎙️ Listening... Speak your legal question now...';
+        };
+
+        chatSpeechRec.onresult = (e) => {
+          const spoken = e.results[0][0].transcript;
+          if (chatInput && spoken) {
+            chatInput.value = spoken;
+            sendUserChat(); // Automatically send spoken question
+          }
+        };
+
+        chatSpeechRec.onerror = () => {
+          isChatMicActive = false;
+          btnChatMic.style.background = '#475569';
+          if (chatInput) chatInput.placeholder = 'Ask a confidential question or type in Hindi...';
+        };
+
+        chatSpeechRec.onend = () => {
+          isChatMicActive = false;
+          btnChatMic.style.background = '#475569';
+          if (chatInput) chatInput.placeholder = 'Ask a confidential question or type in Hindi...';
+        };
+
+        chatSpeechRec.start();
+      } catch (err) {
+        console.warn('Chat speech error:', err);
+        isChatMicActive = false;
+        btnChatMic.style.background = '#475569';
+      }
+    });
+  }
+
   // Clear / Panic Wipe Conversation History
   if (btnClearChatLog) {
     btnClearChatLog.addEventListener('click', async () => {
@@ -1473,6 +1537,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const tellOnceLangEn = document.getElementById('tell-once-lang-en');
   const tellOnceLangHi = document.getElementById('tell-once-lang-hi');
 
+  const btnToggleVoiceMode = document.getElementById('btn-toggle-voice-mode');
+  const voiceToggleLabel = document.getElementById('voice-toggle-label');
+  const voiceLiveStatusBar = document.getElementById('voice-live-status-bar');
+  const voicePulseRing = document.getElementById('voice-pulse-ring');
+  const voiceStatusEmoji = document.getElementById('voice-status-emoji');
+  const voiceStatusHeadline = document.getElementById('voice-status-headline');
+  const voiceStatusSub = document.getElementById('voice-status-sub');
+  const btnVoicePause = document.getElementById('btn-voice-pause');
+  const tellOnceDocBadgeTitle = document.getElementById('tell-once-doc-badge-title');
+
   const tellOnceProgressFill = document.getElementById('tell-once-progress-fill');
   const tellOnceStepLabel = document.getElementById('tell-once-step-label');
   const tellOnceStageTitle = document.getElementById('tell-once-stage-title');
@@ -1504,6 +1578,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeDossierTab = 'fir';
   let speechRecInstance = null;
   let isListeningSpeech = false;
+  let isVoiceModeActive = true; // Auto-Voice Ask & Answer Loop
+  let voiceSilenceTimer = null;
 
   const STEP_TITLES_EN = [
     'Step 1 of 6: Physical Safety Check',
@@ -1530,6 +1606,8 @@ document.addEventListener('DOMContentLoaded', () => {
     tellOnceModal.classList.add('active');
     if (!tellOnceIntakeId) {
       initiateTellOnceIntake(tellOnceLanguage);
+    } else if (tellOncePromptText && isVoiceModeActive) {
+      speakQuestionAndListen(tellOncePromptText.textContent);
     }
   }
 
@@ -1537,12 +1615,182 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tellOnceModal) tellOnceModal.classList.remove('active');
     stopSpeechRecognition();
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    hideVoiceStatus();
   }
 
   function updateLanguageButtons() {
     if (tellOnceLangEn && tellOnceLangHi) {
       tellOnceLangEn.classList.toggle('active', tellOnceLanguage === 'en');
       tellOnceLangHi.classList.toggle('active', tellOnceLanguage === 'hi');
+    }
+  }
+
+  // Visual status indicators for the voice banner
+  function setVoiceStatus(mode, headline, sub = '') {
+    if (!voiceLiveStatusBar) return;
+    voiceLiveStatusBar.style.display = 'flex';
+    if (voicePulseRing) {
+      voicePulseRing.className = `voice-pulse-ring ${mode}`;
+    }
+    if (voiceStatusEmoji) {
+      voiceStatusEmoji.textContent = mode === 'speaking' ? '🔊' : (mode === 'listening' ? '🎙️' : '✨');
+    }
+    if (voiceStatusHeadline) {
+      voiceStatusHeadline.textContent = headline;
+    }
+    if (voiceStatusSub) {
+      voiceStatusSub.textContent = sub;
+    }
+  }
+
+  function hideVoiceStatus() {
+    if (voiceLiveStatusBar) voiceLiveStatusBar.style.display = 'none';
+  }
+
+  // Speak question gently and transition to voice listening
+  function speakQuestionAndListen(questionText) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    stopSpeechRecognition();
+
+    if (!isVoiceModeActive) {
+      hideVoiceStatus();
+      return;
+    }
+
+    const cleanText = (questionText || '').replace(/[*#_]/g, '').trim();
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.94; // Warm, supportive, conversational pace
+    utterance.pitch = 1.0;
+
+    const headline = tellOnceLanguage === 'hi' ? 'सेफमेट सवाल पूछ रही है...' : 'SafeMate is asking the question...';
+    const sub = tellOnceLanguage === 'hi' ? 'सवाल पूरा होते ही माइक्रोफ़ोन आपकी आवाज सुनेगा' : 'Listening will start automatically when question completes';
+    setVoiceStatus('speaking', headline, sub);
+
+    utterance.onend = () => {
+      if (
+        isVoiceModeActive &&
+        tellOnceModal &&
+        tellOnceModal.classList.contains('active') &&
+        tellOnceConversationView &&
+        tellOnceConversationView.style.display !== 'none'
+      ) {
+        setTimeout(() => {
+          startSpeechRecognitionWithAutoSubmit();
+        }, 350);
+      } else {
+        hideVoiceStatus();
+      }
+    };
+
+    utterance.onerror = () => {
+      hideVoiceStatus();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Continuous speech recognition that auto-submits upon conversational pause
+  function startSpeechRecognitionWithAutoSubmit() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      hideVoiceStatus();
+      return;
+    }
+
+    stopSpeechRecognition();
+
+    try {
+      speechRecInstance = new SpeechRecognition();
+      speechRecInstance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+      speechRecInstance.continuous = true;
+      speechRecInstance.interimResults = true;
+
+      const headline = tellOnceLanguage === 'hi' ? '🎙️ आपकी आवाज सुन रहे हैं... बोलिए...' : '🎙️ Listening to you... Speak freely...';
+      const sub = tellOnceLanguage === 'hi' ? 'बोलना बंद करते ही आपका जवाब अपने-आप दर्ज होगा' : 'Pausing your speech will auto-submit your response';
+      setVoiceStatus('listening', headline, sub);
+      if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
+      isListeningSpeech = true;
+
+      let accumulated = '';
+
+      speechRecInstance.onresult = (e) => {
+        let interim = '';
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          if (e.results[i].isFinal) {
+            accumulated += e.results[i][0].transcript + ' ';
+          } else {
+            interim += e.results[i][0].transcript;
+          }
+        }
+
+        const currentSpeech = (accumulated + ' ' + interim).trim();
+        if (tellOnceUserInput && currentSpeech) {
+          tellOnceUserInput.value = currentSpeech;
+        }
+
+        clearTimeout(voiceSilenceTimer);
+        if (currentSpeech.length > 1) {
+          setVoiceStatus(
+            'listening',
+            tellOnceLanguage === 'hi' ? '🎙️ आपकी आवाज दर्ज हो रही है...' : '🎙️ Hearing your voice...',
+            `"${currentSpeech.slice(-50)}"`
+          );
+
+          // 1.5 seconds of silence triggers automated submission
+          voiceSilenceTimer = setTimeout(() => {
+            if (isListeningSpeech && currentSpeech.trim()) {
+              stopSpeechRecognition();
+              setVoiceStatus(
+                'processing',
+                tellOnceLanguage === 'hi' ? '✨ जवाब दर्ज हो रहा है...' : '✨ Processing your answer...',
+                tellOnceLanguage === 'hi' ? 'अगला सवाल तैयार हो रहा है' : 'Preparing next question...'
+              );
+              submitTellOnceTurn(currentSpeech.trim());
+            }
+          }, 1500);
+        }
+      };
+
+      speechRecInstance.onerror = (e) => {
+        console.warn('SpeechRecognition error:', e.error);
+        if (e.error === 'no-speech') {
+          setVoiceStatus(
+            'listening',
+            tellOnceLanguage === 'hi' ? '🎙️ हम सुन रहे हैं... आप जब चाहें बोल सकते हैं' : '🎙️ Ready when you are... Speak freely'
+          );
+        } else {
+          stopSpeechRecognition();
+          hideVoiceStatus();
+        }
+      };
+
+      speechRecInstance.onend = () => {
+        if (isListeningSpeech) {
+          isListeningSpeech = false;
+          if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
+          hideVoiceStatus();
+        }
+      };
+
+      speechRecInstance.start();
+    } catch (err) {
+      console.warn('Could not launch speech recognition:', err);
+      stopSpeechRecognition();
+      hideVoiceStatus();
+    }
+  }
+
+  function stopSpeechRecognition() {
+    isListeningSpeech = false;
+    clearTimeout(voiceSilenceTimer);
+    if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
+    if (speechRecInstance) {
+      try { speechRecInstance.stop(); } catch (e) {}
+      speechRecInstance = null;
     }
   }
 
@@ -1576,7 +1824,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const titles = tellOnceLanguage === 'hi' ? STEP_TITLES_HI : STEP_TITLES_EN;
     const labelText = titles[stepIdx - 1] || `Step ${stepIdx} of ${total}`;
     if (tellOnceStepLabel) tellOnceStepLabel.textContent = labelText;
-    if (tellOnceStageTitle) tellOnceStageTitle.textContent = data.step_name.toUpperCase().replace(/_/g, ' ');
+    if (tellOnceStageTitle) tellOnceStageTitle.textContent = (data.step_name || 'intake').toUpperCase().replace(/_/g, ' ');
 
     if (tellOncePromptText) tellOncePromptText.textContent = data.gentle_prompt;
     if (tellOnceAffirmationText) {
@@ -1612,6 +1860,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (data.is_completed) {
       loadTellOnceDossier();
+      // Read out completion announcement
+      if (isVoiceModeActive && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const doneMsg = tellOnceLanguage === 'hi'
+          ? 'आपका मल्टी-एजेंसी डॉजियर तैयार हो चुका है। अब आपको अपनी बात दोबारा नहीं दोहरानी पड़ेगी।'
+          : 'Your multi-agency dossier is compiled. You never have to repeat your story again. Your official Zero FIR and cyber reports are ready.';
+        const utter = new SpeechSynthesisUtterance(doneMsg);
+        utter.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+        utter.rate = 0.94;
+        window.speechSynthesis.speak(utter);
+      }
+    } else {
+      // Automatic Voice Ask & Listen Loop
+      if (isVoiceModeActive) {
+        speakQuestionAndListen(data.gentle_prompt);
+      } else {
+        hideVoiceStatus();
+      }
     }
   }
 
@@ -1619,6 +1885,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tellOnceIntakeId) {
       await initiateTellOnceIntake(tellOnceLanguage);
     }
+
+    stopSpeechRecognition();
 
     try {
       const payload = {
@@ -1639,7 +1907,6 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTellOnceTurn(data);
     } catch (err) {
       console.warn('Turn submission network error, rendering local advance:', err);
-      // Advance locally if offline
       loadTellOnceDossier();
     }
   }
@@ -1659,6 +1926,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderDossierView(dossier) {
+    stopSpeechRecognition();
+    hideVoiceStatus();
     if (tellOnceConversationView) tellOnceConversationView.style.display = 'none';
     if (tellOnceDossierView) tellOnceDossierView.style.display = 'flex';
     if (tellOnceDossierNote && dossier.support_message) {
@@ -1679,6 +1948,18 @@ document.addEventListener('DOMContentLoaded', () => {
     tabButtons.forEach((tab) => {
       if (tab.id) tab.id.classList.toggle('active', tab.key === tabKey);
     });
+
+    if (tellOnceDocBadgeTitle) {
+      if (tabKey === 'fir') {
+        tellOnceDocBadgeTitle.textContent = '⚖️ MANDATORY ZERO FIR COMPLAINT • SECTION 173 BNSS / SEC 154 CrPC';
+      } else if (tabKey === 'cyber') {
+        tellOnceDocBadgeTitle.textContent = '💻 NATIONAL CYBER HELPLINE 1930 / STATUTORY ESCALATION BRIEF';
+      } else if (tabKey === 'lawyer') {
+        tellOnceDocBadgeTitle.textContent = '🛡️ CONFIDENTIAL COUNSEL BRIEF FOR ADVOCATE & LEGAL DEFENSE';
+      } else if (tabKey === 'evidence') {
+        tellOnceDocBadgeTitle.textContent = '📁 DIGITAL EVIDENCE PRESERVATION LOG • SEC 65B CERTIFIED';
+      }
+    }
 
     if (!tellOnceDossierData || !tellOnceDossierText) return;
 
@@ -1747,76 +2028,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTellOnceTurn(fallbackData);
   }
 
-  // Voice Speech-To-Text (Hindi & English Support)
-  function toggleSpeechRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('Speech recognition is not supported in this browser. You can type directly in the box.');
-      return;
-    }
-
-    if (isListeningSpeech) {
-      stopSpeechRecognition();
-      return;
-    }
-
-    try {
-      speechRecInstance = new SpeechRecognition();
-      speechRecInstance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
-      speechRecInstance.continuous = false;
-      speechRecInstance.interimResults = false;
-
-      speechRecInstance.onstart = () => {
-        isListeningSpeech = true;
-        if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
-      };
-
-      speechRecInstance.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        if (tellOnceUserInput) {
-          tellOnceUserInput.value = (tellOnceUserInput.value ? tellOnceUserInput.value + ' ' : '') + text;
-        }
-      };
-
-      speechRecInstance.onerror = (e) => {
-        console.warn('Speech recognition error:', e.error);
-        stopSpeechRecognition();
-      };
-
-      speechRecInstance.onend = () => {
-        stopSpeechRecognition();
-      };
-
-      speechRecInstance.start();
-    } catch (err) {
-      console.warn('Could not launch speech recognition:', err);
-      stopSpeechRecognition();
-    }
-  }
-
-  function stopSpeechRecognition() {
-    isListeningSpeech = false;
-    if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
-    if (speechRecInstance) {
-      try { speechRecInstance.stop(); } catch (e) {}
-      speechRecInstance = null;
-    }
-  }
-
-  // Text-To-Speech Read-Aloud for Soothing Delivery
-  function readAloudQuestion() {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const prompt = (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
-    if (!prompt) return;
-
-    const utterance = new SpeechSynthesisUtterance(prompt);
-    utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
-    utterance.rate = 0.92; // Calm, gentle pacing
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
-  }
-
   // Event Listeners for Tell-Once
   if (btnNavTellOnce) btnNavTellOnce.addEventListener('click', () => openTellOnceModal('en'));
   if (btnHeroTellOnce) btnHeroTellOnce.addEventListener('click', () => openTellOnceModal('en'));
@@ -1826,6 +2037,51 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dockBtnDisguise) dockBtnDisguise.addEventListener('click', toggleRecipeDisguise);
 
   if (btnCloseTellOnce) btnCloseTellOnce.addEventListener('click', closeTellOnceModal);
+
+  // Toggle Voice Mode (Auto Ask & Listen)
+  if (btnToggleVoiceMode) {
+    btnToggleVoiceMode.addEventListener('click', () => {
+      isVoiceModeActive = !isVoiceModeActive;
+      btnToggleVoiceMode.classList.toggle('active', isVoiceModeActive);
+      if (voiceToggleLabel) {
+        voiceToggleLabel.textContent = isVoiceModeActive ? 'Voice Mode: ON' : 'Voice Mode: OFF';
+      }
+      if (!isVoiceModeActive) {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        stopSpeechRecognition();
+        hideVoiceStatus();
+      } else {
+        const prompt = (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
+        if (prompt) speakQuestionAndListen(prompt);
+      }
+    });
+  }
+
+  if (btnVoicePause) {
+    btnVoicePause.addEventListener('click', () => {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      stopSpeechRecognition();
+      hideVoiceStatus();
+    });
+  }
+
+  if (btnTellOnceMic) {
+    btnTellOnceMic.addEventListener('click', () => {
+      if (isListeningSpeech) {
+        stopSpeechRecognition();
+        hideVoiceStatus();
+      } else {
+        startSpeechRecognitionWithAutoSubmit();
+      }
+    });
+  }
+
+  if (btnTellOnceAudioRead) {
+    btnTellOnceAudioRead.addEventListener('click', () => {
+      const prompt = (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
+      if (prompt) speakQuestionAndListen(prompt);
+    });
+  }
 
   if (tellOnceLangEn) {
     tellOnceLangEn.addEventListener('click', () => {

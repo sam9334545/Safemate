@@ -1298,12 +1298,12 @@ body {
   background: #ffffff;
   border-radius: 20px;
   width: 95%;
-  max-width: 820px;
-  max-height: 92vh;
+  max-width: 880px;
+  max-height: 94vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.4);
   animation: modalSlideUp 0.28s ease-out;
 }
 
@@ -1330,6 +1330,33 @@ body {
   font-size: 0.78rem;
   color: #c7d2fe;
   margin-top: 3px;
+}
+
+/* Voice Conversation Mode Toggle Button */
+.tell-once-voice-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tell-once-voice-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.tell-once-voice-toggle-btn.active {
+  background: #10b981;
+  border-color: #059669;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
 }
 
 .tell-once-lang-toggle {
@@ -1547,29 +1574,123 @@ body {
 }
 
 .tell-once-mic-btn {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  border: 1.5px solid #cbd5e1;
   color: #475569;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
+  position: relative;
 }
 
 .tell-once-mic-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: #ede9fe;
+  color: #6d28d9;
+  border-color: #a78bfa;
 }
 
 .tell-once-mic-btn.listening {
-  background: #ef4444;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+  animation: pulseMicRecording 0.9s infinite alternate;
+}
+
+@keyframes pulseMicRecording {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  100% { transform: scale(1.1); box-shadow: 0 0 16px 4px rgba(220, 38, 38, 0.5); }
+}
+
+/* Live Voice Status & Wave Banner */
+.voice-live-status-bar {
+  background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+  border: 1.5px solid #c4b5fd;
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.voice-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.voice-pulse-ring {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #ffffff;
-  border-color: #dc2626;
-  animation: pulseDot 1s infinite alternate;
+  font-size: 15px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.voice-pulse-ring.speaking {
+  background: #7c3aed;
+  animation: speakerPulse 1.2s infinite ease-in-out;
+}
+
+.voice-pulse-ring.listening {
+  background: #dc2626;
+  animation: micPulseGlow 0.9s infinite alternate;
+}
+
+@keyframes speakerPulse {
+  0% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.6); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
+  100% { transform: scale(0.92); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+}
+
+@keyframes micPulseGlow {
+  0% { box-shadow: 0 0 4px #dc2626; }
+  100% { box-shadow: 0 0 16px #ef4444; }
+}
+
+.voice-status-copy {
+  flex: 1;
+}
+
+.voice-status-headline {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #4338ca;
+}
+
+.voice-status-sub {
+  font-size: 0.74rem;
+  color: #6d28d9;
+}
+
+.btn-voice-pause {
+  background: #ffffff;
+  border: 1px solid #c4b5fd;
+  color: #6d28d9;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-voice-pause:hover {
+  background: #ede9fe;
+  border-color: #8b5cf6;
 }
 
 .tell-once-next-btn {
@@ -1592,51 +1713,80 @@ body {
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
 }
 
-/* Dossier Tabs Container */
+/* Clean, Spacious Multi-Agency Dossier View */
 .tell-once-dossier-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
 }
 
 .tell-once-dossier-nav {
   display: flex;
-  background: #0f172a;
-  overflow-x: auto;
-  border-bottom: 1px solid #334155;
+  background: #f8fafc;
+  padding: 8px 10px;
+  gap: 8px;
+  border-bottom: 1.5px solid #e2e8f0;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
 .tell-once-dossier-tab-btn {
-  background: transparent;
-  color: #94a3b8;
-  border: none;
-  padding: 10px 18px;
-  font-size: 0.8rem;
+  flex: 1;
+  min-width: 150px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  white-space: nowrap;
-  border-bottom: 2px solid transparent;
+  border-radius: 10px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: normal;
+}
+
+.tell-once-dossier-tab-btn:hover {
+  background: #ede9fe;
+  color: #4338ca;
+  border-color: #a78bfa;
 }
 
 .tell-once-dossier-tab-btn.active {
+  background: #4338ca;
   color: #ffffff;
-  border-bottom-color: #38bdf8;
-  background: rgba(255, 255, 255, 0.05);
+  border-color: #4338ca;
+  box-shadow: 0 3px 10px rgba(67, 56, 202, 0.32);
+}
+
+.tell-once-dossier-doc-header {
+  background: #fdf2f8;
+  border-bottom: 1px solid #fbcfe8;
+  padding: 8px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #9d174d;
 }
 
 .tell-once-dossier-content-pane {
-  background: #f8fafc;
-  padding: 18px;
-  font-family: monospace;
-  font-size: 0.82rem;
-  line-height: 1.6;
+  background: #ffffff;
+  padding: 22px 24px;
+  font-family: Consolas, "SF Mono", "Fira Code", Menlo, Monaco, monospace;
+  font-size: 0.86rem;
+  line-height: 1.65;
   white-space: pre-wrap;
   color: #0f172a;
-  max-height: 380px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
