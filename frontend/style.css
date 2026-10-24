@@ -1,5 +1,5 @@
 /* SafeMate - Clean White Minimalist & User-Friendly Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alice&family=Karma:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
 
 :root {
   --bg-main: #ffffff;
@@ -17,10 +17,12 @@
 
   --accent-crimson: #e52543;
   --accent-crimson-subtle: rgba(229, 37, 67, 0.06);
+  --accent-wine: #881337;
   --accent-green: #10b981;
   --accent-blue: #0284c7;
 
   --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: 'Karma', 'Alice', Georgia, serif;
   --font-recipe: 'Playfair Display', Georgia, serif;
 
   --radius-btn: 10px;
@@ -58,22 +60,72 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ============================================================
+   MAITRI-STYLE STICKY LEAVE SITE TAB (Fixed to Viewport Right)
+   ============================================================ */
+.sticky-leave-site-tab {
+  position: fixed;
+  right: 0;
+  top: 42%;
+  transform: translateY(-50%);
+  background: #f59e0b; /* Authentic warm amber/yellow from Maitri.org */
+  color: #1c1917;
+  border: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 18px 11px;
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  cursor: pointer;
+  z-index: 99999;
+  box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sticky-leave-site-tab:hover {
+  background: #d97706;
+  color: #000000;
+  padding-right: 15px;
+  transform: translateY(-50%) translateX(-2px);
+  box-shadow: -6px 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.sticky-leave-site-tab .leave-icon {
+  font-size: 0.8rem;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.sticky-leave-site-tab .leave-text {
+  letter-spacing: 0.06em;
+}
+
 /* Minimalist Clean Navbar */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 68px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 6%;
-  background: rgba(255, 255, 255, 0.96);
+  padding: 0 max(20px, 3%);
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-light);
   z-index: 1000;
+  box-sizing: border-box;
   transition: var(--transition);
 }
 
@@ -83,16 +135,18 @@ body {
   gap: 10px;
   text-decoration: none;
   color: var(--text-dark);
+  flex-shrink: 0;
 }
 
 .brand-icon-shield {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: #0f172a;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .brand-icon-shield svg {
@@ -101,54 +155,119 @@ body {
   fill: #ffffff;
 }
 
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .brand-title {
   font-family: var(--font-inter);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-dark);
+  line-height: 1.1;
+}
+
+.brand-subtitle {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: center;
+  gap: 18px;
   list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  max-width: 580px;
 }
 
 .nav-link {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: #4b5563;
   text-decoration: none;
   white-space: nowrap;
+  padding: 6px 4px;
   transition: var(--transition);
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: var(--text-dark);
+  font-weight: 600;
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Prominent Emergency 112 Pill Button (Inspired by Maitri's crimson pill button) */
+.btn-emergency-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #881337; /* Maitri signature wine crimson */
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(136, 19, 55, 0.32);
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-emergency-pill:hover {
+  background: #700f2b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(136, 19, 55, 0.42);
+}
+
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  background: #f87171;
+  border-radius: 50%;
+  animation: pulseBeacon 1.8s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulseBeacon {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(248, 113, 113, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
 }
 
 /* Panic Disguise Button */
 .btn-panic {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   background: #fee2e2;
   color: #dc2626;
   border: 1px solid #fecaca;
-  padding: 8px 18px;
+  padding: 7px 14px;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-panic:hover {
@@ -157,11 +276,73 @@ body {
 }
 
 .btn-panic .kbd-hint {
-  background: rgba(255, 255, 255, 0.8);
-  padding: 1px 6px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 1px 5px;
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.btn-escape-call-nav {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Responsive Navbar Adaptations */
+@media (max-width: 1400px) {
+  .nav-links {
+    gap: 12px;
+  }
+  .nav-link {
+    font-size: 0.84rem;
+  }
+  .nav-link-extra {
+    display: none;
+  }
+  .btn-call-text {
+    display: none;
+  }
+  .btn-escape-call-nav {
+    padding: 7px 10px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .nav-links {
+    gap: 8px;
+  }
+  .nav-link {
+    font-size: 0.8rem;
+    padding: 4px 2px;
+  }
+  .brand-subtitle {
+    display: none;
+  }
+}
+
+@media (max-width: 1040px) {
+  .nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .btn-panic-text {
+    display: none;
+  }
+  .btn-panic {
+    padding: 7px 10px;
+  }
+  .btn-emergency-pill {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+  }
 }
 
 /* User-Friendly Clean Buttons */
@@ -213,74 +394,269 @@ body {
   color: #0f172a;
 }
 
-/* Hero Section */
-.hero-wrapper {
-  padding-top: 92px;
-  padding-bottom: 24px;
-  max-width: 1160px;
-  margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
-.hero-box {
-  background: #ffffff;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-hero);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  margin-bottom: 24px;
-}
-
-.hero-image-container {
-  width: 100%;
+/* ============================================================
+   MAITRI.ORG SIGNATURE MOSAIC GRID HERO WITH FLOATING MOTTO CARD
+   ============================================================ */
+.maitri-hero-section {
   position: relative;
-  background: #000000;
+  width: 100%;
+  margin-top: 70px;
+  background: #23080e;
   overflow: hidden;
-  line-height: 0;
 }
 
-.hero-image-container img {
+.maitri-grid-wrapper {
+  position: relative;
   width: 100%;
-  height: auto;
-  max-height: 540px;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+  overflow: hidden;
+}
+
+/* 7 Columns x 3 Rows = 21 Portrait Tiles */
+.maitri-mosaic-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  background: #3b0d18;
+  z-index: 1;
+}
+
+.mosaic-tile {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1c070d;
+}
+
+.mosaic-tile img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
-  image-rendering: -webkit-optimize-contrast;
+  filter: sepia(0.18) saturate(1.15) contrast(1.06);
+  transition: transform 0.4s ease;
 }
 
-.hero-content {
-  padding: 42px 48px;
-  background: #ffffff;
+.mosaic-tile:hover img {
+  transform: scale(1.04);
 }
 
-.hero-headline {
+/* Warm Rose/Burgundy Duotone Tint Overlay (Exact match to Maitri.org) */
+.maitri-tint-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(136, 19, 55, 0.48) 0%, rgba(159, 18, 57, 0.40) 50%, rgba(120, 15, 45, 0.50) 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Floating Middle Card with SafeMate Motto & Action Triggers */
+.maitri-motto-card {
+  position: relative;
+  z-index: 10;
+  max-width: 980px;
+  width: 92%;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 38px 52px;
+  border-radius: 4px; /* Crisp, architectural corner styling like Maitri */
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.32), 0 4px 16px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  border-top: 4px solid #881337;
+  animation: mottoCardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mottoCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motto-tag {
+  display: inline-block;
   font-family: var(--font-inter);
-  font-size: clamp(32px, 3.8vw, 42px);
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: -1.8px;
-  line-height: 1.15;
-  color: var(--text-title);
-  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #881337;
+  background: #ffe4e6;
+  padding: 5px 16px;
+  border-radius: var(--radius-full);
+  margin-bottom: 18px;
 }
 
-.hero-description {
-  font-family: var(--font-inter);
-  font-size: 16px;
+.motto-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 1.45vw, 1.38rem);
+  line-height: 1.75;
+  color: #1f2937;
   font-weight: 400;
-  line-height: 1.65;
-  letter-spacing: -0.2px;
-  color: var(--text-body);
-  max-width: 900px;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
-.hero-actions {
+.motto-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.btn-motto-emergency {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #991b1b;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(153, 27, 27, 0.35);
+}
+
+.btn-motto-emergency:hover {
+  background: #7f1d1d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(153, 27, 27, 0.45);
+}
+
+.motto-pulse {
+  width: 8px;
+  height: 8px;
+  background: #fca5a5;
+  border-radius: 50%;
+  animation: pulseBeacon 1.8s infinite;
+}
+
+.btn-motto-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 12px 22px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.btn-motto-primary:hover {
+  background: #1e293b;
+  transform: translateY(-2px);
+}
+
+.btn-motto-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-family: var(--font-inter);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 11px 20px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-motto-outline:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.motto-trust-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.motto-trust-badges .sep {
+  color: #cbd5e1;
+}
+
+/* Responsive Breakpoints for Maitri Mosaic */
+@media (max-width: 960px) {
+  .maitri-mosaic-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+  }
+  .maitri-motto-card {
+    padding: 30px 24px;
+  }
+  .motto-text {
+    font-size: 1.08rem;
+    line-height: 1.65;
+  }
+}
+
+@media (max-width: 640px) {
+  .maitri-mosaic-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+  }
+  .maitri-grid-wrapper {
+    min-height: 480px;
+    padding: 32px 12px;
+  }
+  .maitri-motto-card {
+    padding: 24px 16px;
+    width: 95%;
+  }
+  .motto-text {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .motto-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-motto-emergency,
+  .btn-motto-primary,
+  .btn-motto-outline,
+  .btn-motto-tell-once {
+    width: 100%;
+    justify-content: center;
+  }
+  .sticky-leave-site-tab {
+    top: 50%;
+    padding: 14px 8px;
+    font-size: 0.8rem;
+  }
 }
 
 /* Stats Ribbon */

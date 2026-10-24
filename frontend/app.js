@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Stealth Panic Screen (Recipe Book Disguise)
   // ---------------------------------------------------------------------------
   const panicBtn = document.getElementById('panic-disguise-btn');
+  const stickyLeaveBtn = document.getElementById('sticky-leave-site-btn');
   const recipeDisguise = document.getElementById('recipe-disguise');
   const recipeSecretExit = document.getElementById('recipe-secret-exit');
   const recipeRestoreLogo = document.getElementById('recipe-restore-logo');
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (panicBtn) panicBtn.addEventListener('click', toggleRecipeDisguise);
+  if (stickyLeaveBtn) stickyLeaveBtn.addEventListener('click', toggleRecipeDisguise);
   if (recipeSecretExit) recipeSecretExit.addEventListener('click', toggleRecipeDisguise);
   if (recipeRestoreLogo) recipeRestoreLogo.addEventListener('click', toggleRecipeDisguise);
   if (footerRecipeTrigger) {

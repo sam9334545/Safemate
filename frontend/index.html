@@ -4,13 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SafeMate — A Silent Shield, A Strong Voice.</title>
-  <meta name="description" content="With SafeMate, we're empowering women to reclaim their voice and safety, regardless of their circumstances.">
+  <meta name="description" content="SafeMate is a free, confidential, trauma-informed digital safety platform empowering women, youth, and families facing domestic violence, deepfakes, and cyberstalking.">
   <link rel="icon" type="image/png" href="assets/image_0.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alice&family=Karma:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Minimalist Clean Navbar -->
+  <!-- Maitri-Style Sticky Leave Site Quick-Exit Tab (Fixed to right edge) -->
+  <button class="sticky-leave-site-tab" id="sticky-leave-site-btn" title="Leave Site Instantly (Press ESC)" aria-label="Leave site instantly">
+    <span class="leave-icon">✕</span>
+    <span class="leave-text">Leave Site</span>
+  </button>
+
+  <!-- Clean Maitri-Inspired Navbar -->
   <header class="navbar" id="navbar">
     <a href="#" class="nav-brand" id="brand-link">
       <div class="brand-icon-shield">
@@ -18,21 +27,32 @@
           <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 18c-3.75-1.1-6.5-5.06-6.5-9.5V8.3l6.5-3.61 6.5 3.61V10.5c0 4.44-2.75 8.4-6.5 9.5z"/>
         </svg>
       </div>
-      <span class="brand-title">SafeMate</span>
+      <div class="brand-text-group">
+        <span class="brand-title">SafeMate</span>
+        <span class="brand-subtitle">Confidential Survivor Shield</span>
+      </div>
     </a>
 
     <ul class="nav-links">
-      <li><a href="#tell-once-section" class="nav-link" style="color:#7c3aed; font-weight:700;">✨ Tell-Once</a></li>
-      <li><a href="#sos-section" class="nav-link">Emergency SOS</a></li>
-      <li><a href="#safewalk-section" class="nav-link">SafeWalk</a></li>
-      <li><a href="#deepfake-section" class="nav-link">Deepfake Scan</a></li>
-      <li><a href="#vault-section" class="nav-link">Evidence Vault</a></li>
-      <li><a href="#chatbot-section" class="nav-link">Legal Bot</a></li>
+      <li><a href="#hero" class="nav-link">Home</a></li>
+      <li><a href="#sos-section" class="nav-link">Get Help</a></li>
+      <li><a href="#features" class="nav-link">Services</a></li>
+      <li><a href="#tell-once-section" class="nav-link nav-link-extra" style="color:#7c3aed; font-weight:700;">✨ Tell-Once</a></li>
+      <li><a href="#safewalk-section" class="nav-link nav-link-extra">SafeWalk</a></li>
+      <li><a href="#deepfake-section" class="nav-link">Deepfake</a></li>
+      <li><a href="#chatbot-section" class="nav-link">Safety Bot</a></li>
+      <li><a href="#movement" class="nav-link">About</a></li>
     </ul>
 
     <div class="nav-actions">
+      <!-- Prominent Emergency 112 Pill Button (Inspired by Maitri's crimson pill button) -->
+      <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
+        <span class="pulse-indicator"></span>
+        <span>🚨 Emergency 112</span>
+      </a>
+
       <!-- Tell-Once Quick Launch Button -->
-      <button class="btn-tell-once-nav" id="btn-nav-tell-once" title="Tell-Once Trauma-Informed Intake (Speak or Type Once)">
+      <button class="btn-tell-once-nav btn-open-workspace" id="btn-nav-tell-once" data-target-modal="tell-once-modal" title="Tell-Once Trauma-Informed Intake (Speak or Type Once)">
         🌸 Tell-Once
       </button>
 
@@ -42,41 +62,132 @@
           <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
           <line x1="12" y1="2" x2="12" y2="12"></line>
         </svg>
-        <span>Recipe Disguise</span>
+        <span class="btn-panic-text">Disguise</span>
         <span class="kbd-hint">ESC</span>
       </button>
 
-      <button class="btn-outline" id="btn-escape-call" title="Simulate an incoming rescue call">
+      <button class="btn-outline btn-escape-call-nav" id="btn-escape-call" title="Simulate an incoming rescue call">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
         </svg>
-        <span>Escape Call</span>
+        <span class="btn-call-text">Escape Call</span>
       </button>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <main class="hero-wrapper" id="hero">
-    <div class="hero-box" id="hero-card">
-      <div class="hero-image-container">
-        <!-- Crisp Ultra-Clean Hero Image -->
-        <img src="assets/hero_woman_clear.jpg" alt="Break the silence" id="main-hero-img">
+  <!-- Maitri-Style Hero Mosaic Section -->
+  <main class="maitri-hero-section" id="hero">
+    <div class="maitri-grid-wrapper">
+      <!-- 7 Columns x 3 Rows = 21 Portrait Tiles -->
+      <!-- Female Portraits Preserved; Male Portraits Replaced with Traumatized Women & Survivors -->
+      <div class="maitri-mosaic-grid" aria-hidden="true">
+        <!-- Row 1 (Cols 1-7) -->
+        <div class="mosaic-tile tile-0" title="Trauma survivor portrait">
+          <img src="assets/grid/tile_0.jpg" alt="Traumatized woman seeking safety">
+        </div>
+        <div class="mosaic-tile tile-1">
+          <img src="assets/grid/tile_1.jpg" alt="South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-2">
+          <img src="assets/grid/tile_2.jpg" alt="South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-3">
+          <img src="assets/grid/tile_3.jpg" alt="South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-4" title="Cyber harassment survivor">
+          <img src="assets/grid/tile_4.jpg" alt="Woman facing digital harassment">
+        </div>
+        <div class="mosaic-tile tile-5">
+          <img src="assets/grid/tile_5.jpg" alt="South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-6">
+          <img src="assets/grid/tile_6.jpg" alt="South Asian female portrait">
+        </div>
+
+        <!-- Row 2 (Cols 1-7) -->
+        <div class="mosaic-tile tile-7">
+          <img src="assets/grid/tile_7.jpg" alt="South Asian senior woman portrait">
+        </div>
+        <div class="mosaic-tile tile-8">
+          <img src="assets/grid/tile_8.jpg" alt="South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-9">
+          <img src="assets/grid/tile_9.jpg" alt="South Asian female portrait in traditional attire">
+        </div>
+        <div class="mosaic-tile tile-10">
+          <img src="assets/grid/tile_10.jpg" alt="South Asian female portrait on balcony">
+        </div>
+        <div class="mosaic-tile tile-11">
+          <img src="assets/grid/tile_11.jpg" alt="South Asian female portrait in patterned dress">
+        </div>
+        <div class="mosaic-tile tile-12">
+          <img src="assets/grid/tile_12.jpg" alt="South Asian female portrait looking down">
+        </div>
+        <div class="mosaic-tile tile-13" title="Distressed survivor finding courage">
+          <img src="assets/grid/tile_13.jpg" alt="Woman breaking silence">
+        </div>
+
+        <!-- Row 3 (Cols 1-7) -->
+        <div class="mosaic-tile tile-14">
+          <img src="assets/grid/tile_14.jpg" alt="Young South Asian female portrait">
+        </div>
+        <div class="mosaic-tile tile-15" title="Counselor supporting survivor">
+          <img src="assets/grid/tile_15.jpg" alt="Survivor counselor providing emotional support">
+        </div>
+        <div class="mosaic-tile tile-16">
+          <img src="assets/grid/tile_16.jpg" alt="South Asian female portrait in pink">
+        </div>
+        <div class="mosaic-tile tile-17">
+          <img src="assets/grid/tile_17.jpg" alt="South Asian woman portrait">
+        </div>
+        <div class="mosaic-tile tile-18" title="Survivor reviewing evidence">
+          <img src="assets/grid/tile_18.jpg" alt="Woman reviewing digital harassment evidence">
+        </div>
+        <div class="mosaic-tile tile-19">
+          <img src="assets/grid/tile_19.jpg" alt="South Asian female portrait with bindi">
+        </div>
+        <div class="mosaic-tile tile-20">
+          <img src="assets/grid/tile_20.jpg" alt="South Asian female portrait in hijab">
+        </div>
       </div>
 
-      <div class="hero-content">
-        <h1 class="hero-headline">Break the silence.</h1>
-        <p class="hero-description" style="font-size:1.02rem; color:#475569; max-width:560px; margin-bottom:20px;">
-          A silent shield, a strong voice. Confidential personal safety tools, emergency dispatch, and trauma-informed legal support — 100% private with zero digital traces.
+      <!-- Signature Warm Rose/Burgundy Tint Overlay from Maitri.org -->
+      <div class="maitri-tint-overlay"></div>
+
+      <!-- Center Floating Motto & Mission Card -->
+      <div class="maitri-motto-card">
+        <div class="motto-tag">Free, Confidential &amp; Trauma-Informed Platform</div>
+        <p class="motto-text">
+          SafeMate is a free, confidential, trauma-informed digital safety platform that primarily helps women, youth, and families facing domestic violence, intimate image abuse, deepfakes, cyberstalking, or immediate physical distress.
         </p>
 
-        <div class="hero-actions" style="gap:12px; flex-wrap:wrap;">
-          <button type="button" class="btn-primary" id="btn-hero-tell-once" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); border-color: #6366f1; padding: 12px 22px; font-weight: 700; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.28);">
-            🌸 Tell-Once Intake (बोलें या लिखें)
+        <div class="motto-actions">
+          <button type="button" class="btn-motto-tell-once btn-open-workspace" data-target-modal="tell-once-modal" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color:#fff; border:none; padding:12px 22px; border-radius:9999px; font-weight:700; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35); display:inline-flex; align-items:center; gap:8px;">
+            <span>🌸 Tell-Once Intake</span>
           </button>
-          <button type="button" class="btn-outline" id="btn-hero-sos" style="border-color:#dc2626; color:#dc2626; font-weight:700; padding:12px 20px;">
-            🚨 Emergency SOS (112)
+          <a href="tel:112" class="btn-motto-emergency" id="hero-motto-call">
+            <span class="motto-pulse"></span>
+            <span>🚨 Emergency Help (112)</span>
+          </a>
+          <button type="button" class="btn-motto-primary btn-open-workspace" data-target-modal="modal-feature-chatbot">
+            <span>🛡️ Safety Bot</span>
           </button>
-          <a href="#features" class="btn-outline" style="padding:12px 18px;">View All Tools</a>
+          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-deepfake">
+            <span>🔍 Deepfake Scan</span>
+          </button>
+          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-safewalk">
+            <span>🚶 SafeWalk</span>
+          </button>
+        </div>
+
+        <div class="motto-trust-badges">
+          <span>🔒 100% Client-Side Privacy</span>
+          <span class="sep">•</span>
+          <span>🛡️ Zero Cloud Tracking</span>
+          <span class="sep">•</span>
+          <span>⚡ Instant Disguise (ESC)</span>
+          <span class="sep">•</span>
+          <span>📞 Real 112 Dispatch</span>
         </div>
       </div>
     </div>
