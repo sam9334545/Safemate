@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import auth,chatbot, deepfake, detect, emergency, evidence, health, model_info, safewalk
+from app.api.routes import auth, chatbot, deepfake, detect, emergency, evidence, health, model_info, safewalk, watermark
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
@@ -183,17 +183,12 @@ def create_app() -> FastAPI:
     app.include_router(evidence.router)
     app.include_router(chatbot.router)
     app.include_router(auth.router)
+    app.include_router(watermark.router)
 
-    # 5. Static Files & Chatbot UI
-    static_dir = Path(__file__).resolve().parent / "static"
-    if static_dir.exists():
-        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-
-    @app.get("/chatbot", tags=["Safety & Legal Chatbot"])
+    @app.get("/chatbot", tags=["Chatbot UI"])
     def chatbot_redirect():
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/api/v1/chatbot/ui")
-    
 
     @app.get("/", tags=["Root"])
     def root():
@@ -221,6 +216,9 @@ def create_app() -> FastAPI:
             "chatbot_message": f"{settings.API_V1_PREFIX}/chatbot/message",
             "auth_register": f"{settings.API_V1_PREFIX}/auth/register",
             "auth_login": f"{settings.API_V1_PREFIX}/auth/login",
+            "leak_tracer_embed": f"{settings.API_V1_PREFIX}/watermark/embed",
+            "leak_tracer_batch": f"{settings.API_V1_PREFIX}/watermark/batch-embed",
+            "leak_tracer_extract": f"{settings.API_V1_PREFIX}/watermark/extract",
         }
 
     return app
