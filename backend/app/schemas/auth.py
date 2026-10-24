@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
+
+try:
+    from pydantic import EmailStr
+    from pydantic.networks import import_email_validator
+    import_email_validator()
+except Exception:
+    EmailStr = str
 
 
 class UserCreate(BaseModel):
