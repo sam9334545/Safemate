@@ -22,7 +22,7 @@ except ImportError:
 
 try:
     from passlib.context import CryptContext
-    # pwd_context defined above
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 except ImportError:
     import hashlib
     class FallbackCryptContext:

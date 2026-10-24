@@ -440,7 +440,10 @@ def test_chatbot_with_jwt_auth_integration(client: TestClient):
     reg_res = client.post("/api/v1/auth/register", json=reg_payload)
     assert reg_res.status_code in (201, 400)
 
-    login_res = client.post("/api/v1/auth/login", json=reg_payload)
+    login_res = client.post(
+        "/api/v1/auth/login",
+        data={"username": reg_payload["email"], "password": reg_payload["password"]},
+    )
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
 
