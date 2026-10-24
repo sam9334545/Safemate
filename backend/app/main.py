@@ -15,6 +15,8 @@ from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
 from app.services.model_service import model_service
 from app.services.video_deepfake_service import video_deepfake_service
+from app import models
+from app.database import engine
 from app.utils.request_id import get_request_id, set_request_id
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"Starting {settings.APP_NAME} in '{settings.ENVIRONMENT}' mode.")
     logger.info(f"Configured CORS origins: {settings.CORS_ORIGINS}")
     logger.info(f"Configured max upload: {settings.MAX_UPLOAD_MB} MB")
+
+    # Initialize database tables
+    logger.info("Initializing database tables on startup...")
+    try:
+        models.Base.metadata.create_all(bind=engine)
+        logger.info("Database tables initialized successfully.")
+    except Exception as exc:
+        logger.warning(f"Database table initialization warning: {type(exc).__name__}: {exc}")
 
     # Load pretrained still-image model
     logger.info(f"Attempting model startup load for: {settings.MODEL_ID}")
@@ -62,6 +72,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def create_app() -> FastAPI:
     """Factory creating and configuring the FastAPI instance."""
+    # Ensure database tables exist
+    try:
+        models.Base.metadata.create_all(bind=engine)
+        logger.info("Database tables verified/created via create_app.")
+    except Exception as exc:
+        logger.warning(f"Database table initialization warning: {type(exc).__name__}: {exc}")
+
     app = FastAPI(
         title="AI Image Screening API",
         description=(

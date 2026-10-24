@@ -7,8 +7,11 @@ import json
 import logging
 import secrets
 from typing import Any, Dict, List
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
+from app.database import get_db
+from app.models import SafeWalkTrip
 from app.schemas.safewalk import (
     LocationUpdateRequest,
     LocationUpdateResponse,
@@ -22,32 +25,31 @@ logger = logging.getLogger(__name__)
 # Router definition with project prefix /api/v1/safewalk and tag "SafeWalk Escort"
 router = APIRouter(prefix="/api/v1/safewalk", tags=["SafeWalk Escort"])
 
-# ---------------------------------------------------------------------------
-# In-Memory Active Trip Sessions Database
-# ---------------------------------------------------------------------------
-ACTIVE_TRIPS_DB: Dict[str, Dict[str, Any]] = {}
 
-
-def generate_unique_trip_token() -> str:
-    """Generate a secure, unique temporary trip token prefixed with 'tk_'."""
+def generate_unique_trip_token(db: Session) -> str:
+    """Generate a collision-free temporary trip token prefixed with 'tk_'."""
     while True:
         token = f"tk_{secrets.token_hex(4)}"
-        if token not in ACTIVE_TRIPS_DB:
+        existing = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+        if not existing:
             return token
 
 
-def check_and_update_overdue(session: Dict[str, Any]) -> str:
+def check_and_update_overdue(trip: SafeWalkTrip, db: Session) -> str:
     """Check if trip duration has elapsed and update status to 'overdue' if necessary."""
     try:
-        expected_arrival_dt = datetime.datetime.fromisoformat(session["expected_arrival"])
+        expected_arrival_dt = datetime.datetime.fromisoformat(trip.expected_arrival)
         now = datetime.datetime.now(datetime.timezone.utc)
         if now > expected_arrival_dt:
-            session["status"] = "overdue"
-        elif session.get("status") != "overdue":
-            session["status"] = "active"
+            if trip.status != "overdue":
+                trip.status = "overdue"
+                db.commit()
+                db.refresh(trip)
+        elif trip.status != "overdue":
+            trip.status = "active"
     except Exception as exc:
-        logger.warning(f"Error parsing expected_arrival for token {session.get('trip_token')}: {exc}")
-    return session["status"]
+        logger.warning(f"Error parsing expected_arrival for token {trip.trip_token}: {exc}")
+    return trip.status
 
 
 @router.post(
@@ -58,13 +60,16 @@ def check_and_update_overdue(session: Dict[str, Any]) -> str:
     description=(
         "Initiates an active SafeWalk escort session. Generates a unique temporary trip token, "
         "computes a shareable live-tracking URL (https://aegis.app/trip/{trip_token}), calculates "
-        "expected arrival time, and logs structured session registration data."
+        "expected arrival time, and persists session to the database."
     ),
 )
-async def create_trip(payload: TripCreateRequest) -> TripCreateResponse:
-    """Generate a SafeWalk trip token and store the active tracking session."""
-    # 1. Generate unique temporary trip token
-    trip_token = generate_unique_trip_token()
+async def create_trip(
+    payload: TripCreateRequest,
+    db: Session = Depends(get_db),
+) -> TripCreateResponse:
+    """Generate a SafeWalk trip token and store the active tracking session in database."""
+    # 1. Generate unique temporary trip token verified against database
+    trip_token = generate_unique_trip_token(db)
 
     # 2. Calculate creation and expected arrival timestamps
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -75,23 +80,23 @@ async def create_trip(payload: TripCreateRequest) -> TripCreateResponse:
     # 3. Construct shareable live-tracking link
     shareable_link = f"https://aegis.app/trip/{trip_token}"
 
-    # 4. Store active trip session in temporary in-memory dictionary
-    session_data = {
-        "trip_token": trip_token,
-        "token": trip_token,
-        "user_id": payload.user_id,
-        "destination": payload.destination,
-        "latitude": None,
-        "longitude": None,
-        "duration_minutes": payload.duration_minutes,
-        "created_at": created_at,
-        "expected_arrival": expected_arrival,
-        "expected_arrival_time": expected_arrival,
-        "last_updated_at": None,
-        "shareable_link": shareable_link,
-        "status": "active",
-    }
-    ACTIVE_TRIPS_DB[trip_token] = session_data
+    # 4. Persist active trip session to PostgreSQL/SQLAlchemy database
+    new_trip = SafeWalkTrip(
+        trip_token=trip_token,
+        user_id=payload.user_id,
+        destination=payload.destination,
+        duration_minutes=payload.duration_minutes,
+        latitude=None,
+        longitude=None,
+        created_at=created_at,
+        expected_arrival=expected_arrival,
+        last_updated_at=None,
+        shareable_link=shareable_link,
+        status="active",
+    )
+    db.add(new_trip)
+    db.commit()
+    db.refresh(new_trip)
 
     # 5. Log structured JSON confirmation
     log_payload = {
@@ -127,26 +132,43 @@ async def create_trip(payload: TripCreateRequest) -> TripCreateResponse:
     status_code=status.HTTP_200_OK,
     summary="Retrieve SafeWalk Live Trip Details by Token",
     description=(
-        "Fetches live escort session information using a shareable trip token. "
+        "Fetches live escort session information from database using a shareable trip token. "
         "Returns traveler user_id, destination, current latitude, current longitude, "
         "status (active/overdue), and expected arrival. "
         "Raises 404 if the token is invalid or expired."
     ),
 )
-async def get_trip(token: str) -> TripSessionDetail:
-    """Retrieve session details for an active SafeWalk trip by token."""
-    session = ACTIVE_TRIPS_DB.get(token)
-    if not session:
-        logger.warning(f"Trip token '{token}' not found or session expired.")
+async def get_trip(
+    token: str,
+    db: Session = Depends(get_db),
+) -> TripSessionDetail:
+    """Retrieve session details for an active SafeWalk trip from database."""
+    trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == token).first()
+    if not trip:
+        logger.warning(f"Trip token '{token}' not found or session expired in database.")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Trip token not found or expired",
         )
 
-    # Check if trip time has exceeded the expected duration
-    check_and_update_overdue(session)
+    # Check if trip time has exceeded expected duration
+    check_and_update_overdue(trip, db)
 
-    return TripSessionDetail(**session)
+    return TripSessionDetail(
+        trip_token=trip.trip_token,
+        token=trip.trip_token,
+        user_id=trip.user_id,
+        destination=trip.destination,
+        latitude=trip.latitude,
+        longitude=trip.longitude,
+        status=trip.status,
+        expected_arrival=trip.expected_arrival,
+        expected_arrival_time=trip.expected_arrival,
+        duration_minutes=trip.duration_minutes,
+        created_at=trip.created_at,
+        last_updated_at=trip.last_updated_at,
+        shareable_link=trip.shareable_link,
+    )
 
 
 @router.post(
@@ -155,15 +177,18 @@ async def get_trip(token: str) -> TripSessionDetail:
     status_code=status.HTTP_200_OK,
     summary="Update Live GPS Location During SafeWalk Escort",
     description=(
-        "Updates device latitude and longitude coordinates for an active trip session in memory. "
+        "Updates device latitude and longitude coordinates for an active trip session in the database. "
         "Checks if trip time has exceeded expected arrival and flags status as 'overdue' if necessary. "
         "Raises 404 if the token is invalid or expired."
     ),
 )
-async def update_location(payload: LocationUpdateRequest) -> LocationUpdateResponse:
-    """Update live GPS coordinates for an active trip token."""
-    session = ACTIVE_TRIPS_DB.get(payload.token)
-    if not session:
+async def update_location(
+    payload: LocationUpdateRequest,
+    db: Session = Depends(get_db),
+) -> LocationUpdateResponse:
+    """Update live GPS coordinates for an active trip token in database."""
+    trip = db.query(SafeWalkTrip).filter(SafeWalkTrip.trip_token == payload.token).first()
+    if not trip:
         logger.warning(f"Attempted location update for unknown/expired token: '{payload.token}'")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -173,13 +198,16 @@ async def update_location(payload: LocationUpdateRequest) -> LocationUpdateRespo
     now = datetime.datetime.now(datetime.timezone.utc)
     now_iso = now.isoformat()
 
-    # Update in-memory coordinates
-    session["latitude"] = payload.latitude
-    session["longitude"] = payload.longitude
-    session["last_updated_at"] = now_iso
+    # Update database coordinates
+    trip.latitude = payload.latitude
+    trip.longitude = payload.longitude
+    trip.last_updated_at = now_iso
 
-    # Check if trip time has exceeded expected duration
-    current_status = check_and_update_overdue(session)
+    # Check and update overdue status
+    current_status = check_and_update_overdue(trip, db)
+
+    db.commit()
+    db.refresh(trip)
 
     # Structured JSON log
     log_payload = {
@@ -199,8 +227,22 @@ async def update_location(payload: LocationUpdateRequest) -> LocationUpdateRespo
         latitude=payload.latitude,
         longitude=payload.longitude,
         trip_status=current_status,
-        expected_arrival=session["expected_arrival"],
-        trip=TripSessionDetail(**session),
+        expected_arrival=trip.expected_arrival,
+        trip=TripSessionDetail(
+            trip_token=trip.trip_token,
+            token=trip.trip_token,
+            user_id=trip.user_id,
+            destination=trip.destination,
+            latitude=trip.latitude,
+            longitude=trip.longitude,
+            status=trip.status,
+            expected_arrival=trip.expected_arrival,
+            expected_arrival_time=trip.expected_arrival,
+            duration_minutes=trip.duration_minutes,
+            created_at=trip.created_at,
+            last_updated_at=trip.last_updated_at,
+            shareable_link=trip.shareable_link,
+        ),
     )
 
 
@@ -208,10 +250,28 @@ async def update_location(payload: LocationUpdateRequest) -> LocationUpdateRespo
     "/active-trips",
     response_model=List[TripSessionDetail],
     summary="List All Active SafeWalk Escort Sessions",
-    description="Inspection endpoint returning all currently registered in-memory trip sessions.",
+    description="Inspection endpoint returning all currently registered database trip sessions.",
 )
-async def list_active_trips() -> List[TripSessionDetail]:
-    """List all registered active SafeWalk sessions."""
-    for session in ACTIVE_TRIPS_DB.values():
-        check_and_update_overdue(session)
-    return [TripSessionDetail(**session) for session in ACTIVE_TRIPS_DB.values()]
+async def list_active_trips(db: Session = Depends(get_db)) -> List[TripSessionDetail]:
+    """List all registered active SafeWalk sessions from database."""
+    trips = db.query(SafeWalkTrip).all()
+    for trip in trips:
+        check_and_update_overdue(trip, db)
+    return [
+        TripSessionDetail(
+            trip_token=trip.trip_token,
+            token=trip.trip_token,
+            user_id=trip.user_id,
+            destination=trip.destination,
+            latitude=trip.latitude,
+            longitude=trip.longitude,
+            status=trip.status,
+            expected_arrival=trip.expected_arrival,
+            expected_arrival_time=trip.expected_arrival,
+            duration_minutes=trip.duration_minutes,
+            created_at=trip.created_at,
+            last_updated_at=trip.last_updated_at,
+            shareable_link=trip.shareable_link,
+        )
+        for trip in trips
+    ]
