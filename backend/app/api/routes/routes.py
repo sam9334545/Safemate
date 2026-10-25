@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import datetime
 import logging
 from typing import List, Optional
@@ -133,7 +134,18 @@ async def plan_and_compare_routes(request: RoutePlanRequest) -> RoutePlanRespons
             detail="No navigable route found between the specified origin and destination.",
         )
 
-    # 4. Process each route alternative
+    # 4. Process each route alternative concurrently
+    buffer_dist = 350.0 if request.travel_mode == TravelMode.walking else 500.0
+    places_tasks = [
+        places_service.get_nearby_places_for_route(
+            polyline=r["geometry"],
+            departure_time=departure_eval,
+            buffer_meters=buffer_dist,
+        )
+        for r in raw_routes
+    ]
+    all_places = await asyncio.gather(*places_tasks, return_exceptions=True)
+
     evaluated_alternatives: List[RouteAlternative] = []
 
     for idx, r_data in enumerate(raw_routes):
@@ -142,12 +154,8 @@ async def plan_and_compare_routes(request: RoutePlanRequest) -> RoutePlanRespons
         dur_s = r_data["duration_seconds"]
         road_sum = r_data["road_summary"]
 
-        # Fetch nearby establishments along this specific route geometry
-        places = await places_service.get_nearby_places_for_route(
-            polyline=geom,
-            departure_time=departure_eval,
-            buffer_meters=350.0 if request.travel_mode == TravelMode.walking else 500.0,
-        )
+        places_res = all_places[idx]
+        places = places_res if isinstance(places_res, list) else []
 
         # Compute deterministic Night Activity Score
         score_breakdown = night_activity_service.evaluate_route(

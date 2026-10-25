@@ -120,7 +120,7 @@ class RoutingService:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=4.5) as client:
+            async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.get(url, params=params, headers={"User-Agent": "SafeMate-WomenSafetyApp/1.0"})
                 if resp.status_code == 200:
                     data = resp.json()

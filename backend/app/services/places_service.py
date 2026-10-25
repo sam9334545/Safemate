@@ -218,7 +218,7 @@ class PlacesService:
         if not raw_elements:
             # Overpass QL query bounded to route corridor
             query = f"""
-            [out:json][timeout:6];
+            [out:json][timeout:3];
             (
               node["amenity"="pharmacy"]({bbox_str});
               node["amenity"="police"]({bbox_str});
@@ -233,7 +233,7 @@ class PlacesService:
             out body 60;
             """
             try:
-                async with httpx.AsyncClient(timeout=5.5) as client:
+                async with httpx.AsyncClient(timeout=3.0) as client:
                     resp = await client.post(
                         self.overpass_url,
                         data={"data": query},

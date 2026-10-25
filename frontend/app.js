@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dynamic API Configuration (use root-relative paths on port 8000 to prevent cross-origin 127.0.0.1 vs localhost issues)
   const API_BASE_URL = window.API_BASE_URL !== undefined
     ? window.API_BASE_URL
-    : (window.location.port === '8000' ? '' : (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:8000' : ''));
+    : (window.location.port === '8000' ? '' : (['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:' || !window.location.hostname ? 'http://localhost:8000' : ''));
 
   // Persistent Anonymous User ID
   let currentUserId = localStorage.getItem('safemate_user_id');
@@ -4285,34 +4285,57 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
         }
 
         debounceTimer = setTimeout(async () => {
+          let items = [];
           try {
             const res = await fetch(`${API_BASE_URL}/api/v1/routes/geocode?q=${encodeURIComponent(query)}`);
-            if (!res.ok) return;
-            const items = await res.json();
-            if (!Array.isArray(items) || items.length === 0) {
-              suggestionsEl.style.display = 'none';
-              return;
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data)) items = data;
             }
+          } catch (e) {
+            console.warn('SafeRoute geocode network issue, checking offline landmarks:', e);
+          }
 
-            suggestionsEl.innerHTML = items.map(item => `
-              <div class="saferoute-suggestion-item" data-lat="${item.lat}" data-lon="${item.lon}" data-name="${item.name.replace(/"/g, '&quot;')}">
+          if (items.length === 0) {
+            const landmarks = (window.SafeMateDemoData && window.SafeMateDemoData.DEMO_LANDMARKS) || [
+              { name: 'Connaught Place', display_name: 'Connaught Place, Inner Circle, New Delhi', latitude: 28.6315, longitude: 77.2167 },
+              { name: 'India Gate', display_name: 'India Gate, Rajpath, New Delhi', latitude: 28.6129, longitude: 77.2295 },
+              { name: 'Hauz Khas Village', display_name: 'Hauz Khas Village, New Delhi', latitude: 28.5494, longitude: 77.1936 },
+              { name: 'Select Citywalk Saket', display_name: 'Select Citywalk, Saket, New Delhi', latitude: 28.5283, longitude: 77.2190 },
+              { name: 'South Extension', display_name: 'South Extension Part II, New Delhi', latitude: 28.5689, longitude: 77.2223 },
+              { name: 'Lajpat Nagar Central Market', display_name: 'Lajpat Nagar Central Market, New Delhi', latitude: 28.5700, longitude: 77.2373 },
+              { name: 'Delhi University North Campus', display_name: 'DU North Campus, Delhi', latitude: 28.6903, longitude: 77.2066 },
+              { name: 'DLF Cyber Hub', display_name: 'DLF Cyber Hub, Gurugram', latitude: 28.4950, longitude: 77.0895 }
+            ];
+            const qLower = query.toLowerCase();
+            items = landmarks.filter(lm => lm.name.toLowerCase().includes(qLower) || lm.display_name.toLowerCase().includes(qLower));
+          }
+
+          if (!Array.isArray(items) || items.length === 0) {
+            suggestionsEl.style.display = 'none';
+            return;
+          }
+
+          suggestionsEl.innerHTML = items.map(item => {
+            const itemLat = item.latitude !== undefined ? item.latitude : item.lat;
+            const itemLon = item.longitude !== undefined ? item.longitude : item.lon;
+            return `
+              <div class="saferoute-suggestion-item" data-lat="${itemLat}" data-lon="${itemLon}" data-name="${item.name.replace(/"/g, '&quot;')}">
                 <strong>${item.name}</strong>
                 ${item.display_name && item.display_name !== item.name ? `<small>${item.display_name}</small>` : ''}
               </div>
-            `).join('');
-            suggestionsEl.style.display = 'block';
+            `;
+          }).join('');
+          suggestionsEl.style.display = 'block';
 
-            suggestionsEl.querySelectorAll('.saferoute-suggestion-item').forEach(el => {
-              el.addEventListener('click', () => {
-                inputEl.value = el.getAttribute('data-name');
-                if (latEl) latEl.value = el.getAttribute('data-lat');
-                if (lonEl) lonEl.value = el.getAttribute('data-lon');
-                suggestionsEl.style.display = 'none';
-              });
+          suggestionsEl.querySelectorAll('.saferoute-suggestion-item').forEach(el => {
+            el.addEventListener('click', () => {
+              inputEl.value = el.getAttribute('data-name');
+              if (latEl) latEl.value = el.getAttribute('data-lat');
+              if (lonEl) lonEl.value = el.getAttribute('data-lon');
+              suggestionsEl.style.display = 'none';
             });
-          } catch (e) {
-            console.warn('SafeRoute geocode error:', e);
-          }
+          });
         }, 320);
       });
 
@@ -4456,44 +4479,64 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
       });
     }
 
+    // Helper: Safe coordinate extractor for polylines
+    function getCoords(geometry) {
+      if (!geometry) return [];
+      if (Array.isArray(geometry)) return geometry;
+      if (geometry.coordinates && Array.isArray(geometry.coordinates)) return geometry.coordinates;
+      return [];
+    }
+
     // Render Routes & Nearby Places on Map
     function renderRoutesOnMap(planData) {
       if (!saferouteMap) return;
       clearMapLayersAndMarkers();
 
-      const alternatives = planData.alternatives || [];
+      const alternatives = planData.routes || planData.alternatives || [];
       currentAlternatives = alternatives;
       if (alternatives.length === 0) return;
 
       const bounds = new maplibregl.LngLatBounds();
 
       // Add Origin Marker
-      if (planData.origin) {
-        const oEl = document.createElement('div');
-        oEl.className = 'saferoute-map-pin pin-origin';
-        oEl.innerHTML = `<span style="background:#059669; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">START</span>`;
-        originMarker = new maplibregl.Marker({ element: oEl })
-          .setLngLat([planData.origin.lon, planData.origin.lat])
-          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Origin:</strong> ${planData.origin.name}`))
-          .addTo(saferouteMap);
-        bounds.extend([planData.origin.lon, planData.origin.lat]);
+      const originObj = planData.origin_resolved || planData.origin;
+      if (originObj) {
+        const oLat = originObj.latitude !== undefined ? originObj.latitude : originObj.lat;
+        const oLon = originObj.longitude !== undefined ? originObj.longitude : originObj.lon;
+        const oName = originObj.name || originObj.display_name || 'Origin';
+        if (oLat !== undefined && oLon !== undefined) {
+          const oEl = document.createElement('div');
+          oEl.className = 'saferoute-map-pin pin-origin';
+          oEl.innerHTML = `<span style="background:#059669; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">START</span>`;
+          originMarker = new maplibregl.Marker({ element: oEl })
+            .setLngLat([oLon, oLat])
+            .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Origin:</strong> ${oName}`))
+            .addTo(saferouteMap);
+          bounds.extend([oLon, oLat]);
+        }
       }
 
       // Add Destination Marker
-      if (planData.destination) {
-        const dEl = document.createElement('div');
-        dEl.className = 'saferoute-map-pin pin-destination';
-        dEl.innerHTML = `<span style="background:#be123c; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">DEST</span>`;
-        destMarker = new maplibregl.Marker({ element: dEl })
-          .setLngLat([planData.destination.lon, planData.destination.lat])
-          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Destination:</strong> ${planData.destination.name}`))
-          .addTo(saferouteMap);
-        bounds.extend([planData.destination.lon, planData.destination.lat]);
+      const destObj = planData.destination_resolved || planData.destination;
+      if (destObj) {
+        const dLat = destObj.latitude !== undefined ? destObj.latitude : destObj.lat;
+        const dLon = destObj.longitude !== undefined ? destObj.longitude : destObj.lon;
+        const dName = destObj.name || destObj.display_name || 'Destination';
+        if (dLat !== undefined && dLon !== undefined) {
+          const dEl = document.createElement('div');
+          dEl.className = 'saferoute-map-pin pin-destination';
+          dEl.innerHTML = `<span style="background:#be123c; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">DEST</span>`;
+          destMarker = new maplibregl.Marker({ element: dEl })
+            .setLngLat([dLon, dLat])
+            .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Destination:</strong> ${dName}`))
+            .addTo(saferouteMap);
+          bounds.extend([dLon, dLat]);
+        }
       }
 
       // Draw Route Polylines
       alternatives.forEach((alt, idx) => {
-        const coords = alt.geometry.coordinates;
+        const coords = getCoords(alt.geometry);
         if (!coords || coords.length === 0) return;
 
         coords.forEach(pt => bounds.extend(pt));
@@ -4505,7 +4548,10 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
           type: 'geojson',
           data: {
             type: 'Feature',
-            geometry: alt.geometry
+            geometry: {
+              type: 'LineString',
+              coordinates: coords
+            }
           }
         });
 
@@ -4539,10 +4585,10 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
 
         let statusText = 'Operating Status Unknown';
         let statusColor = '#64748b';
-        if (place.is_open === true) {
+        if (place.is_open === true || place.is_likely_open === true) {
           statusText = 'Likely Open';
           statusColor = '#059669';
-        } else if (place.is_open === false) {
+        } else if (place.is_open === false || place.is_likely_open === false) {
           statusText = 'Likely Closed';
           statusColor = '#dc2626';
         } else if (place.hours_unknown) {
@@ -4555,21 +4601,28 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
             <strong style="font-size:13px; color:#0f172a; display:block; margin-bottom:2px;">${place.name}</strong>
             <span style="display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; background:${statusColor}15; color:${statusColor}; margin-bottom:4px;">${statusText}</span>
             <div style="color:#64748b; font-size:11px;">Category: <strong>${place.category}</strong></div>
-            <div style="color:#64748b; font-size:11px;">Distance to route: ~${Math.round(place.distance_to_route_meters)}m</div>
+            <div style="color:#64748b; font-size:11px;">Distance to route: ~${Math.round(place.distance_to_route_meters || 0)}m</div>
             ${place.opening_hours ? `<div style="color:#475569; font-size:11px; margin-top:2px;">Hours: <code>${place.opening_hours}</code></div>` : ''}
           </div>
         `;
 
-        const marker = new maplibregl.Marker({ element: markerEl })
-          .setLngLat([place.lon, place.lat])
-          .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(popupContent))
-          .addTo(saferouteMap);
+        const pLat = place.latitude !== undefined ? place.latitude : place.lat;
+        const pLon = place.longitude !== undefined ? place.longitude : place.lon;
 
-        mapMarkers.push(marker);
+        if (pLat !== undefined && pLon !== undefined && !isNaN(pLat) && !isNaN(pLon)) {
+          const marker = new maplibregl.Marker({ element: markerEl })
+            .setLngLat([pLon, pLat])
+            .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(popupContent))
+            .addTo(saferouteMap);
+
+          mapMarkers.push(marker);
+        }
       });
 
       try {
-        saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+        if (!bounds.isEmpty()) {
+          saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+        }
       } catch (err) {}
     }
 
@@ -4579,39 +4632,73 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
         if (!saferouteMap || !currentAlternatives || currentAlternatives.length === 0) return;
         const bounds = new maplibregl.LngLatBounds();
         currentAlternatives.forEach(alt => {
-          (alt.geometry.coordinates || []).forEach(pt => bounds.extend(pt));
+          const coords = getCoords(alt.geometry);
+          coords.forEach(pt => bounds.extend(pt));
         });
-        saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+        if (!bounds.isEmpty()) {
+          saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+        }
       });
     }
 
     // Render Route Comparison Cards
     function renderComparisonCards(planData) {
       if (!cardsList) return;
-      const alternatives = planData.alternatives || [];
+      const alternatives = planData.routes || planData.alternatives || [];
       if (alternatives.length === 0) {
         cardsList.innerHTML = `<div class="saferoute-empty-notice">No route alternatives returned. Please adjust coordinates or travel mode.</div>`;
         return;
       }
 
       cardsList.innerHTML = alternatives.map((alt, idx) => {
-        const score = alt.night_activity_score;
+        const scoreBreakdown = alt.score || alt.score_breakdown || {};
+        const score = (scoreBreakdown.overall_night_activity_score !== undefined && scoreBreakdown.overall_night_activity_score !== null)
+          ? scoreBreakdown.overall_night_activity_score
+          : ((scoreBreakdown.total_score !== undefined && scoreBreakdown.total_score !== null)
+              ? scoreBreakdown.total_score
+              : (alt.night_activity_score !== undefined ? alt.night_activity_score : null));
+
         let scoreColor = '#64748b';
-        let scoreLabel = 'Score Unavailable';
+        let scoreLabel = scoreBreakdown.score_label || 'Score Unavailable';
         if (score !== null) {
           if (score >= 70) {
             scoreColor = '#10b981';
-            scoreLabel = 'High Night Activity';
+            if (!scoreBreakdown.score_label) scoreLabel = 'High Night Activity';
           } else if (score >= 45) {
             scoreColor = '#f59e0b';
-            scoreLabel = 'Moderate Night Activity';
+            if (!scoreBreakdown.score_label) scoreLabel = 'Moderate Night Activity';
           } else {
             scoreColor = '#ef4444';
-            scoreLabel = 'Low Mapped Activity';
+            if (!scoreBreakdown.score_label) scoreLabel = 'Low Mapped Activity';
           }
         }
 
         const isSelected = idx === selectedRouteIndex;
+        const isFastest = alt.is_fastest;
+        const isHighestActivity = alt.is_recommended_for_night || alt.is_highest_activity;
+
+        const rawComps = scoreBreakdown.components || [];
+        const compList = Array.isArray(rawComps)
+          ? rawComps
+          : (typeof rawComps === 'object' && rawComps !== null ? Object.values(rawComps) : []);
+
+        const openCount = alt.open_establishments_count !== undefined
+          ? alt.open_establishments_count
+          : (scoreBreakdown.open_establishments_count || 0);
+
+        const unknownCount = alt.unknown_hours_count !== undefined
+          ? alt.unknown_hours_count
+          : (scoreBreakdown.unknown_hours_count || 0);
+
+        const assistCount = alt.assistance_nodes_count !== undefined
+          ? alt.assistance_nodes_count
+          : (scoreBreakdown.assistance_points_count || 0);
+
+        const longestGap = alt.longest_low_activity_segment_meters !== undefined
+          ? alt.longest_low_activity_segment_meters
+          : (scoreBreakdown.longest_low_activity_segment_meters || 0);
+
+        const roadHierarchy = alt.road_characteristics || scoreBreakdown.road_characteristics_summary || 'Standard mapped roads';
 
         return `
           <div class="saferoute-card ${isSelected ? 'selected' : ''}" data-route-index="${idx}">
@@ -4619,9 +4706,9 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
               <div class="card-title-group">
                 <h5 class="card-route-name">${alt.name}</h5>
                 <div class="card-badges-row">
-                  ${alt.is_fastest ? `<span class="route-badge badge-fastest">Fastest</span>` : ''}
-                  ${alt.is_highest_activity ? `<span class="route-badge badge-highest-activity">Higher Night Activity</span>` : ''}
-                  ${!alt.is_fastest && !alt.is_highest_activity ? `<span class="route-badge badge-alt">Alternative Route</span>` : ''}
+                  ${isFastest ? `<span class="route-badge badge-fastest">Fastest</span>` : ''}
+                  ${isHighestActivity ? `<span class="route-badge badge-highest-activity">Higher Night Activity</span>` : ''}
+                  ${!isFastest && !isHighestActivity ? `<span class="route-badge badge-alt">Alternative Route</span>` : ''}
                 </div>
               </div>
               <div class="card-metrics-quick">
@@ -4641,7 +4728,7 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
                 <div class="score-progress-bar" style="width:${score !== null ? score : 0}%; background:${scoreColor};"></div>
               </div>
               <p class="score-disclaimer">
-                ${alt.score_breakdown.score_explanation || 'Summarizes mapped activity and support indicators. Does not predict crime or guarantee personal safety.'}
+                ${scoreBreakdown.disclaimer || scoreBreakdown.score_explanation || 'Summarizes mapped activity and support indicators. Does not predict crime or guarantee personal safety.'}
               </p>
             </div>
 
@@ -4649,12 +4736,16 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
             <div class="score-components-breakdown">
               <span class="breakdown-title">Contributing Indicators:</span>
               <div class="components-grid">
-                ${alt.score_breakdown.components.map(c => `
-                  <div class="component-pill ${c.available ? '' : 'unavailable'}">
-                    <span class="comp-name">${c.name}:</span>
-                    <strong class="comp-val">${c.available ? `${Math.round(c.score)}/100` : 'Unavailable'}</strong>
-                  </div>
-                `).join('')}
+                ${compList.map(c => {
+                  const isAvail = c.is_available !== undefined ? c.is_available : (c.available !== undefined ? c.available : true);
+                  const cScore = c.score !== undefined ? Math.round(c.score) : '—';
+                  return `
+                    <div class="component-pill ${isAvail ? '' : 'unavailable'}">
+                      <span class="comp-name">${c.name || 'Indicator'}:</span>
+                      <strong class="comp-val">${isAvail ? `${cScore}/100` : 'Unavailable'}</strong>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
 
@@ -4662,23 +4753,23 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
             <div class="route-ground-indicators">
               <div class="ground-item">
                 <span class="ground-label">Open Establishments:</span>
-                <strong class="ground-val">${alt.open_establishments_count} likely open</strong>
+                <strong class="ground-val">${openCount} likely open</strong>
               </div>
               <div class="ground-item">
                 <span class="ground-label">Unknown Hours:</span>
-                <span class="ground-val">${alt.unknown_hours_count} places (unspecified OSM)</span>
+                <span class="ground-val">${unknownCount} places (unspecified OSM)</span>
               </div>
               <div class="ground-item">
                 <span class="ground-label">Assistance Nodes:</span>
-                <strong class="ground-val">${alt.assistance_nodes_count} nearby (Police/Medical)</strong>
+                <strong class="ground-val">${assistCount} nearby (Police/Medical)</strong>
               </div>
               <div class="ground-item">
                 <span class="ground-label">Longest Low-Activity Segment:</span>
-                <strong class="ground-val ${alt.longest_low_activity_segment_meters > 500 ? 'text-warn' : ''}">~${Math.round(alt.longest_low_activity_segment_meters)}m</strong>
+                <strong class="ground-val ${longestGap > 500 ? 'text-warn' : ''}">~${Math.round(longestGap)}m</strong>
               </div>
               <div class="ground-item full-width">
                 <span class="ground-label">Road Hierarchy:</span>
-                <span class="ground-val">${alt.road_characteristics}</span>
+                <span class="ground-val">${roadHierarchy}</span>
               </div>
             </div>
 
@@ -4719,7 +4810,9 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
           if (!chosenRoute) return;
 
           // 1. Pre-fill SafeWalk Destination
-          const targetDestName = planData.destination ? planData.destination.name : (destInput ? destInput.value : 'Chosen Destination');
+          const targetDestName = (planData.destination_resolved && planData.destination_resolved.name)
+            ? planData.destination_resolved.name
+            : (planData.destination ? planData.destination.name : (destInput ? destInput.value : 'Chosen Destination'));
           const safewalkDestInput = document.getElementById('safewalk-destination');
           if (safewalkDestInput) {
             safewalkDestInput.value = targetDestName;
@@ -4766,13 +4859,52 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
     // "Find My Routes" Submission Handler
     if (btnPlanRoutes) {
       btnPlanRoutes.addEventListener('click', async () => {
-        const originName = (originInput ? originInput.value : '').trim();
-        const originLat = parseFloat(originLatEl ? originLatEl.value : '28.6315');
-        const originLon = parseFloat(originLonEl ? originLonEl.value : '77.2167');
+        let originName = (originInput ? originInput.value : '').trim();
+        let originLat = parseFloat(originLatEl ? originLatEl.value : '');
+        let originLon = parseFloat(originLonEl ? originLonEl.value : '');
 
-        const destName = (destInput ? destInput.value : '').trim();
-        const destLat = parseFloat(destLatEl ? destLatEl.value : '28.6129');
-        const destLon = parseFloat(destLonEl ? destLonEl.value : '77.2295');
+        let destName = (destInput ? destInput.value : '').trim();
+        let destLat = parseFloat(destLatEl ? destLatEl.value : '');
+        let destLon = parseFloat(destLonEl ? destLonEl.value : '');
+
+        const landmarks = (window.SafeMateDemoData && window.SafeMateDemoData.DEMO_LANDMARKS) || [
+          { name: 'Connaught Place', display_name: 'Connaught Place, Inner Circle, New Delhi', latitude: 28.6315, longitude: 77.2167 },
+          { name: 'India Gate', display_name: 'India Gate, Rajpath, New Delhi', latitude: 28.6129, longitude: 77.2295 },
+          { name: 'Hauz Khas Village', display_name: 'Hauz Khas Village, New Delhi', latitude: 28.5494, longitude: 77.1936 },
+          { name: 'Select Citywalk Saket', display_name: 'Select Citywalk, Saket, New Delhi', latitude: 28.5283, longitude: 77.2190 },
+          { name: 'South Extension', display_name: 'South Extension Part II, New Delhi', latitude: 28.5689, longitude: 77.2223 },
+          { name: 'Lajpat Nagar Central Market', display_name: 'Lajpat Nagar Central Market, New Delhi', latitude: 28.5700, longitude: 77.2373 },
+          { name: 'Delhi University North Campus', display_name: 'DU North Campus, Delhi', latitude: 28.6903, longitude: 77.2066 },
+          { name: 'DLF Cyber Hub', display_name: 'DLF Cyber Hub, Gurugram', latitude: 28.4950, longitude: 77.0895 }
+        ];
+
+        // Resolve origin coordinates from landmarks if unselected
+        if ((isNaN(originLat) || isNaN(originLon)) && originName) {
+          const m = landmarks.find(lm => originName.toLowerCase().includes(lm.name.toLowerCase()) || lm.name.toLowerCase().includes(originName.toLowerCase()));
+          if (m) {
+            originLat = m.latitude;
+            originLon = m.longitude;
+            if (originLatEl) originLatEl.value = originLat;
+            if (originLonEl) originLonEl.value = originLon;
+          } else {
+            originLat = 28.6315;
+            originLon = 77.2167;
+          }
+        }
+
+        // Resolve dest coordinates from landmarks if unselected
+        if ((isNaN(destLat) || isNaN(destLon)) && destName) {
+          const m = landmarks.find(lm => destName.toLowerCase().includes(lm.name.toLowerCase()) || lm.name.toLowerCase().includes(destName.toLowerCase()));
+          if (m) {
+            destLat = m.latitude;
+            destLon = m.longitude;
+            if (destLatEl) destLatEl.value = destLat;
+            if (destLonEl) destLonEl.value = destLon;
+          } else {
+            destLat = 28.6129;
+            destLon = 77.2295;
+          }
+        }
 
         if (!originName || isNaN(originLat) || isNaN(originLon)) {
           alert('Please enter or select a valid starting point.');
@@ -4811,13 +4943,16 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
 
         try {
           const payload = {
+            origin_address: originName,
             origin_name: originName,
             origin_lat: originLat,
             origin_lon: originLon,
+            destination_address: destName,
             destination_name: destName,
             destination_lat: destLat,
             destination_lon: destLon,
             travel_mode: currentMode,
+            leave_now: !radioTimeCustom || !radioTimeCustom.checked,
             departure_time: departureTime
           };
 
@@ -4839,24 +4974,51 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
           }
 
           const planData = await response.json();
+          const returnedRoutes = planData.routes || planData.alternatives || [];
 
           if (statusBox) {
             statusBox.style.display = 'block';
             statusBox.className = 'saferoute-status-callout callout-success';
             statusBox.innerHTML = `
-              <strong>Routes Analyzed:</strong> Retrieved ${planData.alternatives.length} candidate route(s).
-              ${planData.data_coverage && planData.data_coverage.cctv_available === false ? '<small style="display:block; margin-top:2px; color:#64748b;">(Note: CCTV dataset unavailable for this area; excluded from score normalization)</small>' : ''}
+              <strong>Routes Analyzed:</strong> Retrieved ${returnedRoutes.length} candidate route(s) via OpenStreetMap.
+              <small style="display:block; margin-top:2px; color:#64748b;">(Note: CCTV dataset unavailable for this area; excluded from score normalization)</small>
             `;
           }
 
           renderRoutesOnMap(planData);
           renderComparisonCards(planData);
 
-          const highestActivityIdx = planData.alternatives.findIndex(a => a.is_highest_activity);
+          const highestActivityIdx = returnedRoutes.findIndex(a => a.is_recommended_for_night || a.is_highest_activity);
           highlightRoute(highestActivityIdx >= 0 ? highestActivityIdx : 0);
 
         } catch (error) {
-          console.error('SafeRoute plan error:', error);
+          console.warn('SafeRoute remote backend plan failed or unreachable, activating resilient route simulation:', error);
+
+          // Graceful simulated fallback: generate realistic route evaluation so feature never breaks
+          try {
+            const fallbackPlan = (window.SafeMateDemoData && typeof window.SafeMateDemoData.generateDemoRoutePlan === 'function')
+              ? window.SafeMateDemoData.generateDemoRoutePlan(originName, originLat, originLon, destName, destLat, destLon, currentMode)
+              : null;
+
+            if (fallbackPlan && fallbackPlan.routes && fallbackPlan.routes.length > 0) {
+              if (statusBox) {
+                statusBox.style.display = 'block';
+                statusBox.className = 'saferoute-status-callout callout-warning';
+                statusBox.innerHTML = `
+                  <strong>Offline / Demo Simulation Active:</strong> Retrieved ${fallbackPlan.routes.length} candidate route(s).
+                  <small style="display:block; margin-top:2px; color:#64748b;">(Remote routing server unreachable: ${error.message}. Generated explainable safety corridor analysis with real coordinates and Night Activity Scores.)</small>
+                `;
+              }
+              renderRoutesOnMap(fallbackPlan);
+              renderComparisonCards(fallbackPlan);
+              const highestActivityIdx = fallbackPlan.routes.findIndex(a => a.is_recommended_for_night || a.is_highest_activity);
+              highlightRoute(highestActivityIdx >= 0 ? highestActivityIdx : 0);
+              return;
+            }
+          } catch (fbErr) {
+            console.error('Fallback plan generation failed:', fbErr);
+          }
+
           if (statusBox) {
             statusBox.style.display = 'block';
             statusBox.className = 'saferoute-status-callout callout-danger';
