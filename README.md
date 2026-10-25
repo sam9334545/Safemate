@@ -1,158 +1,328 @@
-# Safemate — Women's Safety Platform
+# SafeMate — A Silent Shield, A Strong Voice
+### Digital Safety, Forensic Protection, and Statutory Legal Sanctuary for Survivors
 
-Safemate is a modern, privacy-first safety platform engineered to protect women from digital harassment, non-consensual media manipulation, and synthetic content threats. Safemate equips individuals and support communities with transparent automated screening tools to evaluate suspicious media safely and confidentially.
+SafeMate is a trauma-informed, privacy-first digital safety platform engineered to protect women, youth, and vulnerable individuals facing domestic violence, intimate image abuse, weaponized deepfakes, online blackmail, and physical danger.
+
+SafeMate empowers survivors with automated screening, stealth disguises, forensic leak tracing, and a **Tell-Once** sanctuary that compiles police, legal, and counseling briefs in a single session without repeated re-traumatization.
 
 ---
 
-## Media Safety Screening Overview
+## Visual Walkthrough & System Capabilities
 
-Safemate provides two complementary, strictly isolated media screening pipelines:
+### 1. Homepage & Trauma-Informed Survivor Hub
+The landing interface greets users with an authentic, calming aesthetic, quick-action emergency tiles, a stealth panic switch, and three flexible access pathways (**Try Demo Mode**, **Guest Mode**, **Sign In**).
 
-```
-                                  [ Uploaded Media ]
-                                           │
-                    ┌──────────────────────┴──────────────────────┐
-                    ▼                                             ▼
-          [ Still Image Upload ]                        [ Video File Upload ]
-                    │                                             │
-      POST /api/v1/detect                          POST /api/v1/deepfake/detect
-                    │                                             │
-      InMemory Processing (BytesIO)                Ephemeral Temp File (Purged in finally)
-                    │                                             │
-      Swin Transformer Classifier                  Frame Extraction (cv2) + YOLOv8n-Face
-                    │                                             │
-       umm-maybe/AI-image-detector                 MS-EffGCViT-B0 Classifier (34.8 MB)
-                    │                                             │
-                    ▼                                             ▼
-       AI-Generation Probability                   Confidence-Aggregated Deepfake Score
-       + Contextual Disclaimers                    + Neutral Classification & Disclaimers
-```
+![SafeMate Homepage Hero Interface](docs/screenshots/01_hero_homepage.png)
 
-### 1. Safemate Still-Image Screening (`POST /api/v1/detect`)
-Screens still photographs and artwork for visual artifacts characteristic of AI diffusion models (such as DALL-E, Midjourney, or Stable Diffusion).
-- **Core Technology:** Pretrained Swin Transformer classifier (`umm-maybe/AI-image-detector`).
-- **Privacy Guarantee:** Processed strictly in memory via `io.BytesIO`. Images, metadata, and EXIF tags are never written to disk or stored in any database.
-- **Classification Output:** Normalized probability scores for `artificial` vs. `human` accompanied by plain-language guidance and operational boundaries.
+---
 
-### 2. Safemate Video Safety Screening (`POST /api/v1/deepfake/detect`)
-Safemate analyses sampled video frames and visible facial features to screen for visual patterns associated with digital face manipulation. It returns an automated screening estimate with relevant limitations.
-- **Core Technology:** Mobile-Scale Efficient Global Context Vision Transformer (`MS-EffGCViT-B0`, 8.7M parameters, ~34.8 MB weights) paired with a lightweight YOLOv8 face detector (`yolov8n-face.pt`, ~6.1 MB).
-- **Workflow:** Decodes video files, samples between 5 and 30 representative frames (default: 20), crops visible facial regions with a 20% margin, normalizes crops with ImageNet parameters, and calculates a confidence-weighted score across frames.
-- **Privacy Guarantee:** Uploaded videos are decoded through ephemeral temporary files with randomized filenames and are unconditionally deleted in a `finally` block immediately after frame extraction. No video files or facial crops are ever retained.
-- **Neutral Classifications:**
-  - `potential_manipulation_detected` (Score $\ge 0.70$)
-  - `no_manipulation_detected_by_model` (Score $\le 0.35$)
-  - `inconclusive` ($0.35 < \text{Score} < 0.70$)
-### 3. Safemate Interactive Safety & Legal Chatbot (Feature 4, `/chatbot`)
-Provides structured, privacy-first guidance for users navigating sensitive safety dilemmas, cyber harassment, online blackmail, non-consensual image sharing, fake accounts, or physical stalking.
-- **Web Interface:** Embedded, accessible, responsive interface served directly at `/chatbot` (or `/api/v1/chatbot/ui`).
-- **Safety Engine:** Deterministic emergency interrupt prioritizing personal safety and immediate calling (112, 181, 1091) before non-urgent steps.
-- **9 Structured Guided Flows:**
-  1. `immediate_danger`: Immediate physical threat, being followed, or urgent crisis.
+### 2. The 3-Mode Shield: Authentication & Authorization Matrix
+SafeMate accommodates evaluators, anonymous visitors, and personal users with strict authorization boundaries and zero setup barriers:
+
+![3-Mode Authentication & Access Selection Modal](docs/screenshots/02_auth_3mode_modal.png)
+
+| Capability / Resource | Judge Demo Mode (`demo`) | Ephemeral Guest Mode (`guest`) | Personal Account (`authenticated`) |
+| :--- | :--- | :--- | :--- |
+| **Authentication Requirement** | Zero credentials / Instant click | Anonymous ephemeral JWT | Email + Argon2/Bcrypt password |
+| **Backend Data Source** | Fictional verified sample fixtures | Ephemeral in-memory session | Authenticated database partition |
+| **Evidence Vault Storage** | Preloaded mock evidence items | Volatile session-only records | Encrypted permanent storage |
+| **Emergency SOS Action** | **Simulated** (Non-negotiable) | Active dialer / client trigger | Active dialer + saved Safety Circle |
+| **SafeWalk Journey** | Simulated trip & live escort | Live check-in timer & GPS | Multi-trip history & auto-escalation |
+| **Tell-Once Dossier** | Pre-populated trauma-informed flow | Active turn-by-turn intake | Stored multi-agency briefs |
+| **Session Persistence** | `localStorage` (`safemate_demo_mode`) | `sessionStorage` (Wiped on close) | Secure JWT in header/storage |
+
+---
+
+### 3. Zero-Friction Judge Demo Experience
+Judges, evaluators, and mentors can explore every single module offline with realistic sample data without encountering login gates, registration forms, or network failures.
+
+![Judge Demo Mode Active Banner and Sample Environment](docs/screenshots/03_demo_mode_active.png)
+
+> **Safety Notice:** In Judge Demo Mode, Emergency SOS triggers a **simulated dispatch**. No phone calls, SMS messages, or emergency transmissions are ever dispatched to real authorities (112) or contacts.
+
+---
+
+### 4. Emergency SOS & Simulated Safety Dispatch
+One-tap access to national emergency services (112), primary guardians, and instant GPS coordinate broadcasts with high-visibility dispatch logging.
+
+![Emergency SOS Modal with Live Location and Dispatch Diagnostics](docs/screenshots/04_emergency_sos.png)
+
+- **One-Tap Emergency Calling:** Direct protocol integration for national emergency dispatch (`tel:112`) and trusted safety circle contacts.
+- **High-Accuracy Geolocation:** Automatic GPS coordinates fix with accuracy radius and Google Maps live location routing.
+- **Evaluator Safety Isolation:** In Demo Mode, an explicit simulation banner displays simulated GPS coordinates and standby contacts without external telephony.
+
+---
+
+### 5. SafeWalk: Live Journey Escort & Dead Man's Timer
+A real-time safety escort companion that monitors nighttime transit or risky commutes with automated countdown check-ins and dead-man escalation.
+
+![SafeWalk Live Transit Escort with Dead Man's Timer](docs/screenshots/05_safewalk_journey.png)
+
+- **Dead Man's Timer:** Users set a transit window (5 to 60 minutes). If the timer expires without check-in, automated escalation triggers.
+- **Route Breadcrumb Logging:** Tracks location checkpoints along the transit route.
+- **Instant Escalation:** Allows the traveler to immediately notify their safety circle if they feel followed or unsafe.
+
+---
+
+### 6. Tell-Once: Trauma-Informed Incident Sanctuary
+Survivors often have to recount agonizing details multiple times to police, lawyers, counselors, and family. **Tell-Once** guides survivors through a calm, multi-step intake once, and automatically formats specialized briefs for each agency.
+
+![Tell-Once Multi-Agency Incident Intake Sanctuary](docs/screenshots/06_tell_once_intake.png)
+
+- **Bilingual Guided Voice / Text:** Step-by-step physical safety check, timeline capture, perpetrator details, and evidence cataloging in English and Hindi.
+- **Statutory Multi-Agency Outputs:**
+  1. **Police Complaint & Zero FIR:** Formatted in strict compliance with **BNSS Section 173** and **IT Act 66E / 67A**.
+  2. **Legal Counsel Case Brief:** Chronological evidentiary timeline for attorneys and legal aid cells.
+  3. **Medical & Counseling Intake:** Clinical context and emotional trauma assessment.
+  4. **Support Circle Summary:** Plain-language safety summary for trusted friends and family.
+
+---
+
+### 7. Evidence Vault & Cryptographic Chain of Custody
+Tamper-evident digital evidence repository that computes cryptographic SHA-256 hashes upon upload, preserving forensic chain-of-custody for legal admissibility under Indian and international evidence acts.
+
+![Cryptographic Evidence Vault with SHA-256 Hashing](docs/screenshots/07_evidence_vault.png)
+
+- **Cryptographic Fingerprinting:** SHA-256 HMAC hash generated immediately upon file staging.
+- **Chain of Custody Metadata:** Records exact ISO timestamps, file size, MIME type, device metadata, and cryptographic digests.
+- **Calculator Camouflage:** One-click camouflage transforms the vault into a functional calculator.
+
+---
+
+### 8. Leak-Tracer: Forensic Steganographic Watermarking
+Enables users to protect sensitive photos before sharing them with intimate partners, agents, or colleagues by embedding invisible cryptographic recipient tags into image pixels.
+
+![Leak-Tracer Forensic Steganographic Watermarking](docs/screenshots/08_leak_tracer.png)
+
+- **Invisible LSB Steganography:** Embeds encrypted recipient IDs (e.g., `"Liam"`, `"Jake"`, `"Sarah"`) into the least significant bits of image pixels with zero visual distortion.
+- **Batch Export in 1 Go:** Automatically creates individually fingerprinted copies in a ZIP archive for each designated recipient.
+- **Forensic Leak Identification:** If a photo is leaked online or shared maliciously, uploading the leaked copy extracts the hidden signature, unmasking the exact leaker.
+
+---
+
+### 9. Dual-Engine AI Deepfake & Media Screening
+Forensic detection pipelines designed to screen manipulated media, non-consensual deepfakes, and synthetic images in memory.
+
+![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scanner.png)
+
+- **Still Image Diffusion Screening:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`), screening for diffusion artifacts from Midjourney, DALL-E, and Stable Diffusion.
+- **Video Face Manipulation Screening:** Powered by **MS-EffGCViT-B0** (Efficient Global Context Vision Transformer) and **YOLOv8n-Face** face detection, sampling video frames to detect face-swaps.
+- **100% In-Memory Processing:** Uploaded images and video frames are decoded in volatile RAM (`io.BytesIO`) and purged immediately in a `finally` block.
+
+---
+
+### 10. Interactive Safety & Legal Assistant (Chatbot)
+Statutory legal counselor and crisis assistant offering 9 structured triage workflows, emergency interrupt capabilities, and legal guidance under Indian law.
+
+![Safety and Legal Assistant Chatbot with Zero FIR Drafting](docs/screenshots/10_legal_chatbot.png)
+
+- **9 Guided Safety Flows:**
+  1. `immediate_danger`: Emergency physical crisis triage & 112 hotline.
   2. `online_harassment`: Cyberstalking, trolling, abusive messages, or threats.
   3. `blackmail_threats`: Extortion, sextortion, or monetary coercion.
-  4. `intimate_image_abuse`: Unauthorized photo/video sharing, deepfake morphing, StopNCII.org integration.
-  5. `impersonation_fake_profile`: Cloned accounts or identity theft take-downs.
-  6. `physical_harassment`: Street stalking, eve-teasing, or POSH workplace safety.
-  7. `report_cybercrime_india`: Step-by-step walkthrough for `cybercrime.gov.in` and helpline 1930.
-  8. `preserve_evidence`: Screenshot and digital evidence preservation best practices & Safemate Evidence Vault.
-  9. `understand_options`: Legal rights under Indian law (Zero FIR, IT Act, BNS) and support pathways.
-- **Verified Resources:** Pre-verified official Indian and global helplines (ERSS 112, WHL 181, 1091, 1930, NCW, StopNCII.org, Take It Down).
-- **Privacy & Integrity:** Stateless session handling, zero conversation storage, no forced logins, and transparent disclosures that Safemate does not self-dispatch emergency services.
+  4. `intimate_image_abuse`: Non-consensual media sharing & StopNCII.org intake.
+  5. `impersonation_fake_profile`: Identity theft take-down workflows.
+  6. `physical_harassment`: Street stalking & workplace POSH compliance.
+  7. `report_cybercrime_india`: `cybercrime.gov.in` and 1930 helpline guidance.
+  8. `preserve_evidence`: Digital forensics and chain-of-custody best practices.
+  9. `understand_options`: Statutory rights under Zero FIR (BNSS 173) and IT Act.
+- **Emergency Hotline Override:** Instant fallback to national helplines (**112**, **181**, **1091**, **1930**).
 
 ---
 
-## Repository Structure
+### 11. Stealth Panic Switch: Instant Recipe Disguise
+A life-saving safety feature for individuals browsing in dangerous domestic environments. Hitting `ESC` or clicking the disguise button instantly masks the entire application with an authentic food blog.
 
-```
-Safemate/
-├── backend/                  # FastAPI Screening & Safety Backend Service
-│   ├── app/
-│   │   ├── api/routes/       # Route handlers: health, model-info, detect, deepfake, chatbot, emergency, safewalk, evidence
-│   │   ├── chatbot/          # Chatbot knowledge base (curated flows and verified resources)
-│   │   ├── core/             # Configuration settings, CORS, and logging
-│   │   ├── schemas/          # Pydantic schemas (detection, deepfake, chatbot, emergency, etc.)
-│   │   ├── services/         # Image & video inference, and chatbot service engines
-│   │   ├── static/chatbot/   # Accessible HTML/CSS/JS frontend for Safety Assistant
-│   │   ├── utils/            # Request ID correlation helpers
-│   │   └── main.py           # Application entry point & model lifespan
-│   ├── tests/                # Automated pytest suite (111 unit & integration tests)
-│   ├── .env.example          # Environment configuration template
-│   ├── pytest.ini            # Pytest configuration
-│   ├── requirements.txt       # Production Python dependencies
-│   └── README.md             # In-depth backend API & frontend integration guide
-├── docs/
-│   └── DEEPFAKE_INTEGRATION_AUDIT.md # Architecture & compliance audit report
-├── THIRD_PARTY_NOTICES.md    # Upstream open-source licenses & model attribution
-├── render.yaml               # Cloud deployment blueprint
-├── .gitignore                # Exclusions for caches, weights, and environment files
-└── README.md                 # Project documentation
+![Stealth Recipe Disguise Panic Screen](docs/screenshots/11_stealth_recipe_disguise.png)
+
+- **Instant Disguise:** Replaces active screen with **"The Hearth & Spoon: 15-Minute Tuscan Garlic Basil Penne"**.
+- **Stealth Restore:** Clicking the recipe brand icon restores the survivor interface without losing in-progress work.
+- **Quick-Leave:** Unconditionally redirects browser history to Google if an abuser enters the room.
+
+---
+
+### 12. Modular Feature Matrix & Urban Safety Hub
+Interactive workspace linking physical transit safety, civic audit indexes, and digital forensics in one unified suite.
+
+![SafeMate Feature Matrix and Workspace Cards](docs/screenshots/12_feature_matrix_cards.png)
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TB
+    subgraph ClientLayer ["Client & Interface Layer"]
+        UI["SafeMate Responsive Web Client<br/>(React / Vite + Vanilla Design System)"]
+        Stealth["Stealth Panic Screen<br/>(Recipe Disguise)"]
+        Cam["Camera & Audio Capture<br/>(Web Speech & MediaDevices API)"]
+    end
+
+    subgraph AccessShield ["3-Mode Access & Authorization Shield"]
+        JudgeMode["Judge Demo Mode<br/>(Zero-Friction Offline Data)"]
+        GuestMode["Guest Session<br/>(Ephemeral Scoped Token)"]
+        AuthMode["Personal Account<br/>(Argon2 / JWT Authenticated)"]
+    end
+
+    subgraph APIGateway ["FastAPI REST Gateway (Uvicorn / Port 8000)"]
+        Middleware["Security Middleware<br/>(CORS, Request ID, Safe Exception Handlers)"]
+        AuthRoute["/api/v1/auth<br/>(Register, Login, Guest Token)"]
+        SosRoute["/api/v1/emergency<br/>(SOS Logs, Contacts)"]
+        WalkRoute["/api/v1/safewalk<br/>(Trips, Check-ins, Dead Man's Timer)"]
+        VaultRoute["/api/v1/evidence<br/>(Uploads, SHA-256 Digest)"]
+        WatermarkRoute["/api/v1/watermark<br/>(LSB Stego Embed & Extract)"]
+        ChatRoute["/api/v1/chatbot<br/>(9 Triage Flows, Legal Resources)"]
+        DetectRoute["/api/v1/detect & /deepfake/detect<br/>(Still & Video AI Screening)"]
+    end
+
+    subgraph MLEngines ["AI & Forensic Inference Engines"]
+        Swin["Swin Transformer Classifier<br/>umm-maybe/AI-image-detector"]
+        EffGCViT["MS-EffGCViT-B0 Classifier<br/>Video Deepfake Facial Model"]
+        YOLO["YOLOv8n-Face Detector<br/>Facial Bounding Box Cropper"]
+        StegoCore["High-Speed Bounded LSB Engine<br/>Invisible Steganography"]
+    end
+
+    subgraph StorageLayer ["Persistence & Volatile Memory"]
+        SQLite[("SafeMate SQLite DB<br/>Auto-Migrated Schema")]
+        RAM[("Volatile Memory<br/>BytesIO / Ephemeral Temp Files")]
+    end
+
+    UI --> AccessShield
+    AccessShield --> Middleware
+    Middleware --> APIGateway
+
+    DetectRoute --> RAM --> Swin
+    DetectRoute --> RAM --> YOLO --> EffGCViT
+    WatermarkRoute --> RAM --> StegoCore
+
+    AuthRoute --> SQLite
+    SosRoute --> SQLite
+    WalkRoute --> SQLite
+    VaultRoute --> SQLite
+    ChatRoute --> SQLite
 ```
 
 ---
 
-## Quick Start (Local Development)
+## Technology Stack
+
+| Domain | Technology / Library | Version / Specs | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Frontend Framework** | React + Vite | 18.x / Vite 8.3 | High-performance reactive UI components and dashboard |
+| **Design System** | Vanilla CSS (Maitri Design Tokens) | Modern CSS Variables | Trauma-informed minimalist styling, zero bloat, high responsiveness |
+| **Backend Framework** | FastAPI (Python) | Python 3.12+ | High-throughput async REST API engine |
+| **Server Engine** | Uvicorn (ASGI) | 0.34+ | Production-grade async HTTP server |
+| **Database & ORM** | SQLite + SQLAlchemy | SQLAlchemy 2.0+ | Relational persistence with runtime idempotent auto-migrations |
+| **Authentication** | PyJWT + Passlib (Argon2 / Bcrypt) | JWT HS256 | 3-mode role authorization, stateless tokens, password hashing |
+| **Still-Image AI Screening** | Hugging Face Transformers | Swin Transformer | In-memory diffusion artifact classifier (`umm-maybe/AI-image-detector`) |
+| **Video Deepfake AI Screening** | PyTorch + Torchvision + OpenCV | MS-EffGCViT-B0 + YOLOv8n-Face | Facial frame extraction and temporal deepfake classification |
+| **Forensic Watermarking** | NumPy + Pillow (PIL) | Custom Bounded LSB | High-speed invisible steganographic recipient fingerprinting |
+| **Audio & Speech** | Web Speech API | Client Native | Bilingual (Hindi/English) speech-to-text intake and text-to-speech replay |
+| **Testing & Verification** | Pytest + HTTPX + Selenium | Pytest 9.x | 214+ automated unit, integration, and end-to-end acceptance tests |
+
+---
+
+## Statutory & Legal Framework Reference
+
+SafeMate is designed around verified legal mechanisms available to survivors under Indian and international statutes:
+
+1. **Bharatiya Nagarik Suraksha Sanhita (BNSS) 2023 — Section 173 (Zero FIR):**
+   - Mandates that any police station must register a First Information Report (FIR) regardless of territorial jurisdiction where the offense occurred.
+   - SafeMate's **Tell-Once** incident brief formats complaints to meet statutory Zero FIR requirements.
+2. **Information Technology Act, 2000:**
+   - **Section 66E:** Violation of bodily privacy by capturing, publishing, or transmitting intimate images without consent.
+   - **Section 67A / 67B:** Publishing or transmitting sexually explicit material or child sexual abuse material in electronic form.
+3. **Emergency Helplines (India & Global):**
+   - **112:** National Emergency Response Support System (ERSS).
+   - **181 / 1091:** Women's Crisis Helpline (24/7 National).
+   - **1930:** National Cybercrime Reporting Portal helpline (`cybercrime.gov.in`).
+   - **StopNCII.org & Take It Down:** Global cryptographic hashing platforms to prevent intimate image re-upload.
+
+---
+
+## Local Development & Quick Start
 
 ### Prerequisites
-- Python 3.10+ (tested on Python 3.12.8)
-- Windows PowerShell, macOS zsh, or Linux bash
+- **Python:** Version 3.10+ (tested on Python 3.12.8)
+- **Node.js:** Version 18+ (tested on Node v20/v22)
+- **Git**
 
-### Setup & Launch
-```powershell
-# 1. Enter the backend directory
+### 1. Clone the Repository
+```bash
+git clone https://github.com/sam9334545/Safemate.git
+cd Safemate
+```
+
+### 2. Backend Setup
+```bash
 cd backend
 
-# 2. Set up virtual environment
-python -m venv .venv
-.venv\Scripts\Activate.ps1   # On macOS/Linux: source .venv/bin/activate
+# Create and activate virtual environment
+python -m venv venv
+# Windows:
+.\venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
-# 3. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. Configure environment
-Copy-Item .env.example .env
-
-# 5. Start development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Launch FastAPI backend
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
+- Interactive Swagger API Documentation: `http://127.0.0.1:8000/docs`
+- Health check: `http://127.0.0.1:8000/api/v1/health`
 
-Once running, interactive OpenAPI documentation is available at:
-`http://localhost:8000/docs`
+### 3. Frontend Setup
+In a new terminal window:
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Build production bundle
+npm run build
+
+# Serve locally
+python -m http.server 3000
+# OR run Vite dev server
+npm run dev
+```
+- Web Application: `http://localhost:3000/` (or `http://localhost:5173/`)
+- Backend-mounted Static Frontend: `http://127.0.0.1:8000/app/`
 
 ---
 
-## Running the Automated Test Suite
+## Automated Test Suite
 
-```powershell
+SafeMate maintains rigorous test coverage spanning API endpoints, ownership isolation, path traversal guards, and judge demo scenarios:
+
+```bash
 cd backend
-python -m pytest
+pytest tests/ -v
 ```
 
-**Test Outcome:**
-- **111 passed, 1 deselected, 7 warnings in ~4.3s**
-- Rigorous coverage across still-image screening, video deepfake screening, Emergency SOS, SafeWalk, Evidence upload, and all Feature 4 Interactive Chatbot flows, deterministic safety overrides, and privacy protections.
+### Verified Test Matrix
+- **`tests/test_judge_scenarios.py`**: 6 comprehensive acceptance scenarios verifying Judge Demo Mode, Ephemeral Guest Mode, Personal Accounts, Simulated SOS safety, and SafeWalk lifecycle.
+- **`tests/test_authorization.py`**: Multi-tenant ownership isolation, unauthenticated 401 barriers, and cross-account access prevention.
+- **`tests/test_watermark.py`**: Steganographic embed and extraction fidelity, recipient identification, and ZIP archive validation.
+- **`tests/test_chatbot.py`**: Chatbot triage state machines, emergency override protocols, and Zero FIR dossier compilation.
+- **`tests/test_detect.py` & `test_deepfake.py`**: Swin Transformer still-image screening and video face manipulation classifiers.
+
+**Status:** `214 passed, 1 deselected in 100s (100% passing)`.
 
 ---
 
-## Production Deployment & Sizing
+## Ethical Disclosures & Safety Commitments
 
-A `render.yaml` deployment blueprint is provided for cloud hosting (e.g. Render, Railway, AWS ECS).
-
-- **Recommended Instance Tier:** Starter tier with **1 GB or 2 GB RAM**.
-- **Memory Footprint:** The still-image classifier (~348 MB) and video deepfake classifier (~41 MB total weights) together require ~900 MB to 1.2 GB of active system RAM under dual model concurrency.
-- **CPU Inference Speed:** Running entirely on CPU, still-image screening finishes in ~0.3s–1.0s, and video screening (20 sampled frames) finishes in ~1.5s–3.0s on standard multi-core instances.
-
----
-
-## Ethical Principles & Safety Boundaries
-
-1. **Automated Screening, Not Proof:** Safemate produces heuristic confidence indicators. Results are never presented as definitive proof of digital manipulation or authenticity.
-2. **Context Limitations:** Detection accuracy depends on facial clarity, lighting, compression, frame rate, and movement.
-3. **No Intent or Identity Recognition:** Safemate does not identify individuals, evaluate personal consent, or determine whether content is non-consensual sexual material.
-4. **Human Review Centered:** Automated scores are designed to assist human safety caseworkers and users with triaging, never as the sole basis for legal, punitive, or moderation actions.
+1. **Non-Negotiable Demo Safety:** In Judge Demo Mode, Emergency SOS is strictly simulated. SafeMate will never transmit unauthorized calls, SMS, or network packets to emergency dispatchers (112) or real phone numbers without affirmative survivor action.
+2. **Zero Cloud Retention:** Image and video screening occur strictly in volatile RAM (`BytesIO`). Files are unlinked and purged in `finally` blocks immediately upon analysis.
+3. **Client-Side Privacy:** Ephemeral guest sessions store zero persistent identifiers on external servers.
+4. **Stealth by Design:** Every screen supports instant panic camouflage (`ESC` key) to protect users from immediate domestic discovery.
 
 ---
 
-## Attribution & Licenses
+## License & Attribution
 
-Safemate is committed to ethical open-source reuse. All third-party neural architectures, pretrained checkpoints, and libraries are fully credited with original licenses in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [docs/DEEPFAKE_INTEGRATION_AUDIT.md](docs/DEEPFAKE_INTEGRATION_AUDIT.md).
+SafeMate is released under the **MIT License**. Third-party models and components (`umm-maybe/AI-image-detector`, `MS-EffGCViT-B0`, `yolov8n-face`) remain subject to their respective upstream licenses as detailed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
