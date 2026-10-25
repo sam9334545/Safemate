@@ -1369,12 +1369,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const speakBtn = document.createElement('button');
     speakBtn.type = 'button';
     speakBtn.className = 'bubble-action-btn';
-    speakBtn.innerHTML = '🔊 Read Aloud';
+    speakBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:4px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>Read Aloud';
     speakBtn.title = 'Listen to this safety guidance';
     speakBtn.addEventListener('click', () => {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const cleanText = rawSpeechText || aiBubble.innerText.replace(/[\n\r]+/g, ' ').replace(/🔊.*📋 Copy/, '').trim();
+        const cleanText = rawSpeechText || aiBubble.innerText.replace(/[\n\r]+/g, ' ').replace(/(Read Aloud|Copy|Copied).*/i, '').trim();
         const utter = new SpeechSynthesisUtterance(cleanText.substring(0, 320));
         const lang = chatLanguageSelect ? chatLanguageSelect.value : 'en';
         utter.lang = (lang === 'hi' ? 'hi-IN' : 'en-US');
@@ -1388,15 +1388,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
     copyBtn.className = 'bubble-action-btn';
-    copyBtn.innerHTML = '📋 Copy';
+    copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copy';
     copyBtn.title = 'Copy guidance to clipboard';
     copyBtn.addEventListener('click', () => {
-      const textToCopy = aiBubble.innerText.replace(/🔊.*📋 Copy/, '').trim();
+      const textToCopy = aiBubble.innerText.replace(/[\n\r]+/g, ' ').replace(/(Read Aloud|Copy|Copied).*/i, '').trim();
       if (navigator.clipboard) {
         navigator.clipboard.writeText(textToCopy);
       }
-      copyBtn.innerHTML = '✓ Copied';
-      setTimeout(() => { copyBtn.innerHTML = '📋 Copy'; }, 2000);
+      copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>Copied';
+      setTimeout(() => {
+        copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copy';
+      }, 2000);
     });
 
     actionsRow.appendChild(speakBtn);
@@ -1490,19 +1492,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let outputHtml = '';
         if (data.is_emergency_priority) {
-          outputHtml += '<div style="background:#fee2e2; border-left:4px solid #ef4444; padding:8px 12px; border-radius:4px; margin-bottom:8px; font-weight:700; color:#b91c1c;">🚨 IMMEDIATE EMERGENCY DIRECTIVE</div>';
+          outputHtml += '<div style="background:#0B132B; border:1px solid #D90429; border-left:4px solid #D90429; padding:8px 12px; border-radius:0px !important; margin-bottom:8px; font-weight:700; color:#EF233C;">PRIORITY: IMMEDIATE EMERGENCY DIRECTIVE</div>';
         }
         if (data.title) {
-          outputHtml += `<strong style="display:block; color:#0f172a; font-size:0.92rem; margin-bottom:6px;">${data.title}</strong>`;
+          outputHtml += `<strong style="display:block; color:#F8F9FA; font-size:0.92rem; margin-bottom:6px;">${data.title}</strong>`;
         }
         if (data.text || data.guidance) {
           const bodyTxt = (data.text || data.guidance).replace(/\n/g, '<br>');
-          outputHtml += `<div style="margin-bottom:8px; line-height:1.5;">${bodyTxt}</div>`;
+          outputHtml += `<div style="margin-bottom:8px; line-height:1.5; color:#F8F9FA;">${bodyTxt}</div>`;
         }
 
         // Render numbered steps if provided
         if (data.numbered_steps && data.numbered_steps.length > 0) {
-          outputHtml += `<ol style="margin-left:20px; margin-bottom:8px; line-height:1.6; font-size:0.84rem;">`;
+          outputHtml += `<ol style="margin-left:20px; margin-bottom:8px; line-height:1.6; font-size:0.84rem; color:#F8F9FA;">`;
           data.numbered_steps.forEach(s => {
             outputHtml += `<li>${s}</li>`;
           });
@@ -1511,13 +1513,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render verified helplines
         if (data.resources && data.resources.length > 0) {
-          outputHtml += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; margin-top:8px; font-size:0.8rem;">`;
-          outputHtml += `<strong>Verified 24/7 Helplines &amp; Portals:</strong><br>`;
+          outputHtml += `<div style="background:#1C2541; border:1px solid rgba(141, 153, 174, 0.3); border-radius:0px !important; padding:8px 10px; margin-top:8px; font-size:0.8rem; color:#F8F9FA;">`;
+          outputHtml += `<strong style="color:#EF233C;">Verified 24/7 Helplines &amp; Portals:</strong><br>`;
           data.resources.forEach(r => {
             const cleanPh = sanitizePhone(r.phone_number);
-            const telPart = r.phone_number ? `<a href="tel:${cleanPh}" style="color:#dc2626; font-weight:700; text-decoration:none;">📞 ${r.phone_number}</a>` : '';
-            const portalPart = r.action_url ? `<a href="${r.action_url}" target="_blank" style="margin-left:6px; color:#0284c7; text-decoration:none;">🌐 Portal ↗</a>` : '';
-            outputHtml += `• <strong>${r.display_name}:</strong> ${telPart} ${portalPart}<br>`;
+            const telPart = r.phone_number ? `<a href="tel:${cleanPh}" style="color:#EF233C; font-weight:700; text-decoration:none;">Tel: ${r.phone_number}</a>` : '';
+            const portalPart = r.action_url ? `<a href="${r.action_url}" target="_blank" style="margin-left:6px; color:#64DFDF; text-decoration:none;">Portal ↗</a>` : '';
+            outputHtml += `&bull; <strong>${r.display_name}:</strong> ${telPart} ${portalPart}<br>`;
           });
           outputHtml += `</div>`;
         }
@@ -1626,8 +1628,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chatSpeechRec.onstart = () => {
           isChatMicActive = true;
-          btnChatMic.style.background = '#dc2626';
-          if (chatInput) chatInput.placeholder = currentLang === 'hi' ? '🎙️ बोलिए... आपकी आवाज सुनी जा रही है...' : '🎙️ Listening... Speak your legal question now...';
+          btnChatMic.style.background = '#D90429';
+          btnChatMic.classList.add('listening');
+          if (chatInput) chatInput.placeholder = currentLang === 'hi' ? 'बोलिए... आपकी आवाज दर्ज हो रही है...' : 'Listening... Speak your legal query now...';
         };
 
         chatSpeechRec.onresult = (e) => {
@@ -1640,21 +1643,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         chatSpeechRec.onerror = () => {
           isChatMicActive = false;
-          btnChatMic.style.background = '#475569';
-          if (chatInput) chatInput.placeholder = 'Ask a confidential question or type in Hindi...';
+          btnChatMic.style.background = '#1C2541';
+          btnChatMic.classList.remove('listening');
+          if (chatInput) chatInput.placeholder = 'Type your confidential legal question or query in Hindi...';
         };
 
         chatSpeechRec.onend = () => {
           isChatMicActive = false;
-          btnChatMic.style.background = '#475569';
-          if (chatInput) chatInput.placeholder = 'Ask a confidential question or type in Hindi...';
+          btnChatMic.style.background = '#1C2541';
+          btnChatMic.classList.remove('listening');
+          if (chatInput) chatInput.placeholder = 'Type your confidential legal question or query in Hindi...';
         };
 
         chatSpeechRec.start();
       } catch (err) {
         console.warn('Chat speech error:', err);
         isChatMicActive = false;
-        btnChatMic.style.background = '#475569';
+        btnChatMic.style.background = '#1C2541';
+        btnChatMic.classList.remove('listening');
       }
     });
   }
@@ -1727,7 +1733,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       btnGenerateFir.disabled = true;
-      btnGenerateFir.textContent = '⏳ Generating Formal Complaint Draft...';
+      btnGenerateFir.textContent = 'Generating Formal Complaint Draft...';
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/draft-complaint`, {
@@ -1764,7 +1770,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Error connecting to legal complaint generator.');
       } finally {
         btnGenerateFir.disabled = false;
-        btnGenerateFir.textContent = '📜 Generate Formal Zero FIR Letter';
+        btnGenerateFir.textContent = 'Generate Formal Zero FIR Letter';
       }
     });
   }
@@ -1773,7 +1779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyFir.addEventListener('click', () => {
       navigator.clipboard?.writeText(firOutputLetter.textContent);
       btnCopyFir.textContent = '✓ Copied!';
-      setTimeout(() => { btnCopyFir.textContent = '📋 Copy'; }, 2000);
+      setTimeout(() => { btnCopyFir.textContent = 'Copy Letter'; }, 2000);
     });
   }
 
@@ -2045,7 +2051,7 @@ document.addEventListener('DOMContentLoaded', () => {
       voicePulseRing.className = `voice-pulse-ring ${mode}`;
     }
     if (voiceStatusEmoji) {
-      voiceStatusEmoji.textContent = mode === 'speaking' ? '🔊' : (mode === 'listening' ? '🎙️' : '✨');
+      voiceStatusEmoji.textContent = mode === 'speaking' ? 'SPEECH' : (mode === 'listening' ? 'LISTEN' : 'ACTIVE');
     }
     if (voiceStatusHeadline) {
       voiceStatusHeadline.textContent = headline;
@@ -2121,7 +2127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       speechRecInstance.continuous = true;
       speechRecInstance.interimResults = true;
 
-      const headline = tellOnceLanguage === 'hi' ? '🎙️ आपकी आवाज सुन रहे हैं... बोलिए...' : '🎙️ Listening to you... Speak freely...';
+      const headline = tellOnceLanguage === 'hi' ? 'आपकी आवाज सुन रहे हैं... बोलिए...' : 'Listening to you... Speak freely...';
       const sub = tellOnceLanguage === 'hi' ? 'बोलना बंद करते ही आपका जवाब अपने-आप दर्ज होगा' : 'Pausing your speech will auto-submit your response';
       setVoiceStatus('listening', headline, sub);
       if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
@@ -2148,7 +2154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentSpeech.length > 1) {
           setVoiceStatus(
             'listening',
-            tellOnceLanguage === 'hi' ? '🎙️ आपकी आवाज दर्ज हो रही है...' : '🎙️ Hearing your voice...',
+            tellOnceLanguage === 'hi' ? 'आपकी आवाज दर्ज हो रही है...' : 'Hearing your voice...',
             `"${currentSpeech.slice(-50)}"`
           );
 
@@ -2158,7 +2164,7 @@ document.addEventListener('DOMContentLoaded', () => {
               stopSpeechRecognition();
               setVoiceStatus(
                 'processing',
-                tellOnceLanguage === 'hi' ? '✨ जवाब दर्ज हो रहा है...' : '✨ Processing your answer...',
+                tellOnceLanguage === 'hi' ? 'जवाब दर्ज हो रहा है...' : 'Processing your answer...',
                 tellOnceLanguage === 'hi' ? 'अगला सवाल तैयार हो रहा है' : 'Preparing next question...'
               );
               submitTellOnceTurn(currentSpeech.trim());
@@ -2172,7 +2178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.error === 'no-speech') {
           setVoiceStatus(
             'listening',
-            tellOnceLanguage === 'hi' ? '🎙️ हम सुन रहे हैं... आप जब चाहें बोल सकते हैं' : '🎙️ Ready when you are... Speak freely'
+            tellOnceLanguage === 'hi' ? 'हम सुन रहे हैं... आप जब चाहें बोल सकते हैं' : 'Ready when you are... Speak freely'
           );
         } else {
           stopSpeechRecognition();
@@ -2240,7 +2246,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (tellOncePromptText) tellOncePromptText.textContent = data.gentle_prompt;
     if (tellOnceAffirmationText) {
-      tellOnceAffirmationText.textContent = data.calm_affirmation ? `✨ ${data.calm_affirmation}` : '';
+      tellOnceAffirmationText.textContent = data.calm_affirmation ? data.calm_affirmation : '';
     }
 
     // Render Suggested Chips
@@ -2363,13 +2369,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (tellOnceDocBadgeTitle) {
       if (tabKey === 'fir') {
-        tellOnceDocBadgeTitle.textContent = '⚖️ MANDATORY ZERO FIR COMPLAINT • SECTION 173 BNSS / SEC 154 CrPC';
+        tellOnceDocBadgeTitle.textContent = 'MANDATORY ZERO FIR COMPLAINT • SECTION 173 BNSS / SEC 154 CrPC';
       } else if (tabKey === 'cyber') {
-        tellOnceDocBadgeTitle.textContent = '💻 NATIONAL CYBER HELPLINE 1930 / STATUTORY ESCALATION BRIEF';
+        tellOnceDocBadgeTitle.textContent = 'NATIONAL CYBER HELPLINE 1930 / STATUTORY ESCALATION BRIEF';
       } else if (tabKey === 'lawyer') {
-        tellOnceDocBadgeTitle.textContent = '🛡️ CONFIDENTIAL COUNSEL BRIEF FOR ADVOCATE & LEGAL DEFENSE';
+        tellOnceDocBadgeTitle.textContent = 'CONFIDENTIAL COUNSEL BRIEF FOR ADVOCATE & LEGAL DEFENSE';
       } else if (tabKey === 'evidence') {
-        tellOnceDocBadgeTitle.textContent = '📁 DIGITAL EVIDENCE PRESERVATION LOG • SEC 65B CERTIFIED';
+        tellOnceDocBadgeTitle.textContent = 'DIGITAL EVIDENCE PRESERVATION LOG • SEC 65B CERTIFIED';
       }
     }
 
