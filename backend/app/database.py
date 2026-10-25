@@ -72,3 +72,43 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+def safe_migrate_tables(db_engine, declarative_base_cls) -> None:
+    """Inspect and add any missing columns from model metadata to existing tables.
+    
+    Guarantees that database upgrades (e.g. SQLite breadcrumbs or alert_id columns)
+    are applied automatically at startup without dropping or altering existing user records.
+    """
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db_engine)
+    existing_table_names = set(inspector.get_table_names())
+
+    with db_engine.connect() as conn:
+        for table_name, table in declarative_base_cls.metadata.tables.items():
+            if table_name not in existing_table_names:
+                continue
+
+            existing_cols = {col["name"] for col in inspector.get_columns(table_name)}
+            for col in table.columns:
+                if col.name not in existing_cols:
+                    col_type = col.type.compile(db_engine.dialect)
+                    default_clause = ""
+                    if col.default is not None and hasattr(col.default, "arg"):
+                        default_val = col.default.arg
+                        if isinstance(default_val, str):
+                            default_clause = f" DEFAULT '{default_val}'"
+                        elif isinstance(default_val, (int, float)):
+                            default_clause = f" DEFAULT {default_val}"
+                    elif col.nullable:
+                        default_clause = " DEFAULT NULL"
+
+                    alter_stmt = f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}{default_clause}"
+                    logger.info(f"Applying safe schema migration: {alter_stmt}")
+                    try:
+                        conn.execute(text(alter_stmt))
+                        conn.commit()
+                    except Exception as err:
+                        logger.warning(f"Failed to execute alter statement '{alter_stmt}': {err}")
+

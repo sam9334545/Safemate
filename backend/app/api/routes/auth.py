@@ -40,10 +40,12 @@ async def register(
     db: Session = Depends(get_db),
 ) -> UserResponse:
     """Register a new user account."""
+    clean_email = str(payload.email).strip().lower()
+
     # Check if email is already registered
-    existing_user = db.query(UserModel).filter(UserModel.email == payload.email).first()
+    existing_user = db.query(UserModel).filter(UserModel.email == clean_email).first()
     if existing_user:
-        logger.warning(f"Registration attempt with existing email: {payload.email}")
+        logger.warning(f"Registration attempt with existing email: {clean_email}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already registered.",
@@ -54,17 +56,32 @@ async def register(
     created_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     new_user = UserModel(
-        email=payload.email,
+        email=clean_email,
         hashed_password=hashed_password,
         created_at=created_at,
         is_active=True,
     )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+    except Exception as exc:
+        db.rollback()
+        logger.error(f"Error persisting new user {clean_email}: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not create user account. Email may already exist.",
+        )
 
     logger.info(f"Successfully registered user ID: {new_user.id} ({new_user.email})")
-    return new_user
+    return UserResponse(
+        id=new_user.id,
+        email=new_user.email,
+        is_active=new_user.is_active,
+        created_at=new_user.created_at,
+        is_guest=False,
+        access_mode="personal_account",
+    )
 
 
 @router.post(
@@ -79,9 +96,10 @@ async def login(
     db: Session = Depends(get_db),
 ) -> Token:
     """Authenticate user with email (passed as username) and password via OAuth2 form data."""
-    user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
+    clean_email = form_data.username.strip().lower()
+    user = db.query(UserModel).filter(UserModel.email == clean_email).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
-        logger.warning(f"Failed login attempt for username/email: {form_data.username}")
+        logger.warning(f"Failed login attempt for username/email: {clean_email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -94,7 +112,13 @@ async def login(
             detail="Inactive user account",
         )
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    is_guest = user.email.startswith("guest_") and user.email.endswith("@safemate.internal")
+    access_token = create_access_token(data={
+        "sub": user.email,
+        "user_id": user.id,
+        "is_guest": is_guest,
+        "mode": "guest" if is_guest else "personal_account",
+    })
     logger.info(f"User {user.email} logged in successfully via OAuth2 form.")
     return Token(access_token=access_token, token_type="bearer")
 
@@ -126,9 +150,10 @@ async def login_json(
     db: Session = Depends(get_db),
 ) -> Token:
     """Authenticate user with email and password submitted as JSON."""
-    user = db.query(UserModel).filter(UserModel.email == payload.email).first()
+    clean_email = str(payload.email).strip().lower()
+    user = db.query(UserModel).filter(UserModel.email == clean_email).first()
     if not user or not verify_password(payload.password, user.hashed_password):
-        logger.warning(f"Failed JSON login attempt for email: {payload.email}")
+        logger.warning(f"Failed JSON login attempt for email: {clean_email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -141,7 +166,13 @@ async def login_json(
             detail="Inactive user account",
         )
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    is_guest = user.email.startswith("guest_") and user.email.endswith("@safemate.internal")
+    access_token = create_access_token(data={
+        "sub": user.email,
+        "user_id": user.id,
+        "is_guest": is_guest,
+        "mode": "guest" if is_guest else "personal_account",
+    })
     logger.info(f"User {user.email} logged in successfully via JSON.")
     return Token(access_token=access_token, token_type="bearer")
 
@@ -174,7 +205,12 @@ async def guest_session(
     db.commit()
     db.refresh(guest_user)
 
-    access_token = create_access_token(data={"sub": guest_user.email, "user_id": guest_user.id})
+    access_token = create_access_token(data={
+        "sub": guest_user.email,
+        "user_id": guest_user.id,
+        "is_guest": True,
+        "mode": "guest",
+    })
     logger.info(f"Guest session created: {guest_user.email}")
     return Token(access_token=access_token, token_type="bearer")
 
@@ -190,7 +226,14 @@ async def get_me(
     current_user: UserModel = Depends(get_current_user),
 ) -> UserResponse:
     """Return profile of the authenticated user."""
-    return current_user
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+        is_guest=getattr(current_user, "is_guest", False),
+        access_mode=getattr(current_user, "access_mode", "personal_account"),
+    )
 
 
 @router.post(

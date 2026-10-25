@@ -673,6 +673,15 @@ async def resolve_emergency_alert(
             detail=f"Emergency alert record '{alert_id}' not found.",
         )
 
+    # Enforce ownership check: User A cannot resolve User B's alert
+    if current_user:
+        user_matches = log.user_id in (str(current_user.id), current_user.email)
+        if not user_matches and getattr(current_user, "role", "") != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to resolve another user's emergency incident.",
+            )
+
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
     log.status = "resolved"
     log.resolved_at = now_iso

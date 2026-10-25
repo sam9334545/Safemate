@@ -116,9 +116,12 @@ async def upload_evidence(
     simulated_dispatch_status = "CONFIRMED_DELIVERED_TO_TRUSTED_CONTACTS"
 
     # 5. Persist record into PostgreSQL/SQLAlchemy database
+    # Bind owner_id to authenticated user while preserving requested user_id tag
+    owner_id = current_user.id if current_user else None
     new_record = EvidenceRecord(
         evidence_id=evidence_id,
         user_id=user_id,
+        owner_id=owner_id,
         file_name=original_filename,
         file_path=str(target_path),
         file_size=file_size,
@@ -140,6 +143,7 @@ async def upload_evidence(
         "event": "DISGUISED_EVIDENCE_VAULT_RECORDED",
         "evidence_id": evidence_id,
         "user_id": user_id,
+        "owner_id": owner_id,
         "file_name": original_filename,
         "file_size_bytes": file_size,
         "sha256_checksum": sha256_hash,
@@ -171,15 +175,42 @@ async def upload_evidence(
     )
 
 
+def check_evidence_owner(entry: EvidenceRecord, current_user: UserModel) -> None:
+    """Validate that current_user is the legitimate owner of the evidence record."""
+    is_owner = False
+    if entry.owner_id is not None:
+        is_owner = (entry.owner_id == current_user.id)
+    else:
+        is_owner = entry.user_id in (str(current_user.id), current_user.email)
+
+    if not is_owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access or modify this evidence record.",
+        )
+
+
 @router.get(
     "/records",
     response_model=List[EvidenceRecordDetail],
     summary="List Evidence Vault Metadata Records",
-    description="Inspection endpoint returning database-persisted evidence metadata records.",
+    description="Inspection endpoint returning database-persisted evidence metadata records owned by authenticated user.",
 )
-async def list_evidence_records(db: Session = Depends(get_db)) -> List[EvidenceRecordDetail]:
-    """Retrieve metadata list of secured evidence records from database."""
-    records = db.query(EvidenceRecord).all()
+async def list_evidence_records(
+    db: Session = Depends(get_db),
+    current_user: Optional[UserModel] = Depends(get_current_user),
+) -> List[EvidenceRecordDetail]:
+    """Retrieve metadata list of secured evidence records owned by current user."""
+    search_keys = [str(current_user.id), current_user.email]
+    records = (
+        db.query(EvidenceRecord)
+        .filter(
+            (EvidenceRecord.owner_id == current_user.id)
+            | (EvidenceRecord.user_id.in_(search_keys))
+        )
+        .order_by(EvidenceRecord.id.desc())
+        .all()
+    )
     return [
         EvidenceRecordDetail(
             evidence_id=entry.evidence_id,
@@ -206,14 +237,17 @@ async def list_evidence_records(db: Session = Depends(get_db)) -> List[EvidenceR
 async def verify_evidence_integrity(
     evidence_id: str,
     db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Verify chain-of-custody checksum for a specific evidence record from database."""
+    """Verify chain-of-custody checksum for a specific evidence record owned by current user."""
     entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
     if not entry:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Evidence record '{evidence_id}' was not found in database.",
         )
+
+    check_evidence_owner(entry, current_user)
 
     target_path = Path(entry.file_path)
     file_exists = target_path.exists()
@@ -242,7 +276,7 @@ async def download_evidence(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    """Download stored evidence file binary."""
+    """Download stored evidence file binary, verifying record ownership."""
     entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
     if not entry:
         raise HTTPException(
@@ -250,7 +284,18 @@ async def download_evidence(
             detail=f"Evidence record '{evidence_id}' was not found in database.",
         )
 
-    target_path = Path(entry.file_path)
+    check_evidence_owner(entry, current_user)
+
+    target_path = Path(entry.file_path).resolve()
+    secure_dir = SECURE_STORAGE_DIR.resolve()
+    try:
+        target_path.relative_to(secure_dir)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid evidence file path.",
+        )
+
     if not target_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -275,13 +320,15 @@ async def get_evidence_record(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ) -> EvidenceRecordDetail:
-    """Retrieve metadata for a specific evidence record."""
+    """Retrieve metadata for a specific evidence record ensuring caller is owner."""
     entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
     if not entry:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Evidence record '{evidence_id}' was not found in database.",
         )
+
+    check_evidence_owner(entry, current_user)
 
     return EvidenceRecordDetail(
         evidence_id=entry.evidence_id,
@@ -309,7 +356,7 @@ async def delete_evidence_record(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ) -> EvidenceDeleteResponse:
-    """Securely delete evidence record and unlinks its physical file."""
+    """Securely delete evidence record and unlinks its physical file with ownership enforcement."""
     entry = db.query(EvidenceRecord).filter(EvidenceRecord.evidence_id == evidence_id).first()
     if not entry:
         raise HTTPException(
@@ -317,9 +364,11 @@ async def delete_evidence_record(
             detail=f"Evidence record '{evidence_id}' was not found in database.",
         )
 
+    check_evidence_owner(entry, current_user)
+
     # Securely remove file from storage
     if entry.file_path:
-        target_path = Path(entry.file_path)
+        target_path = Path(entry.file_path).resolve()
         if target_path.exists():
             try:
                 target_path.unlink()
@@ -330,12 +379,14 @@ async def delete_evidence_record(
     db.delete(entry)
     db.commit()
 
-    logger.info(f"Evidence record '{evidence_id}' purged from vault database.")
+    logger.info(f"Evidence record '{evidence_id}' purged from vault database by {current_user.email}.")
 
     return EvidenceDeleteResponse(
         status="success",
         message=f"Evidence record '{evidence_id}' and associated file securely purged from vault.",
         evidence_id=evidence_id,
     )
+
+
 
 

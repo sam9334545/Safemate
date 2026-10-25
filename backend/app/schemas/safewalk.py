@@ -9,10 +9,9 @@ from pydantic import BaseModel, Field
 class TripCreateRequest(BaseModel):
     """Request payload for generating a SafeWalk trip token and tracking session."""
 
-    user_id: str = Field(
-        ...,
-        min_length=1,
-        description="Unique identifier of the user initiating the SafeWalk session",
+    user_id: Optional[str] = Field(
+        default=None,
+        description="Unique identifier of the user initiating the SafeWalk session (optional if authenticated)",
         examples=["usr_aegis_001"],
     )
     destination: str = Field(

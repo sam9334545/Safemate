@@ -85,6 +85,11 @@ def create_access_token(
     return encoded_jwt
 
 
+def decode_access_token(token: str) -> dict:
+    """Decode and validate a JWT access token returning payload claims."""
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+
 # ---------------------------------------------------------------------------
 # Dependency: Get Current Authenticated User
 # ---------------------------------------------------------------------------
@@ -115,7 +120,30 @@ async def get_current_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user account",
         )
+
+    # Attach dynamic session attributes (non-persistent)
+    is_guest = bool(
+        payload.get("is_guest", False)
+        or (user.email and user.email.startswith("guest_") and user.email.endswith("@safemate.internal"))
+    )
+    user.is_guest = is_guest
+    user.access_mode = "guest" if is_guest else "personal_account"
     return user
+
+
+async def get_current_registered_user(
+    current_user: UserModel = Depends(get_current_user),
+) -> UserModel:
+    """Ensure the authenticated user is a registered personal account, not a temporary guest session.
+    
+    Prevents guest tokens from performing sensitive personal account actions.
+    """
+    if getattr(current_user, "is_guest", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This action requires a registered personal account. Please create an account or log in.",
+        )
+    return current_user
 
 
 # Optional OAuth2 scheme that does not raise 401 when token is omitted
@@ -139,8 +167,15 @@ async def get_optional_current_user(
             return None
         user = db.query(UserModel).filter(UserModel.email == email).first()
         if user and user.is_active:
+            is_guest = bool(
+                payload.get("is_guest", False)
+                or (user.email and user.email.startswith("guest_") and user.email.endswith("@safemate.internal"))
+            )
+            user.is_guest = is_guest
+            user.access_mode = "guest" if is_guest else "personal_account"
             return user
     except Exception:
         return None
     return None
+
 

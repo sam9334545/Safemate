@@ -34,6 +34,21 @@
     </a>
 
     <div class="nav-actions">
+      <!-- Access Mode & Auth Controls -->
+      <div class="nav-access-group" id="nav-access-group">
+        <button type="button" class="btn-nav-demo-highlight" id="btn-quick-demo-mode" title="Instant access for judges and evaluators without login">
+          <span>⚖️</span>
+          <span>Try Demo Mode</span>
+        </button>
+        <button type="button" class="btn-nav-auth" id="btn-quick-guest-mode" title="Explore features as guest">
+          <span>🌐</span>
+          <span>Guest Mode</span>
+        </button>
+        <button type="button" class="btn-nav-auth" id="btn-open-auth-modal" title="Sign in or register personal account">
+          <span>Sign In</span>
+        </button>
+      </div>
+
       <!-- Stealth Panic Switch (Recipe Disguise) -->
       <button class="btn-panic" id="panic-disguise-btn" title="Instantly hide this page with a recipe blog (ESC)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -51,6 +66,18 @@
       </a>
     </div>
   </header>
+
+  <!-- Floating Judge Demo Notice Banner -->
+  <div class="judge-demo-banner" id="judge-demo-banner" style="display:none;">
+    <div class="demo-banner-content">
+      <span class="demo-banner-badge">⚖️ JUDGE DEMO MODE ACTIVE</span>
+      <span class="demo-banner-text">Exploring SafeMate with realistic sample data. Emergency SOS is simulated and will NOT contact real emergency services or contacts.</span>
+    </div>
+    <div class="demo-banner-actions">
+      <button type="button" class="btn-demo-banner-action" id="btn-banner-switch-account">Sign In to Account</button>
+      <button type="button" class="btn-demo-banner-close" id="btn-banner-exit-demo" title="Exit Judge Demo Mode">✕ Exit Demo</button>
+    </div>
+  </div>
 
   <!-- Maitri-Style Hero Mosaic Section -->
   <main class="maitri-hero-section" id="hero">
@@ -1545,6 +1572,114 @@
       </div>
     </div>
   </div>
+
+  <!-- Unified Authentication & Access Mode Modal -->
+  <div class="modal-overlay" id="auth-modal" style="display:none; z-index:10000; align-items:center; justify-content:center;">
+    <div class="auth-modal-dialog">
+      <div class="auth-modal-header">
+        <div class="auth-modal-brand">
+          <div class="brand-icon-shield">
+            <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 18c-3.75-1.1-6.5-5.06-6.5-9.5V8.3l6.5-3.61 6.5 3.61V10.5c0 4.44-2.75 8.4-6.5 9.5z"/></svg>
+          </div>
+          <div>
+            <h2 class="auth-modal-title">Welcome to SafeMate</h2>
+            <p class="auth-modal-subtitle">Confidential Survivor Shield & Safety Portal</p>
+          </div>
+        </div>
+        <button type="button" class="auth-modal-close" id="auth-modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <!-- Judge / Evaluator Fast Access Box -->
+      <div class="auth-fast-access-box">
+        <div class="fast-access-badge">JUDGE & EVALUATOR FAST ACCESS</div>
+        <p class="fast-access-desc">Explore all features instantly with verified fictional sample data. No registration, credentials, or backend dependencies required.</p>
+        <div class="fast-access-buttons">
+          <button type="button" class="btn-demo-primary" id="btn-modal-demo-mode">
+            <span>⚖️</span>
+            <strong>Try Demo Mode</strong>
+            <small>(Instant Evaluator Access)</small>
+          </button>
+          <button type="button" class="btn-guest-secondary" id="btn-modal-guest-mode">
+            <span>🌐</span>
+            <strong>Explore as Guest</strong>
+            <small>(Ephemeral Session)</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-divider">
+        <span>OR CONTINUE WITH YOUR ACCOUNT</span>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab-btn active" id="tab-auth-login">Sign In</button>
+        <button type="button" class="auth-tab-btn" id="tab-auth-register">Create Account</button>
+      </div>
+
+      <!-- Alert / Status Notice -->
+      <div class="auth-alert" id="auth-alert-box" style="display:none;"></div>
+
+      <!-- Login Form Panel -->
+      <form id="form-login" class="auth-form-panel">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" required placeholder="user@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="toggle-password-btn" data-target="login-password" title="Toggle password visibility">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-auth-submit" id="btn-login-submit">
+          <span>Sign In to Personal Account</span>
+        </button>
+      </form>
+
+      <!-- Register Form Panel -->
+      <form id="form-register" class="auth-form-panel" style="display:none;">
+        <div class="form-group">
+          <label for="register-name">Full Name or Alias (Optional)</label>
+          <input type="text" id="register-name" placeholder="Survivor Alias" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="register-email">Email Address</label>
+          <input type="email" id="register-email" required placeholder="user@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password (Min. 8 characters)</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="register-password" required minlength="8" placeholder="••••••••" autocomplete="new-password" />
+            <button type="button" class="toggle-password-btn" data-target="register-password" title="Toggle password visibility">👁</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="register-confirm-password">Confirm Password</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="register-confirm-password" required minlength="8" placeholder="••••••••" autocomplete="new-password" />
+            <button type="button" class="toggle-password-btn" data-target="register-confirm-password" title="Toggle password visibility">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-auth-submit" id="btn-register-submit">
+          <span>Create Confidential Account</span>
+        </button>
+      </form>
+
+      <div class="auth-modal-footer">
+        <span>🔒 100% Client-Side Privacy. Your data is isolated and end-to-end protected.</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as demoData from './demoData.js';
+    import authState from './authState.js';
+    window.SafeMateDemoData = demoData;
+    window.SafeMateAuth = authState;
+    window.dispatchEvent(new CustomEvent('safemate-auth-ready', { detail: { authState, demoData } }));
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

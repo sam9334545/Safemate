@@ -243,8 +243,15 @@ async def draft_complaint(
 )
 async def get_chat_history(
     session_id: str,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
 ) -> ChatHistoryResponse:
     """Return past message turns for multi-turn assistant context."""
+    if session_id.startswith("user_"):
+        if not current_user or session_id != f"user_{current_user.id}":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to access another user's chat session history.",
+            )
     return chatbot_service.get_history(session_id)
 
 
@@ -255,8 +262,15 @@ async def get_chat_history(
 )
 async def clear_chat_history(
     session_id: str,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
 ) -> Dict[str, Any]:
     """Wipe session history immediately upon user request or panic trigger."""
+    if session_id.startswith("user_"):
+        if not current_user or session_id != f"user_{current_user.id}":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to clear another user's chat session history.",
+            )
     cleared = chatbot_service.clear_history(session_id)
     return {
         "status": "cleared" if cleared else "not_found",
@@ -273,8 +287,15 @@ async def clear_chat_history(
 )
 async def export_chat_report(
     session_id: str,
+    current_user: Optional[UserModel] = Depends(get_optional_current_user),
 ) -> ChatExportResponse:
     """Export formatted consultation summary for police, legal counsel, or personal records."""
+    if session_id.startswith("user_"):
+        if not current_user or session_id != f"user_{current_user.id}":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to export another user's chat session report.",
+            )
     return chatbot_service.export_report(session_id)
 
 

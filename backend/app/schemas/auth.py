@@ -27,6 +27,11 @@ class UserCreate(BaseModel):
         description="Account password (minimum 6 characters)",
         examples=["SecurePass123!"],
     )
+    full_name: Optional[str] = Field(
+        default=None,
+        description="Optional full name or alias",
+        examples=["Priya Sharma"],
+    )
 
 
 class UserLogin(BaseModel):
@@ -58,12 +63,14 @@ class TokenData(BaseModel):
 
 
 class UserResponse(BaseModel):
-    """Response schema representing a registered user."""
+    """Response schema representing a user profile."""
 
     id: int
     email: EmailStr
     is_active: bool
     created_at: str
+    is_guest: bool = False
+    access_mode: str = "personal_account"
 
     model_config = {
         "from_attributes": True,
