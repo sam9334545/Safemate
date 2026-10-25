@@ -1339,14 +1339,14 @@
   <!-- ========================================================
        TELL-ONCE INTAKE MODAL (SHARP INDUSTRIAL TRAUMA-INFORMED PROTOCOL)
        ======================================================== -->
-  <div class="modal-overlay" id="tellOnceModal" style="display: none; z-index: 99997;">
+  <div class="modal-overlay" id="tellOnceModal" style="z-index: 99997;">
     <div class="tell-once-modal-card">
       
       <!-- Architectural Midnight Header with Crimson Accent -->
       <div class="tell-once-modal-header">
         <div class="tell-once-brand-wrap">
           <div class="tell-once-header-title">
-            <span>Tell-Once Intake Protocol</span>
+            <span>🌸 Tell-Once Safe Space Sanctuary</span>
           </div>
           <div class="tell-once-header-sub" id="tell-once-header-sub">
             Unified statutory statement builder &bull; Disclose once with zero cloud retention.
@@ -1377,6 +1377,33 @@
         <div class="tell-once-step-label" id="tell-once-step-label">Step 1 of 6: Physical Safety Check</div>
       </div>
 
+      <!-- Dedicated Voice & Audio Experience Deck -->
+      <div class="tell-once-audio-deck" id="tell-once-audio-deck">
+        <div class="audio-deck-left">
+          <button type="button" class="btn-audio-deck" id="btn-voice-test" title="Test audio playback & sound clarity">
+            <span class="deck-btn-icon">🎵</span>
+            <span>Test Sound &amp; Voice</span>
+          </button>
+          <button type="button" class="btn-audio-deck" id="btn-voice-replay" title="Replay current question aloud">
+            <span class="deck-btn-icon">🔁</span>
+            <span>Replay Voice</span>
+          </button>
+        </div>
+        <div class="audio-deck-right">
+          <div class="voice-vol-wrap" title="Adjust voice volume">
+            <span id="voice-vol-icon" class="deck-vol-icon">🔊</span>
+            <input type="range" id="voice-volume-slider" min="0" max="1" step="0.05" value="1" class="deck-slider" aria-label="Voice Volume">
+          </div>
+          <div class="voice-speed-wrap" title="Speech pacing">
+            <select id="voice-speed-select" class="deck-select" aria-label="Speech Speed">
+              <option value="0.85">🐢 0.85x Calm</option>
+              <option value="0.95" selected>🗣️ 1.0x Normal</option>
+              <option value="1.15">⚡ 1.15x Crisp</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- Calming Breather Bar -->
       <div class="tell-once-breather-bar">
         <span class="tell-once-breather-hint">Feeling overwhelmed? Take all the time you need.</span>
@@ -1393,37 +1420,6 @@
         </div>
       </div>
 
-      <!-- Distinct Module Separation Blocks: Evidence Vault vs. Leak Tracer -->
-      <div class="tell-once-modules-split">
-        <!-- Evidence Vault Feature Block -->
-        <div class="module-block-vault">
-          <div class="module-header-row">
-            <span class="module-badge-vault">EVIDENCE VAULT</span>
-            <span class="module-subtag">SECURE DEPOSIT &bull; SHA-256</span>
-          </div>
-          <h4 class="module-title">Disguised Evidence Vault</h4>
-          <p class="module-desc">Cryptographically preserve extortion chats, photos, and voice notes behind instant calculator camouflage.</p>
-          <button type="button" class="btn-module-vault" data-open-workspace="modal-feature-vault" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-vault');">
-            <span>Access Vault</span>
-            <span class="module-btn-arrow">&rarr;</span>
-          </button>
-        </div>
-
-        <!-- Leak Tracer Feature Block -->
-        <div class="module-block-leak">
-          <div class="module-header-row">
-            <span class="module-badge-leak">LEAK TRACER</span>
-            <span class="module-subtag-warn">FORENSIC WATERMARK &bull; TRACE</span>
-          </div>
-          <h4 class="module-title">Forensic Leak Tracer</h4>
-          <p class="module-desc">Embed forensic invisible signatures into media or trace circulating leaked photos to the recipient.</p>
-          <button type="button" class="btn-module-leak" data-open-workspace="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
-            <span>Launch Tracer</span>
-            <span class="module-btn-arrow">&rarr;</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Modal Body (Question Flow) -->
       <div class="tell-once-body" id="tell-once-conversation-view">
         <!-- Live Voice Interactive Status Banner -->
@@ -1432,20 +1428,43 @@
             <div class="voice-pulse-ring speaking" id="voice-pulse-ring">
               <span id="voice-status-emoji" class="voice-status-text-pill">VOICE</span>
             </div>
+
+            <!-- Real-Time 5-Bar Voice Equalizer -->
+            <div class="voice-equalizer-bars" id="voice-equalizer-bars" title="Voice audio level">
+              <span class="eq-bar bar-1"></span>
+              <span class="eq-bar bar-2"></span>
+              <span class="eq-bar bar-3"></span>
+              <span class="eq-bar bar-4"></span>
+              <span class="eq-bar bar-5"></span>
+            </div>
+
             <div class="voice-status-copy">
               <div class="voice-status-headline" id="voice-status-headline">SafeMate is asking the question...</div>
               <div class="voice-status-sub" id="voice-status-sub">Listening will begin automatically when question finishes</div>
             </div>
           </div>
-          <button type="button" class="btn-voice-pause" id="btn-voice-pause">Pause Voice</button>
+
+          <div class="voice-status-actions">
+            <button type="button" class="btn-voice-done-speaking" id="btn-voice-done-speaking" style="display:none;">
+              Done Speaking &rarr;
+            </button>
+            <button type="button" class="btn-voice-pause" id="btn-voice-pause">Pause Voice</button>
+          </div>
         </div>
 
-        <!-- Question Bubble (Sharp Minimal Framing) -->
+        <!-- Question Bubble (Sharp Minimal Framing with Sanctuary Companion) -->
         <div class="tell-once-question-bubble" id="tell-once-question-box">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-            <span id="tell-once-stage-title" style="font-size:0.72rem; color:#EF233C; text-transform:uppercase; letter-spacing:0.06em; font-weight:800;">GENTLE INTAKE QUESTION</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="counselor-avatar-badge" title="Safe Space Sanctuary Companion">🌸 Sanctuary Companion</span>
+              <span id="tell-once-stage-title" style="font-size:0.72rem; color:#EF233C; text-transform:uppercase; letter-spacing:0.06em; font-weight:800;">GENTLE INTAKE QUESTION</span>
+            </div>
             <button type="button" id="btn-tell-once-audio-read" class="bubble-action-btn" title="Listen to question aloud">
-              Read Question Aloud
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+              <span id="btn-tell-once-audio-read-label">Read Question Aloud</span>
             </button>
           </div>
           <div class="tell-once-prompt-text" id="tell-once-prompt-text">

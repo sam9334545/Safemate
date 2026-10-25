@@ -201,7 +201,11 @@ def create_app() -> FastAPI:
         return RedirectResponse(url="/api/v1/chatbot/ui")
 
     @app.get("/", tags=["Root"])
-    def root():
+    def root(request: Request):
+        accept = request.headers.get("accept", "")
+        if "text/html" in accept and "application/json" not in accept:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(url="/app/")
         return {
             "name": settings.APP_NAME,
             "version": "1.0.0",

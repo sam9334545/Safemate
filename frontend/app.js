@@ -1042,9 +1042,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnGenLeakTrace) {
     btnGenLeakTrace.addEventListener('click', async () => {
       leakTracerStatusBox.style.display = 'block';
-      const recipients = (leakRecipientsInput ? leakRecipientsInput.value : '').trim() || 'Liam, Jake, Sarah';
+      const recipientsRaw = (leakRecipientsInput ? leakRecipientsInput.value : '').trim() || 'Liam, Jake, Sarah';
+      const recipientList = recipientsRaw
+        .split(/[,;\n]+/)
+        .map((r) => r.trim())
+        .filter(Boolean);
 
-      leakTracerStatusBox.innerHTML = `<div style="color:#0284c7; font-size:0.85rem;">Embedding invisible forensic watermarks for <strong>${recipients}</strong>...</div>`;
+      if (recipientList.length === 0) {
+        recipientList.push('Liam', 'Jake', 'Sarah');
+      }
+
+      leakTracerStatusBox.innerHTML = `
+        <div style="color:#0284c7; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+          <span class="pulse-dot"></span>
+          <span>Generating cryptographically signed forensic watermarks for: <strong>${recipientList.join(', ')}</strong>...</span>
+        </div>
+      `;
 
       try {
         let fileToUpload = chosenEmbedFile;
@@ -1054,45 +1067,151 @@ document.addEventListener('DOMContentLoaded', () => {
           fileToUpload = new File([sampleBlob], 'private_photo.jpg', { type: 'image/jpeg' });
         }
 
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
-        formData.append('recipients', recipients);
-        formData.append('owner_id', currentUserId);
+        // 1. Generate individual watermarked copies in parallel (ideal for mobile direct download & share)
+        const recipientResults = await Promise.all(
+          recipientList.map(async (name) => {
+            const formData = new FormData();
+            formData.append('file', fileToUpload);
+            formData.append('recipient_name', name);
+            formData.append('owner_id', currentUserId);
 
-        const res = await fetch(`${API_BASE_URL}/api/v1/watermark/batch-embed`, {
-          method: 'POST',
-          body: formData,
+            const res = await fetch(`${API_BASE_URL}/api/v1/watermark/embed`, {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData?.error?.message || `Failed to embed watermark for ${name}`);
+            }
+
+            const blob = await res.blob();
+            const cleanName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const filename = `safemate_copy_${cleanName}.png`;
+            const file = new File([blob], filename, { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
+            const fingerprint = res.headers.get('X-Watermark-Fingerprint') || '';
+            const recId = res.headers.get('X-Watermark-ID') || '';
+
+            return { name, cleanName, filename, file, blob, url, fingerprint, recId };
+          })
+        );
+
+        // 2. Also generate ZIP bundle in background for desktop users
+        let zipDownloadUrl = null;
+        try {
+          const zipForm = new FormData();
+          zipForm.append('file', fileToUpload);
+          zipForm.append('recipients', recipientList.join(', '));
+          zipForm.append('owner_id', currentUserId);
+
+          const zipRes = await fetch(`${API_BASE_URL}/api/v1/watermark/batch-embed`, {
+            method: 'POST',
+            body: zipForm,
+          });
+          if (zipRes.ok) {
+            const zipBlob = await zipRes.blob();
+            zipDownloadUrl = URL.createObjectURL(zipBlob);
+          }
+        } catch (zErr) {
+          console.warn('ZIP bundle creation non-critical error:', zErr);
+        }
+
+        // 3. Render mobile-optimized individual download & share cards
+        let cardsHtml = `
+          <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:12px; margin-bottom:12px;">
+            <div style="color:#15803d; font-weight:800; font-size:0.92rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+              <span>✅</span> <span>${recipientResults.length} Forensic Watermarked Copies Ready!</span>
+            </div>
+            <p style="font-size:0.8rem; line-height:1.45; color:#334155; margin:0 0 6px 0;">
+              Every copy looks identical to the original image, but contains an imperceptible cryptographic HMAC-SHA256 signature scattered in the blue channel pixels.
+            </p>
+            <div style="font-size:0.75rem; color:#0369a1; background:#e0f2fe; padding:6px 10px; border-radius:6px; font-weight:600;">
+              📱 <strong>Mobile Tip:</strong> Tap "Save Photo" to save directly to your Phone Photos / Gallery, or tap &amp; hold the image to save. Tap "Share" to send directly via WhatsApp or AirDrop.
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+        `;
+
+        recipientResults.forEach((item, idx) => {
+          cardsHtml += `
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:800; font-size:0.88rem; color:#0f172a;">
+                  👤 Send to: <strong style="color:#0284c7;">${item.name}</strong>
+                </span>
+                <span style="font-size:0.7rem; background:#f1f5f9; padding:2px 8px; border-radius:999px; color:#475569; font-family:monospace;">
+                  ID: ${item.recId || 'rec_' + (idx + 1)}
+                </span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:12px;">
+                <img src="${item.url}" alt="Watermarked copy for ${item.name}" style="width:72px; height:72px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" />
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <a href="${item.url}" download="${item.filename}" class="btn-primary" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px; font-size:0.78rem; text-decoration:none; background:#0f172a; color:#ffffff; font-weight:700; border-radius:6px;">
+                    <span>💾</span> <span>Save Photo (${item.name})</span>
+                  </a>
+                  <button type="button" class="btn-share-recipient" data-recipient-idx="${idx}" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:6px 12px; font-size:0.75rem; background:#f8fafc; border:1px solid #cbd5e1; color:#0f172a; font-weight:700; border-radius:6px; cursor:pointer;">
+                    <span>📲</span> <span>Share Photo / WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
         });
 
-        if (res.ok) {
-          const zipBlob = await res.blob();
-          const downloadUrl = URL.createObjectURL(zipBlob);
-          const recipientCount = res.headers.get('X-Recipient-Count') || recipients.split(',').length;
+        cardsHtml += `</div>`;
 
-          leakTracerStatusBox.innerHTML = `
-            <div style="color:#059669; font-weight:700; margin-bottom:6px;">
-              Forensic Watermark Batch Generated!
+        if (zipDownloadUrl) {
+          cardsHtml += `
+            <div style="text-align:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
+              <a href="${zipDownloadUrl}" download="safemate_protected_bundle.zip" class="btn-outline" style="display:inline-block; padding:8px 16px; font-size:0.78rem; text-decoration:none; color:#0f172a; border:1px solid #0f172a; font-weight:700; border-radius:6px;">
+                📦 Download All in One ZIP Archive (Laptop / Desktop)
+              </a>
             </div>
-            <div style="font-size:0.82rem; line-height:1.5; color:#334155; margin-bottom:10px;">
-              Created ${recipientCount} individually signed copies with HMAC-SHA256 signatures for: <em>${recipients}</em>.<br>
-              Every copy looks identical to the naked eye, but uniquely identifies the leaker if distributed without consent.
-            </div>
-            <a href="${downloadUrl}" download="safemate_protected_bundle.zip" class="btn-primary" style="display:inline-block; text-align:center; padding:10px 18px; font-size:12px; text-decoration:none; background:#0B132B; border:1.5px solid #0B132B; color:#ffffff; font-weight:800; text-transform:uppercase;">
-              Download Watermarked ZIP Bundle
-            </a>
           `;
-        } else {
-          throw new Error('Failed to embed batch');
         }
+
+        leakTracerStatusBox.innerHTML = cardsHtml;
+
+        // Attach Web Share API triggers for each recipient button
+        leakTracerStatusBox.querySelectorAll('.btn-share-recipient').forEach((shareBtn) => {
+          shareBtn.addEventListener('click', async () => {
+            const idx = parseInt(shareBtn.getAttribute('data-recipient-idx'), 10);
+            const item = recipientResults[idx];
+            if (!item) return;
+
+            if (navigator.canShare && navigator.canShare({ files: [item.file] })) {
+              try {
+                await navigator.share({
+                  files: [item.file],
+                  title: `Protected Photo for ${item.name}`,
+                  text: `Confidential protected photo for ${item.name} via SafeMate Leak Tracer.`,
+                });
+              } catch (shareErr) {
+                if (shareErr.name !== 'AbortError') {
+                  console.warn('Share error:', shareErr);
+                }
+              }
+            } else {
+              // Fallback for browsers without Web Share: open in new tab for direct long-press
+              const w = window.open(item.url, '_blank');
+              if (!w) {
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.download = item.filename;
+                a.click();
+              }
+            }
+          });
+        });
       } catch (err) {
+        console.error('Leak Tracer generation error:', err);
         leakTracerStatusBox.innerHTML = `
-          <div style="color:#059669; font-weight:700; margin-bottom:4px;">
-            3 Unique Invisible Watermarked Copies Created
-          </div>
-          <div style="font-size:0.82rem; line-height:1.5; color:#334155;">
-            • Copy 1 (Liam): Tag <code>TRC-891-LIAM</code> (Embedded)<br>
-            • Copy 2 (Jake): Tag <code>TRC-892-JAKE</code> (Embedded)<br>
-            • Copy 3 (Sarah): Tag <code>TRC-893-SARAH</code> (Embedded)
+          <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px; color:#b91c1c;">
+            <div style="font-weight:700; font-size:0.88rem; margin-bottom:4px;">Embedding Error</div>
+            <div style="font-size:0.8rem; line-height:1.4;">${err.message || 'Could not connect to backend server. Make sure the backend server is running on http://localhost:8000.'}</div>
           </div>
         `;
       }
@@ -1938,11 +2057,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // 10. Tell-Once Trauma-Informed Intake Interactive Controller
+  // 10. Tell-Once Safe Space Sanctuary & Advanced Voice Audio Engine
   // ---------------------------------------------------------------------------
   const tellOnceModal = document.getElementById('tellOnceModal') || document.getElementById('tell-once-modal');
   const btnNavTellOnce = document.getElementById('btn-nav-tell-once');
   const btnHeroTellOnce = document.getElementById('btn-hero-tell-once');
+  const ctaTellOnceBtn = document.getElementById('cta-tell-once-btn');
+  const openTellOnceBtnDirect = document.getElementById('openTellOnceBtn');
   const btnCardTellOnceEn = document.getElementById('btn-card-tell-once-en');
   const btnCardTellOnceHi = document.getElementById('btn-card-tell-once-hi');
   const btnCardBreatherOpen = document.getElementById('btn-card-breather-open');
@@ -1960,17 +2081,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const voiceLiveStatusBar = document.getElementById('voice-live-status-bar');
   const voicePulseRing = document.getElementById('voice-pulse-ring');
   const voiceStatusEmoji = document.getElementById('voice-status-emoji');
+  const voiceEqualizerBars = document.getElementById('voice-equalizer-bars');
   const voiceStatusHeadline = document.getElementById('voice-status-headline');
   const voiceStatusSub = document.getElementById('voice-status-sub');
   const btnVoicePause = document.getElementById('btn-voice-pause');
-  const tellOnceDocBadgeTitle = document.getElementById('tell-once-doc-badge-title');
+  const btnVoiceDoneSpeaking = document.getElementById('btn-voice-done-speaking');
 
+  const btnVoiceTest = document.getElementById('btn-voice-test');
+  const btnVoiceReplay = document.getElementById('btn-voice-replay');
+  const voiceVolumeSlider = document.getElementById('voice-volume-slider');
+  const voiceSpeedSelect = document.getElementById('voice-speed-select');
+  const voiceVolIcon = document.getElementById('voice-vol-icon');
+
+  const tellOnceDocBadgeTitle = document.getElementById('tell-once-doc-badge-title');
   const tellOnceProgressFill = document.getElementById('tell-once-progress-fill');
   const tellOnceStepLabel = document.getElementById('tell-once-step-label');
   const tellOnceStageTitle = document.getElementById('tell-once-stage-title');
   const tellOncePromptText = document.getElementById('tell-once-prompt-text');
   const tellOnceAffirmationText = document.getElementById('tell-once-affirmation-text');
   const btnTellOnceAudioRead = document.getElementById('btn-tell-once-audio-read');
+  const btnTellOnceAudioReadLabel = document.getElementById('btn-tell-once-audio-read-label');
   const tellOnceChipsContainer = document.getElementById('tell-once-chips-container');
   const btnTellOnceMic = document.getElementById('btn-tell-once-mic');
   const tellOnceUserInput = document.getElementById('tell-once-user-input');
@@ -1998,6 +2128,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let isListeningSpeech = false;
   let isVoiceModeActive = true; // Auto-Voice Ask & Answer Loop
   let voiceSilenceTimer = null;
+  let speechKeepAliveTimer = null;
+
+  let currentVoiceVolume = 1.0;
+  let currentVoiceRate = 0.95;
+  let cachedSystemVoices = [];
+  let currentLastQuestionPrompt = '';
 
   const STEP_TITLES_EN = [
     'Step 1 of 6: Physical Safety Check',
@@ -2017,12 +2153,149 @@ document.addEventListener('DOMContentLoaded', () => {
     'चरण 6/6: समाधान और वैधानिक फाइलिंग',
   ];
 
+  // ---------------------------------------------------------------------------
+  // Web Audio Context & Gentle Ambient Chime Engine
+  // ---------------------------------------------------------------------------
+  let audioCtxInstance = null;
+
+  function unlockAudioContext() {
+    try {
+      if (!audioCtxInstance) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtxInstance = new AudioContextClass();
+      }
+      if (audioCtxInstance && audioCtxInstance.state === 'suspended') {
+        audioCtxInstance.resume();
+      }
+    } catch (e) {}
+
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.resume();
+      } catch (e) {}
+    }
+  }
+
+  // Pre-listen globally for user interaction to unblock audio
+  ['click', 'touchstart', 'keydown'].forEach((evt) => {
+    window.addEventListener(evt, unlockAudioContext, { once: true, passive: true });
+  });
+
+  function playGentleChime(type = 'bell') {
+    if (currentVoiceVolume <= 0) return;
+    try {
+      unlockAudioContext();
+      if (!audioCtxInstance) return;
+
+      const now = audioCtxInstance.currentTime;
+      const osc1 = audioCtxInstance.createOscillator();
+      const osc2 = audioCtxInstance.createOscillator();
+      const gainNode = audioCtxInstance.createGain();
+
+      gainNode.connect(audioCtxInstance.destination);
+      gainNode.gain.setValueAtTime(0.001, now);
+      const targetGain = 0.14 * currentVoiceVolume;
+
+      if (type === 'test') {
+        // Soothing warm major triad
+        osc1.frequency.setValueAtTime(523.25, now); // C5
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.18); // E5
+        osc2.frequency.setValueAtTime(659.25, now);
+        osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.22); // G5
+        gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.04);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.9);
+        osc2.stop(now + 0.9);
+      } else {
+        // Subtle attention chime before asking question
+        osc1.frequency.setValueAtTime(440, now); // A4
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+        gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.03);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.6);
+      }
+    } catch (err) {
+      console.warn('Audio chime notice:', err);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Speech Synthesis (Text-to-Speech) with Smart Voice Fallback
+  // ---------------------------------------------------------------------------
+  function loadAvailableVoices() {
+    if (!('speechSynthesis' in window)) return;
+    cachedSystemVoices = window.speechSynthesis.getVoices() || [];
+  }
+
+  if ('speechSynthesis' in window) {
+    loadAvailableVoices();
+    window.speechSynthesis.onvoiceschanged = () => {
+      loadAvailableVoices();
+    };
+  }
+
+  function getBestSpeechVoice(lang) {
+    if (!cachedSystemVoices || cachedSystemVoices.length === 0) {
+      loadAvailableVoices();
+    }
+    const voices = cachedSystemVoices || [];
+    if (voices.length === 0) return null;
+
+    if (lang === 'hi') {
+      // Look for Hindi voices
+      const hiVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().startsWith('hi') ||
+          v.name.toLowerCase().includes('hindi') ||
+          v.name.toLowerCase().includes('swara') ||
+          v.name.toLowerCase().includes('kalpana') ||
+          v.name.toLowerCase().includes('hemant')
+      );
+      if (hiVoice) return hiVoice;
+      const enInVoice = voices.find((v) => v.lang.toLowerCase().includes('in') || v.name.toLowerCase().includes('india'));
+      if (enInVoice) return enInVoice;
+    }
+
+    // English natural voice priority
+    const preferredEnglish = voices.find(
+      (v) =>
+        v.name.includes('Natural') ||
+        v.name.includes('Zira') ||
+        v.name.includes('Jenny') ||
+        v.name.includes('Google UK English Female') ||
+        v.name.includes('Google US English') ||
+        v.name.includes('Samantha') ||
+        v.lang === 'en-IN' ||
+        v.lang === 'en-US' ||
+        v.lang === 'en-GB'
+    );
+    if (preferredEnglish) return preferredEnglish;
+
+    return voices.find((v) => v.lang.toLowerCase().startsWith('en')) || voices[0] || null;
+  }
+
   function openTellOnceModal(lang = 'en') {
     if (!tellOnceModal) return;
+    unlockAudioContext();
     tellOnceLanguage = lang;
     updateLanguageButtons();
+
+    // Ensure conversation view is shown and dossier view is hidden
+    if (tellOnceConversationView) tellOnceConversationView.style.display = 'flex';
+    if (tellOnceDossierView) tellOnceDossierView.style.display = 'none';
+
+    tellOnceModal.style.display = 'flex';
     tellOnceModal.classList.add('active');
-    if (!tellOnceIntakeId) {
+    document.body.style.overflow = 'hidden';
+
+    // If no active intake, or if previous session was completed, start fresh at Step 1!
+    if (!tellOnceIntakeId || tellOnceDossierData) {
+      tellOnceIntakeId = null;
+      tellOnceDossierData = null;
       initiateTellOnceIntake(tellOnceLanguage);
     } else if (tellOncePromptText && isVoiceModeActive) {
       speakQuestionAndListen(tellOncePromptText.textContent);
@@ -2030,9 +2303,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeTellOnceModal() {
-    if (tellOnceModal) tellOnceModal.classList.remove('active');
+    if (tellOnceModal) {
+      tellOnceModal.style.display = 'none';
+      tellOnceModal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
     stopSpeechRecognition();
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    clearInterval(speechKeepAliveTimer);
     hideVoiceStatus();
   }
 
@@ -2043,10 +2321,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Visual status indicators for the voice banner
   function setVoiceStatus(mode, headline, sub = '') {
     if (!voiceLiveStatusBar) return;
     voiceLiveStatusBar.style.display = 'flex';
+    voiceLiveStatusBar.className = `voice-live-status-bar ${mode}`;
+
     if (voicePulseRing) {
       voicePulseRing.className = `voice-pulse-ring ${mode}`;
     }
@@ -2062,134 +2341,289 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function hideVoiceStatus() {
-    if (voiceLiveStatusBar) voiceLiveStatusBar.style.display = 'none';
+    if (voiceLiveStatusBar) {
+      voiceLiveStatusBar.style.display = 'none';
+      voiceLiveStatusBar.className = 'voice-live-status-bar';
+    }
+    if (btnTellOnceAudioReadLabel) {
+      btnTellOnceAudioReadLabel.textContent = 'Read Question Aloud';
+    }
+    if (btnTellOnceAudioRead) {
+      btnTellOnceAudioRead.classList.remove('speaking');
+    }
+    if (btnVoiceDoneSpeaking) {
+      btnVoiceDoneSpeaking.style.display = 'none';
+    }
   }
 
-  // Speak question gently and transition to voice listening
-  function speakQuestionAndListen(questionText) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    stopSpeechRecognition();
-
-    if (!isVoiceModeActive) {
-      hideVoiceStatus();
+  function speakQuestionAndListen(questionText, autoListenAfter = true) {
+    if (!('speechSynthesis' in window)) {
+      console.warn('SpeechSynthesis unavailable in this browser environment.');
       return;
     }
 
-    const cleanText = (questionText || '').replace(/[*#_]/g, '').trim();
+    unlockAudioContext();
+    window.speechSynthesis.cancel();
+    stopSpeechRecognition();
+    clearInterval(speechKeepAliveTimer);
+
+    const cleanText = (questionText || '').replace(/[*#_\[\]`]/g, '').trim();
     if (!cleanText) return;
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
-    utterance.rate = 0.94; // Warm, supportive, conversational pace
-    utterance.pitch = 1.0;
+    currentLastQuestionPrompt = cleanText;
 
-    const headline = tellOnceLanguage === 'hi' ? 'सेफमेट सवाल पूछ रही है...' : 'SafeMate is asking the question...';
+    // Play soft cue chime
+    playGentleChime('bell');
+
+    if (btnTellOnceAudioReadLabel) {
+      btnTellOnceAudioReadLabel.textContent = 'Speaking...';
+    }
+    if (btnTellOnceAudioRead) {
+      btnTellOnceAudioRead.classList.add('speaking');
+    }
+
+    const headline = tellOnceLanguage === 'hi' ? 'सेफमेट सवाल पूछ रही है...' : 'SafeMate is speaking...';
     const sub = tellOnceLanguage === 'hi' ? 'सवाल पूरा होते ही माइक्रोफ़ोन आपकी आवाज सुनेगा' : 'Listening will start automatically when question completes';
     setVoiceStatus('speaking', headline, sub);
 
-    utterance.onend = () => {
-      if (
-        isVoiceModeActive &&
-        tellOnceModal &&
-        tellOnceModal.classList.contains('active') &&
-        tellOnceConversationView &&
-        tellOnceConversationView.style.display !== 'none'
-      ) {
-        setTimeout(() => {
-          startSpeechRecognitionWithAutoSubmit();
-        }, 350);
-      } else {
+    setTimeout(() => {
+      try {
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-US';
+        utterance.rate = currentVoiceRate;
+        utterance.volume = currentVoiceVolume;
+        utterance.pitch = 1.0;
+
+        const bestVoice = getBestSpeechVoice(tellOnceLanguage);
+        if (bestVoice) {
+          utterance.voice = bestVoice;
+        }
+
+        utterance.onend = () => {
+          clearInterval(speechKeepAliveTimer);
+          if (btnTellOnceAudioReadLabel) btnTellOnceAudioReadLabel.textContent = 'Read Question Aloud';
+          if (btnTellOnceAudioRead) btnTellOnceAudioRead.classList.remove('speaking');
+
+          if (
+            isVoiceModeActive &&
+            autoListenAfter &&
+            tellOnceModal &&
+            tellOnceModal.classList.contains('active') &&
+            tellOnceConversationView &&
+            tellOnceConversationView.style.display !== 'none'
+          ) {
+            setTimeout(() => {
+              startSpeechRecognitionWithAutoSubmit();
+            }, 300);
+          } else {
+            hideVoiceStatus();
+          }
+        };
+
+        utterance.onerror = (e) => {
+          clearInterval(speechKeepAliveTimer);
+          if (btnTellOnceAudioReadLabel) btnTellOnceAudioReadLabel.textContent = 'Read Question Aloud';
+          if (btnTellOnceAudioRead) btnTellOnceAudioRead.classList.remove('speaking');
+          console.warn('SpeechSynthesis notice:', e);
+          if (isVoiceModeActive && autoListenAfter) {
+            setTimeout(() => startSpeechRecognitionWithAutoSubmit(), 200);
+          } else {
+            hideVoiceStatus();
+          }
+        };
+
+        speechKeepAliveTimer = setInterval(() => {
+          if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          } else {
+            clearInterval(speechKeepAliveTimer);
+          }
+        }, 7000);
+
+        window.speechSynthesis.resume();
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('Could not launch speech utterance:', err);
         hideVoiceStatus();
       }
-    };
-
-    utterance.onerror = () => {
-      hideVoiceStatus();
-    };
-
-    window.speechSynthesis.speak(utterance);
+    }, 60);
   }
 
-  // Continuous speech recognition that auto-submits upon conversational pause
-  function startSpeechRecognitionWithAutoSubmit() {
+  // Real-time microphone audio visualizer
+  let micAudioStream = null;
+  let micAudioContext = null;
+  let micAnalyserNode = null;
+  let micDataArray = null;
+  let micAnimFrameId = null;
+
+  async function startMicVisualizer() {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      if (!micAudioStream) {
+        micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!micAudioContext) micAudioContext = new AudioCtx();
+      if (micAudioContext.state === 'suspended') await micAudioContext.resume();
+
+      const source = micAudioContext.createMediaStreamSource(micAudioStream);
+      micAnalyserNode = micAudioContext.createAnalyser();
+      micAnalyserNode.fftSize = 64;
+      source.connect(micAnalyserNode);
+
+      const bufferLength = micAnalyserNode.frequencyBinCount;
+      micDataArray = new Uint8Array(bufferLength);
+
+      const eqBars = document.querySelectorAll('#voice-equalizer-bars .eq-bar');
+      function drawBars() {
+        if (!isListeningSpeech) return;
+        micAnimFrameId = requestAnimationFrame(drawBars);
+        micAnalyserNode.getByteFrequencyData(micDataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) sum += micDataArray[i];
+        const avg = sum / bufferLength;
+
+        eqBars.forEach((bar, idx) => {
+          const val = micDataArray[idx * 2] || avg;
+          const heightScale = Math.max(0.2, Math.min(1.5, (val / 110) * 1.6));
+          bar.style.transform = `scaleY(${heightScale})`;
+        });
+      }
+      drawBars();
+    } catch (e) {
+      console.warn('Microphone visualizer optional fallback:', e);
+    }
+  }
+
+  function stopMicVisualizer() {
+    if (micAnimFrameId) cancelAnimationFrame(micAnimFrameId);
+    micAnimFrameId = null;
+    const eqBars = document.querySelectorAll('#voice-equalizer-bars .eq-bar');
+    eqBars.forEach((bar) => { bar.style.transform = ''; });
+    if (micAudioStream) {
+      micAudioStream.getTracks().forEach((track) => track.stop());
+      micAudioStream = null;
+    }
+  }
+
+  let accumulatedSpokenTranscript = '';
+
+  function startSpeechRecognitionWithAutoSubmit(resetAccumulated = true) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       hideVoiceStatus();
+      alert('Voice microphone input is not supported in this browser. Please type directly into the input bar.');
       return;
     }
 
-    stopSpeechRecognition();
+    if (resetAccumulated) {
+      accumulatedSpokenTranscript = (tellOnceUserInput && tellOnceUserInput.value) ? tellOnceUserInput.value.trim() : '';
+    }
+
+    stopSpeechRecognition(false);
+    unlockAudioContext();
+    startMicVisualizer();
 
     try {
       speechRecInstance = new SpeechRecognition();
-      speechRecInstance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+      if (tellOnceLanguage === 'hi') {
+        speechRecInstance.lang = 'hi-IN';
+      } else {
+        speechRecInstance.lang = (navigator.language && navigator.language.startsWith('en')) ? navigator.language : 'en-IN';
+      }
       speechRecInstance.continuous = true;
       speechRecInstance.interimResults = true;
+      speechRecInstance.maxAlternatives = 1;
 
-      const headline = tellOnceLanguage === 'hi' ? 'आपकी आवाज सुन रहे हैं... बोलिए...' : 'Listening to you... Speak freely...';
-      const sub = tellOnceLanguage === 'hi' ? 'बोलना बंद करते ही आपका जवाब अपने-आप दर्ज होगा' : 'Pausing your speech will auto-submit your response';
+      const headline = tellOnceLanguage === 'hi'
+        ? '🎙️ सेफमेट आपकी आवाज़ सुन रही है... बोलिए...'
+        : '🎙️ SafeMate is listening to your voice... Speak freely...';
+      const sub = tellOnceLanguage === 'hi'
+        ? 'बोलने के बाद रुकें या "Done Speaking" पर क्लिक करें'
+        : 'Speak at your own pace. Click "Done Speaking" or wait when finished.';
       setVoiceStatus('listening', headline, sub);
+
       if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
+      if (btnVoiceDoneSpeaking) btnVoiceDoneSpeaking.style.display = 'inline-block';
       isListeningSpeech = true;
 
-      let accumulated = '';
-
       speechRecInstance.onresult = (e) => {
-        let interim = '';
+        let interimText = '';
         for (let i = e.resultIndex; i < e.results.length; ++i) {
           if (e.results[i].isFinal) {
-            accumulated += e.results[i][0].transcript + ' ';
+            const finalChunk = e.results[i][0].transcript.trim();
+            if (finalChunk) {
+              accumulatedSpokenTranscript = accumulatedSpokenTranscript
+                ? `${accumulatedSpokenTranscript} ${finalChunk}`
+                : finalChunk;
+            }
           } else {
-            interim += e.results[i][0].transcript;
+            interimText += e.results[i][0].transcript;
           }
         }
 
-        const currentSpeech = (accumulated + ' ' + interim).trim();
-        if (tellOnceUserInput && currentSpeech) {
-          tellOnceUserInput.value = currentSpeech;
+        const currentFull = (accumulatedSpokenTranscript + (interimText ? ' ' + interimText : '')).trim();
+        if (tellOnceUserInput && currentFull) {
+          tellOnceUserInput.value = currentFull;
         }
 
         clearTimeout(voiceSilenceTimer);
-        if (currentSpeech.length > 1) {
+
+        if (currentFull.length > 0) {
           setVoiceStatus(
             'listening',
-            tellOnceLanguage === 'hi' ? 'आपकी आवाज दर्ज हो रही है...' : 'Hearing your voice...',
-            `"${currentSpeech.slice(-50)}"`
+            tellOnceLanguage === 'hi' ? '🎙️ आपकी बात रिकॉर्ड हो रही है...' : '🎙️ Hearing your voice loud & clear...',
+            `"${currentFull.slice(-65)}"`
           );
 
-          // 1.5 seconds of silence triggers automated submission
+          // Generous 5-second silence buffer before auto-submitting
           voiceSilenceTimer = setTimeout(() => {
-            if (isListeningSpeech && currentSpeech.trim()) {
+            if (isListeningSpeech && currentFull.trim()) {
               stopSpeechRecognition();
               setVoiceStatus(
                 'processing',
-                tellOnceLanguage === 'hi' ? 'जवाब दर्ज हो रहा है...' : 'Processing your answer...',
-                tellOnceLanguage === 'hi' ? 'अगला सवाल तैयार हो रहा है' : 'Preparing next question...'
+                tellOnceLanguage === 'hi' ? '✨ जवाब दर्ज हो रहा है...' : '✨ Submitting your answer...',
+                tellOnceLanguage === 'hi' ? 'अगला सवाल तैयार हो रहा है...' : 'Preparing next question...'
               );
-              submitTellOnceTurn(currentSpeech.trim());
+              submitTellOnceTurn(currentFull.trim());
             }
-          }, 1500);
+          }, 5000);
         }
       };
 
       speechRecInstance.onerror = (e) => {
-        console.warn('SpeechRecognition error:', e.error);
+        console.warn('SpeechRecognition status:', e.error);
         if (e.error === 'no-speech') {
           setVoiceStatus(
             'listening',
-            tellOnceLanguage === 'hi' ? 'हम सुन रहे हैं... आप जब चाहें बोल सकते हैं' : 'Ready when you are... Speak freely'
+            tellOnceLanguage === 'hi' ? '🎙️ हम सुन रहे हैं... आप जब चाहें आराम से बोलें' : '🎙️ SafeMate is listening... Speak whenever you are ready'
           );
-        } else {
+        } else if (e.error === 'not-allowed') {
           stopSpeechRecognition();
           hideVoiceStatus();
+          alert('Microphone access was denied. Please allow microphone permissions in your browser URL bar.');
+        } else if (e.error === 'network') {
+          console.warn('Speech recognition network notice, reconnecting...');
         }
       };
 
       speechRecInstance.onend = () => {
-        if (isListeningSpeech) {
+        if (isListeningSpeech && tellOnceModal && tellOnceModal.classList.contains('active')) {
+          setTimeout(() => {
+            if (isListeningSpeech && tellOnceModal && tellOnceModal.classList.contains('active')) {
+              try {
+                startSpeechRecognitionWithAutoSubmit(false);
+              } catch (err) {
+                console.warn('Re-start speech error:', err);
+              }
+            }
+          }, 150);
+        } else {
           isListeningSpeech = false;
           if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
+          if (btnVoiceDoneSpeaking) btnVoiceDoneSpeaking.style.display = 'none';
+          stopMicVisualizer();
           hideVoiceStatus();
         }
       };
@@ -2202,12 +2636,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function stopSpeechRecognition() {
+  function stopSpeechRecognition(stopVis = true) {
     isListeningSpeech = false;
     clearTimeout(voiceSilenceTimer);
     if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
+    if (btnVoiceDoneSpeaking) btnVoiceDoneSpeaking.style.display = 'none';
+    if (stopVis) stopMicVisualizer();
     if (speechRecInstance) {
-      try { speechRecInstance.stop(); } catch (e) {}
+      try {
+        speechRecInstance.stop();
+      } catch (e) {}
       speechRecInstance = null;
     }
   }
@@ -2278,7 +2716,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (data.is_completed) {
       loadTellOnceDossier();
-      // Read out completion announcement
       if (isVoiceModeActive && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const doneMsg = tellOnceLanguage === 'hi'
@@ -2290,7 +2727,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.speak(utter);
       }
     } else {
-      // Automatic Voice Ask & Listen Loop
       if (isVoiceModeActive) {
         speakQuestionAndListen(data.gentle_prompt);
       } else {
@@ -2449,6 +2885,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event Listeners for Tell-Once
   if (btnNavTellOnce) btnNavTellOnce.addEventListener('click', () => openTellOnceModal('en'));
   if (btnHeroTellOnce) btnHeroTellOnce.addEventListener('click', () => openTellOnceModal('en'));
+  if (ctaTellOnceBtn) ctaTellOnceBtn.addEventListener('click', () => openTellOnceModal('en'));
+  if (openTellOnceBtnDirect) openTellOnceBtnDirect.addEventListener('click', () => openTellOnceModal('en'));
   if (btnCardTellOnceEn) btnCardTellOnceEn.addEventListener('click', () => openTellOnceModal('en'));
   if (btnCardTellOnceHi) btnCardTellOnceHi.addEventListener('click', () => openTellOnceModal('hi'));
   if (dockBtnTellOnce) dockBtnTellOnce.addEventListener('click', () => openTellOnceModal('en'));
@@ -2475,6 +2913,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Audio Deck Controls
+  if (btnVoiceTest) {
+    btnVoiceTest.addEventListener('click', () => {
+      unlockAudioContext();
+      playGentleChime('test');
+      const testMsg = tellOnceLanguage === 'hi'
+        ? 'सेफमेट की आवाज़ बिल्कुल साफ़ और स्पष्ट है। आप पूरी तरह सुरक्षित हैं।'
+        : 'SafeMate sound and voice are loud and clear. You are in a safe, judgment-free space.';
+      speakQuestionAndListen(testMsg, false);
+    });
+  }
+
+  if (btnVoiceReplay) {
+    btnVoiceReplay.addEventListener('click', () => {
+      const prompt = currentLastQuestionPrompt || (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
+      if (prompt) speakQuestionAndListen(prompt, isVoiceModeActive);
+    });
+  }
+
+  if (voiceVolumeSlider) {
+    voiceVolumeSlider.addEventListener('input', () => {
+      currentVoiceVolume = parseFloat(voiceVolumeSlider.value);
+      if (voiceVolIcon) {
+        voiceVolIcon.textContent = currentVoiceVolume === 0 ? '🔇' : (currentVoiceVolume < 0.5 ? '🔉' : '🔊');
+      }
+    });
+  }
+
+  if (voiceSpeedSelect) {
+    voiceSpeedSelect.addEventListener('change', () => {
+      currentVoiceRate = parseFloat(voiceSpeedSelect.value) || 0.95;
+    });
+  }
+
+  if (btnVoiceDoneSpeaking) {
+    btnVoiceDoneSpeaking.addEventListener('click', () => {
+      clearTimeout(voiceSilenceTimer);
+      stopSpeechRecognition();
+      const val = (tellOnceUserInput ? tellOnceUserInput.value : '').trim();
+      if (val) {
+        setVoiceStatus(
+          'processing',
+          tellOnceLanguage === 'hi' ? '✨ जवाब दर्ज हो रहा है...' : '✨ Submitting your answer...',
+          tellOnceLanguage === 'hi' ? 'अगला सवाल तैयार हो रहा है...' : 'Preparing next question...'
+        );
+        submitTellOnceTurn(val);
+      } else {
+        hideVoiceStatus();
+      }
+    });
+  }
+
   if (btnVoicePause) {
     btnVoicePause.addEventListener('click', () => {
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -2483,9 +2973,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // Voice Dictation & Speech Synthesis Actions (Safely Exposed Globally)
-  // ---------------------------------------------------------------------------
+  // Voice Dictation & Speech Synthesis Actions
   function toggleSpeechRecognition(e) {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2501,7 +2989,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSpeechRecognition();
         hideVoiceStatus();
       } else {
-        startSpeechRecognitionWithAutoSubmit();
+        startSpeechRecognitionWithAutoSubmit(false);
       }
       return true;
     } catch (err) {
@@ -2526,7 +3014,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return false;
   }
 
-  // Expose on global window object for any external / inline triggers
+  // Expose on global window object
   window.toggleSpeechRecognition = toggleSpeechRecognition;
   window.readAloudQuestion = readAloudQuestion;
   window.toggleRecipeDisguise = toggleRecipeDisguise;
@@ -2544,6 +3032,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tellOnceLangEn) {
     tellOnceLangEn.addEventListener('click', () => {
       tellOnceLanguage = 'en';
+      tellOnceIntakeId = null;
       initiateTellOnceIntake('en');
     });
   }
@@ -2551,6 +3040,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tellOnceLangHi) {
     tellOnceLangHi.addEventListener('click', () => {
       tellOnceLanguage = 'hi';
+      tellOnceIntakeId = null;
       initiateTellOnceIntake('hi');
     });
   }
@@ -2603,6 +3093,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTellOnceBackToChat.addEventListener('click', () => {
       if (tellOnceConversationView) tellOnceConversationView.style.display = 'flex';
       if (tellOnceDossierView) tellOnceDossierView.style.display = 'none';
+      if (tellOncePromptText && isVoiceModeActive) {
+        speakQuestionAndListen(tellOncePromptText.textContent);
+      }
     });
   }
 
@@ -2900,13 +3393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Movement Callout CTA - Open Tell-Once Intake
-  const ctaTellOnceBtn = document.getElementById('cta-tell-once-btn');
-  if (ctaTellOnceBtn) {
-    ctaTellOnceBtn.addEventListener('click', () => {
-      openWorkspaceModal('tell-once-modal');
-    });
-  }
+
 
   // ---------------------------------------------------------------------------
   // 12. Feature Filter/Selector Tabs (Section Jumps & Modular Grid Reset)
