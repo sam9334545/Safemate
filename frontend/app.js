@@ -854,6 +854,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateVerdictStandbyState(file = null) {
     if (!deepfakeVerdictCard) return;
     deepfakeVerdictCard.style.display = 'block';
+    deepfakeVerdictCard.style.width = '100%';
+    deepfakeVerdictCard.style.flexShrink = '0';
+    deepfakeVerdictCard.style.minHeight = 'fit-content';
+    deepfakeVerdictCard.style.height = 'auto';
+    deepfakeVerdictCard.style.overflow = 'visible';
     deepfakeVerdictCard.style.border = file ? '1.5px solid #0284c7' : '1.5px solid #cbd5e1';
     deepfakeVerdictCard.style.backgroundColor = '#ffffff';
 
@@ -1107,6 +1112,11 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'Natural sensor noise pattern, authentic optical physics, and genuine camera origin.';
 
     deepfakeVerdictCard.style.display = 'block';
+    deepfakeVerdictCard.style.width = '100%';
+    deepfakeVerdictCard.style.flexShrink = '0';
+    deepfakeVerdictCard.style.minHeight = 'fit-content';
+    deepfakeVerdictCard.style.height = 'auto';
+    deepfakeVerdictCard.style.overflow = 'visible';
     deepfakeVerdictCard.style.border = `2px solid ${accentColor}`;
     deepfakeVerdictCard.style.backgroundColor = '#ffffff';
     deepfakeVerdictCard.style.boxShadow = isManipulated 
@@ -1291,9 +1301,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Scroll into view immediately so user sees result
+    // Scroll into view immediately so user sees full result card
     setTimeout(() => {
-      deepfakeVerdictCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const modalBody = deepfakeVerdictCard.closest('.workspace-modal-body');
+      if (modalBody) {
+        modalBody.scrollTo({ top: deepfakeVerdictCard.offsetTop - 16, behavior: 'smooth' });
+      } else {
+        deepfakeVerdictCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }, 60);
   }
 
@@ -1338,6 +1353,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (deepfakeVerdictCard) {
         deepfakeVerdictCard.style.display = 'block';
+        deepfakeVerdictCard.style.width = '100%';
+        deepfakeVerdictCard.style.flexShrink = '0';
+        deepfakeVerdictCard.style.minHeight = 'fit-content';
+        deepfakeVerdictCard.style.height = 'auto';
+        deepfakeVerdictCard.style.overflow = 'visible';
         deepfakeVerdictCard.style.border = '2px solid #0284c7';
         deepfakeVerdictCard.innerHTML = `
           <div style="padding: 18px 22px; background: #f0f9ff; border-left: 4px solid #0284c7; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">

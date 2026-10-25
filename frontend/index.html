@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alice&family=Karma:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20261025_05">
+  <link rel="stylesheet" href="style.css?v=20261025_06">
   <!-- MapLibre GL JS for real OpenStreetMap Interactive Maps -->
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
@@ -875,7 +875,7 @@
         </div>
 
         <!-- Structured Confidence Verdict Breakdown Container -->
-        <div id="deepfake-verdict-card" style="display: block; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); margin-top: 4px;">
+        <div id="deepfake-verdict-card" style="display: block; width: 100%; flex-shrink: 0; min-height: fit-content; height: auto; overflow: visible; background: #ffffff; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); margin-top: 6px;">
           <!-- Default / Initial Standby State (Populated dynamically) -->
           <div id="verdict-card-placeholder" style="padding: 16px 20px; background: #f8fafc; border-left: 4px solid #0B132B; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1931,6 +1931,6 @@
     window.SafeMateAuth = authState;
     window.dispatchEvent(new CustomEvent('safemate-auth-ready', { detail: { authState, demoData } }));
   </script>
-  <script src="app.js?v=20261025_05"></script>
+  <script src="app.js?v=20261025_06"></script>
 </body>
 </html>
