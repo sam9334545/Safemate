@@ -255,7 +255,14 @@ class TellOnceService:
         lang = "hi" if request.language and request.language.lower().startswith("hi") else "en"
 
         if session_id not in self.intake_sessions:
-            return self.start_intake(session_id, lang)
+            self.intake_sessions[session_id] = {
+                "intake_id": session_id,
+                "current_step_index": 1,
+                "language": lang,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "answers": {},
+                "history": [],
+            }
 
         session = self.intake_sessions[session_id]
         current_idx = session["current_step_index"]

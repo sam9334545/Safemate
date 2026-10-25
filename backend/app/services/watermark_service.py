@@ -14,7 +14,7 @@ import zipfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageOps, PngImagePlugin
 
 from app.schemas.errors import AppException, ValidationException
 from app.schemas.watermark import WatermarkAuditReport, WatermarkExtractResponse
@@ -49,6 +49,7 @@ class WatermarkService:
         recipient_id: Optional[str] = None,
         owner_id: Optional[str] = "usr_safemate",
         notes: Optional[str] = None,
+        visible_stamp: bool = True,
     ) -> Tuple[bytes, str, Dict[str, Any]]:
         """Embed a per-recipient cryptographic watermark invisibly into an image."""
         recipient_name = recipient_name.strip()
@@ -91,6 +92,19 @@ class WatermarkService:
         except Exception as exc:
             raise ValidationException(f"Unsupported or corrupted image file: {exc}")
 
+        # Burn visible forensic security watermark banner if requested
+        if visible_stamp:
+            w_img, h_img = img_rgb.size
+            bar_height = max(34, int(h_img * 0.055))
+            stamp_layer = Image.new("RGBA", (w_img, h_img), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(stamp_layer)
+            draw.rectangle([(0, h_img - bar_height), (w_img, h_img)], fill=(11, 19, 43, 225))
+            draw.line([(0, h_img - bar_height), (w_img, h_img - bar_height)], fill=(217, 4, 41, 255), width=2)
+            stamp_text = f"SAFEMATE FORENSIC COPY • FOR: {recipient_name} • TRACKING ID: {rec_id} • LEAK TRACER ACTIVE"
+            y_text = h_img - bar_height + max(4, int((bar_height - 14) / 2))
+            draw.text((12, y_text), stamp_text, fill=(255, 255, 255, 250))
+            img_rgb = Image.alpha_composite(img_rgb.convert("RGBA"), stamp_layer).convert("RGB")
+
         arr = np.array(img_rgb, dtype=np.uint8).copy()
         h, w, c = arr.shape
         total_pixels = h * w
@@ -114,9 +128,14 @@ class WatermarkService:
         arr[:, :, 2] = flat_blue.reshape(h, w)
         watermarked_img = Image.fromarray(arr, "RGB")
 
-        # Save to lossless PNG buffer
+        # Save to lossless PNG buffer with embedded PngInfo cryptographic metadata
+        png_info = PngImagePlugin.PngInfo()
+        png_info.add_text("Safemate-Watermark", raw_json.decode("utf-8"))
+        png_info.add_text("Safemate-Signature", sig.hex())
+        png_info.add_text("Safemate-Fingerprint", fingerprint)
+
         output_buffer = io.BytesIO()
-        watermarked_img.save(output_buffer, format="PNG", optimize=True)
+        watermarked_img.save(output_buffer, format="PNG", pnginfo=png_info, compress_level=1)
         encoded_bytes = output_buffer.getvalue()
 
         meta = {
@@ -139,6 +158,7 @@ class WatermarkService:
         recipients: List[str],
         owner_id: Optional[str] = "usr_safemate",
         notes: Optional[str] = None,
+        visible_stamp: bool = True,
     ) -> Tuple[bytes, str]:
         """Generate a complete ZIP bundle of individual watermarked copies for each recipient."""
         recipients = [r.strip() for r in recipients if r.strip()]
@@ -158,6 +178,7 @@ class WatermarkService:
                     recipient_name=recipient,
                     owner_id=owner_id,
                     notes=notes,
+                    visible_stamp=visible_stamp,
                 )
 
                 zf.writestr(filename, img_bytes)
@@ -184,87 +205,14 @@ class WatermarkService:
 
         return zip_buffer.getvalue(), "application/zip"
 
-    def extract(self, image_bytes: bytes) -> WatermarkExtractResponse:
-        """Inspect a suspected leaked image, extract the embedded forensic token, and identify the leaker."""
-        case_id = f"case_{uuid.uuid4().hex[:10]}"
-        now_ts = self._now_iso()
-
-        try:
-            with Image.open(io.BytesIO(image_bytes)) as pil_img:
-                pil_img = ImageOps.exif_transpose(pil_img)
-                img_rgb = pil_img.convert("RGB")
-        except Exception as exc:
-            raise ValidationException(f"Invalid image file: {exc}")
-
-        arr = np.array(img_rgb, dtype=np.uint8)
-        h, w, _ = arr.shape
-        total_pixels = h * w
-
-        flat_blue = arr[:, :, 2].reshape(-1)
-        perm = self._get_permutation(total_pixels)
-
-        # Read bitstream up to MAX_EMBED_BITS
-        sample_size = min(total_pixels, MAX_EMBED_BITS)
-        indices = perm[:sample_size]
-        raw_bits = [int(flat_blue[idx] & 1) for idx in indices]
-
-        # Majority voting across 3x redundancy triplets
-        decoded_bits = []
-        for i in range(0, len(raw_bits) - 2, 3):
-            triplet = raw_bits[i : i + 3]
-            bit = 1 if sum(triplet) >= 2 else 0
-            decoded_bits.append(bit)
-
-        # Convert bits to bytes
-        extracted = bytearray()
-        for i in range(0, len(decoded_bits) - 7, 8):
-            val = 0
-            for b in range(8):
-                val = (val << 1) | decoded_bits[i + b]
-            extracted.append(val)
-
-        # Check for magic header
-        if not extracted.startswith(MAGIC_HEADER):
-            logger.info(f"[Leak Tracer] No watermark detected in inspected image (case: {case_id}).")
-            return WatermarkExtractResponse(
-                status="no_watermark_detected",
-                detected=False,
-                confidence_score=0.0,
-                audit_report=WatermarkAuditReport(
-                    case_reference_id=case_id,
-                    cryptographic_integrity="NO_WATERMARK",
-                    evidence_affidavit="No Safemate forensic watermark signature was identified in this media.",
-                    actionable_remedies=[
-                        "Ensure the original uncompressed image file is provided.",
-                        "If the image was heavily compressed through social media screenshots, secondary visual hash screening is recommended.",
-                    ],
-                ),
-            )
-
-        # Read payload length
-        idx = len(MAGIC_HEADER)
-        length = int.from_bytes(extracted[idx : idx + 2], "big")
-        idx += 2
-
-        if len(extracted) < idx + length + 16:
-            logger.warning("[Leak Tracer] Incomplete watermark bitstream detected.")
-            return WatermarkExtractResponse(
-                status="no_watermark_detected",
-                detected=False,
-                confidence_score=0.1,
-                audit_report=WatermarkAuditReport(
-                    case_reference_id=case_id,
-                    cryptographic_integrity="TRUNCATED_BITSTREAM",
-                    evidence_affidavit="Watermark header located but bitstream was truncated or damaged.",
-                    actionable_remedies=["Upload higher resolution original capture."],
-                ),
-            )
-
-        raw_json = bytes(extracted[idx : idx + length])
-        idx += length
-        sig = bytes(extracted[idx : idx + 16])
-
-        # Verify HMAC integrity
+    def _build_match_response(
+        self,
+        raw_json: bytes,
+        sig: bytes,
+        case_id: str,
+        now_ts: str,
+    ) -> WatermarkExtractResponse:
+        """Helper to build a WatermarkExtractResponse from validated or inspected payload."""
         expected_sig = hmac.new(self.secret_key.encode("utf-8"), raw_json, hashlib.sha256).digest()[:16]
         is_tampered = sig != expected_sig
 
@@ -333,6 +281,106 @@ class WatermarkService:
                 actionable_remedies=remedies,
             ),
         )
+
+    def extract(self, image_bytes: bytes) -> WatermarkExtractResponse:
+        """Inspect a suspected leaked image, extract the embedded forensic token, and identify the leaker."""
+        case_id = f"case_{uuid.uuid4().hex[:10]}"
+        now_ts = self._now_iso()
+
+        meta_json_str = None
+        meta_sig_hex = None
+
+        try:
+            with Image.open(io.BytesIO(image_bytes)) as pil_img:
+                # Check for embedded PNG cryptographic chunk
+                if hasattr(pil_img, "info") and isinstance(pil_img.info, dict):
+                    meta_json_str = pil_img.info.get("Safemate-Watermark")
+                    meta_sig_hex = pil_img.info.get("Safemate-Signature")
+
+                pil_img = ImageOps.exif_transpose(pil_img)
+                img_rgb = pil_img.convert("RGB")
+        except Exception as exc:
+            raise ValidationException(f"Invalid image file: {exc}")
+
+        # Layer 1: Check metadata chunk if present and authentic
+        if meta_json_str:
+            try:
+                raw_json = meta_json_str.encode("utf-8")
+                sig = bytes.fromhex(meta_sig_hex) if meta_sig_hex else b""
+                logger.info(f"[Leak Tracer] Recovered cryptographic PNG metadata token (case: {case_id}).")
+                return self._build_match_response(raw_json, sig, case_id, now_ts)
+            except Exception as e:
+                logger.warning(f"[Leak Tracer] Failed parsing metadata chunk: {e}, falling back to stego bitstream.")
+
+        # Layer 2: Decouple and inspect steganographic bitstream from blue channel
+        arr = np.array(img_rgb, dtype=np.uint8)
+        h, w, _ = arr.shape
+        total_pixels = h * w
+
+        flat_blue = arr[:, :, 2].reshape(-1)
+        perm = self._get_permutation(total_pixels)
+
+        # Read bitstream up to MAX_EMBED_BITS
+        sample_size = min(total_pixels, MAX_EMBED_BITS)
+        indices = perm[:sample_size]
+        raw_bits = [int(flat_blue[idx] & 1) for idx in indices]
+
+        # Majority voting across 3x redundancy triplets
+        decoded_bits = []
+        for i in range(0, len(raw_bits) - 2, 3):
+            triplet = raw_bits[i : i + 3]
+            bit = 1 if sum(triplet) >= 2 else 0
+            decoded_bits.append(bit)
+
+        # Convert bits to bytes
+        extracted = bytearray()
+        for i in range(0, len(decoded_bits) - 7, 8):
+            val = 0
+            for b in range(8):
+                val = (val << 1) | decoded_bits[i + b]
+            extracted.append(val)
+
+        # Check for magic header
+        if not extracted.startswith(MAGIC_HEADER):
+            logger.info(f"[Leak Tracer] No watermark detected in inspected image (case: {case_id}).")
+            return WatermarkExtractResponse(
+                status="no_watermark_detected",
+                detected=False,
+                confidence_score=0.0,
+                audit_report=WatermarkAuditReport(
+                    case_reference_id=case_id,
+                    cryptographic_integrity="NO_WATERMARK",
+                    evidence_affidavit="No Safemate forensic watermark signature was identified in this media.",
+                    actionable_remedies=[
+                        "Ensure the original uncompressed image file is provided.",
+                        "If the image was heavily compressed through social media screenshots, secondary visual hash screening is recommended.",
+                    ],
+                ),
+            )
+
+        # Read payload length
+        idx = len(MAGIC_HEADER)
+        length = int.from_bytes(extracted[idx : idx + 2], "big")
+        idx += 2
+
+        if len(extracted) < idx + length + 16:
+            logger.warning("[Leak Tracer] Incomplete watermark bitstream detected.")
+            return WatermarkExtractResponse(
+                status="no_watermark_detected",
+                detected=False,
+                confidence_score=0.1,
+                audit_report=WatermarkAuditReport(
+                    case_reference_id=case_id,
+                    cryptographic_integrity="TRUNCATED_BITSTREAM",
+                    evidence_affidavit="Watermark header located but bitstream was truncated or damaged.",
+                    actionable_remedies=["Upload higher resolution original capture."],
+                ),
+            )
+
+        raw_json = bytes(extracted[idx : idx + length])
+        idx += length
+        sig = bytes(extracted[idx : idx + 16])
+        return self._build_match_response(raw_json, sig, case_id, now_ts)
 
 
 # Global singleton instance

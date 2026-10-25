@@ -112,9 +112,16 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.CORS_ORIGINS,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["X-Request-ID"],
+        expose_headers=[
+            "X-Request-ID",
+            "Content-Disposition",
+            "X-Watermark-Recipient",
+            "X-Watermark-ID",
+            "X-Watermark-Fingerprint",
+            "X-Recipient-Count",
+        ],
     )
 
     # 3. Exception Handlers
@@ -196,6 +203,9 @@ def create_app() -> FastAPI:
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
     if frontend_dir.exists():
         app.mount("/app", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
+        assets_dir = frontend_dir / "assets"
+        if assets_dir.exists():
+            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
 
     @app.get("/chatbot", tags=["Chatbot UI"])
     def chatbot_redirect():

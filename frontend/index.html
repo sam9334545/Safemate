@@ -863,7 +863,7 @@
   </div>
 
   <!-- Modal 4: Leak Tracer Workspace (Standardized Workspace Architecture) -->
-  <div class="modal-overlay" id="modal-feature-leak" style="z-index: 99996;">
+  <div class="modal-overlay" id="modal-feature-leak" style="z-index: 100000;">
     <div class="workspace-modal-card">
       <div class="workspace-modal-header">
         <div>
@@ -911,7 +911,30 @@
           </div>
           
           <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Recipients (comma separated):</label>
-          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
+          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 14px; box-sizing: border-box; background: #ffffff;">
+
+          <!-- Watermark Protection Mode Selection -->
+          <div style="margin-bottom: 16px;">
+            <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em;">
+              Watermark Protection Type:
+            </label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label style="display: flex; align-items: flex-start; gap: 8px; padding: 10px; border: 1.5px solid #15803d; background: #f0fdf4; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #0f172a; font-weight: 600;">
+                <input type="radio" name="watermark_mode" id="watermark-mode-dual" value="dual" checked style="margin-top: 3px;">
+                <div>
+                  <div style="font-weight: 800; color: #15803d; font-size: 0.82rem;">🛡️ Visible Banner + Cryptographic Hash</div>
+                  <div style="font-size: 0.72rem; color: #64748b; font-weight: normal; margin-top: 2px;">Shows recipient tracking banner on photo + invisible stego proof.</div>
+                </div>
+              </label>
+              <label style="display: flex; align-items: flex-start; gap: 8px; padding: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #0f172a; font-weight: 600;">
+                <input type="radio" name="watermark_mode" id="watermark-mode-stealth" value="stealth" style="margin-top: 3px;">
+                <div>
+                  <div style="font-weight: 800; color: #0B132B; font-size: 0.82rem;">🕵️ Covert Stealth (100% Invisible)</div>
+                  <div style="font-size: 0.72rem; color: #64748b; font-weight: normal; margin-top: 2px;">Zero visible changes. Secret signature hidden in pixel blue channel.</div>
+                </div>
+              </label>
+            </div>
+          </div>
 
           <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width: 100%; padding: 15px; font-size: 13px; cursor: pointer; font-weight: 800; background: #D90429; color: #ffffff; border: 1.5px solid #D90429; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 4px 14px rgba(217, 4, 41, 0.25);">
             Generate Watermarked Copies (ZIP Archive)
@@ -1396,10 +1419,10 @@
         </div>
 
         <div class="tell-once-header-actions">
-          <!-- Voice Conversation Mode Toggle Button -->
-          <button type="button" class="tell-once-voice-toggle-btn active" id="btn-toggle-voice-mode" title="Toggle automatic voice asking and answering">
+          <!-- Voice Narration Mode Toggle Button -->
+          <button type="button" class="tell-once-voice-toggle-btn" id="btn-toggle-voice-mode" title="Toggle voice readout">
             <span class="voice-indicator-dot"></span>
-            <span id="voice-toggle-label">Voice Mode: ON</span>
+            <span id="voice-toggle-label">Voice Mode: OFF</span>
           </button>
 
           <!-- Bilingual Language Toggle -->

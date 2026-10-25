@@ -40,8 +40,10 @@ export default function TellOnceModal({
   const [activeDossierTab, setActiveDossierTab] = useState('fir'); // 'fir' | 'cyber' | 'lawyer' | 'evidence'
   const [copiedDossier, setCopiedDossier] = useState(false);
 
-  // Speech Recognition
+  // Speech Recognition & Synthesis
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const recognitionRef = useRef(null);
 
   const resolvedApiBase = apiBaseUrl || (typeof window !== 'undefined' && window.API_BASE_URL) || 'http://localhost:8000';
@@ -232,6 +234,26 @@ export default function TellOnceModal({
     }
   };
 
+  const speakPrompt = (textToSpeak) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const clean = (textToSpeak || promptText || '').replace(/[*#_\[\]`]/g, '').trim();
+    if (!clean) return;
+
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+    utterance.rate = 0.95;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      if (isVoiceMode) {
+        toggleMic();
+      }
+    };
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
   const handleCopyDossier = () => {
     if (!dossierData) return;
     let text = dossierData.fir_complaint_text;
@@ -319,6 +341,31 @@ export default function TellOnceModal({
             <button
               type="button"
               onClick={() => {
+                const nextMode = !isVoiceMode;
+                setIsVoiceMode(nextMode);
+                if (nextMode) {
+                  speakPrompt(promptText);
+                } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+                }
+              }}
+              style={{
+                backgroundColor: isVoiceMode ? '#be123c' : 'rgba(255, 255, 255, 0.1)',
+                border: isVoiceMode ? '1px solid #fda4af' : '1px solid rgba(255, 255, 255, 0.25)',
+                color: '#ffffff',
+                borderRadius: '4px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+              title="Toggle automatic voice narration"
+            >
+              {isVoiceMode ? '🎙️ Voice Mode: ON' : '🔇 Voice Mode: OFF'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 const nextLang = language === 'en' ? 'hi' : 'en';
                 setLanguage(nextLang);
                 startIntakeSession(nextLang);
@@ -386,9 +433,32 @@ export default function TellOnceModal({
             <>
               {/* Question Card */}
               <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
-                <span style={{ fontSize: '0.72rem', color: '#be123c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Gentle Guided Intake
-                </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.72rem', color: '#be123c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Gentle Guided Intake
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => speakPrompt(promptText)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 8px',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      backgroundColor: isSpeaking ? '#ffe4e6' : '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      color: isSpeaking ? '#be123c' : '#0f172a',
+                      cursor: 'pointer'
+                    }}
+                    title="Listen to question aloud"
+                  >
+                    <span>{isSpeaking ? '🔊' : '🔈'}</span>
+                    <span>{isSpeaking ? 'Speaking...' : 'Read Aloud'}</span>
+                  </button>
+                </div>
                 <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#090d16', margin: '8px 0 6px 0', lineHeight: 1.5 }}>
                   {promptText}
                 </p>

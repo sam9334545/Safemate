@@ -109,8 +109,8 @@ async def get_current_user(
         if email is None:
             raise credentials_exception
         token_data = TokenData(email=email)
-    except JWTError:
-        raise credentials_exception
+    except Exception:
+        raise credentials_exception from None
 
     user = db.query(UserModel).filter(UserModel.email == token_data.email).first()
     if user is None:

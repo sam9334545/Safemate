@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DeepfakeScannerModal from './DeepfakeScannerModal';
 import EmergencySOSModal from './EmergencySOSModal';
 import TellOnceModal from './TellOnceModal';
+import LeakTracerModal from './LeakTracerModal';
 
 /**
  * SafeMate Main Dashboard Component
@@ -10,17 +11,20 @@ import TellOnceModal from './TellOnceModal';
  * 1. AI Deepfake & Manipulation Detector -> DeepfakeScannerModal (via isDeepfakeModalOpen state)
  * 2. Emergency SOS & Instant Real Calling -> EmergencySOSModal (via isSosModalOpen state)
  * 3. Tell-Once Intake (बोलें या लिखें - सिर्फ एक बार) -> TellOnceModal (via isTellOnceModalOpen state)
+ * 4. Forensic Watermarking & Leak Tracer -> LeakTracerModal (via isLeakModalOpen state)
  */
 export default function Dashboard({ 
   apiBaseUrl = 'http://localhost:8000',
   onOpenDeepfake,
   onOpenSos,
-  onOpenTellOnce
+  onOpenTellOnce,
+  onOpenLeak
 }) {
   // Reactive boolean state for modals
   const [isDeepfakeModalOpen, setIsDeepfakeModalOpen] = useState(false);
   const [isSosModalOpen, setIsSosModalOpen] = useState(false);
   const [isTellOnceModalOpen, setIsTellOnceModalOpen] = useState(false);
+  const [isLeakModalOpen, setIsLeakModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
 
   const handleOpenDeepfake = () => {
@@ -44,6 +48,14 @@ export default function Dashboard({
     if (onOpenTellOnce) onOpenTellOnce();
     if (typeof window !== 'undefined' && window.openWorkspaceModal) {
       window.openWorkspaceModal('tell-once-modal');
+    }
+  };
+
+  const handleOpenLeak = () => {
+    setIsLeakModalOpen(true);
+    if (onOpenLeak) onOpenLeak();
+    if (typeof window !== 'undefined' && window.openWorkspaceModal) {
+      window.openWorkspaceModal('modal-feature-leak');
     }
   };
 
@@ -105,11 +117,7 @@ export default function Dashboard({
       desc: 'Embed imperceptible cryptographic recipient signatures before sharing photos. If a photo leaks, extract the watermark to pinpoint who shared it.',
       tags: ['Invisible Signatures', 'Batch ZIP Export', 'Leaker Attribution'],
       btnText: 'Open Leak Tracer',
-      onClick: () => {
-        if (typeof window !== 'undefined' && window.openWorkspaceModal) {
-          window.openWorkspaceModal('modal-feature-leak');
-        }
-      }
+      onClick: handleOpenLeak
     },
     {
       id: 'vault-section',
@@ -349,6 +357,12 @@ export default function Dashboard({
       <EmergencySOSModal
         isOpen={isSosModalOpen}
         onClose={() => setIsSosModalOpen(false)}
+        apiBaseUrl={apiBaseUrl}
+      />
+
+      <LeakTracerModal
+        isOpen={isLeakModalOpen}
+        onClose={() => setIsLeakModalOpen(false)}
         apiBaseUrl={apiBaseUrl}
       />
 

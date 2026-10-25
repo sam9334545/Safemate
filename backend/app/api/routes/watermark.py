@@ -15,6 +15,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/watermark", tags=["Forensic Leak Tracer"])
 
 
+def _parse_bool(val: Any) -> bool:
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        return val.strip().lower() not in ("false", "0", "no", "off", "none", "")
+    return bool(val)
+
+
 @router.post(
     "/embed",
     summary="Embed Invisible Recipient Watermark",
@@ -26,6 +34,7 @@ async def embed_watermark(
     recipient_id: Optional[str] = Form(None, description="Optional unique identifier for recipient"),
     owner_id: Optional[str] = Form("usr_safemate", description="SafeMate user ID of the sender"),
     notes: Optional[str] = Form(None, description="Optional sharing terms or notes"),
+    visible_stamp: Any = Form(True, description="Whether to burn visible recipient security banner"),
 ):
     """Embed an invisible watermark into an image and return the protected PNG file."""
     image_bytes = await file.read()
@@ -35,6 +44,7 @@ async def embed_watermark(
         recipient_id=recipient_id,
         owner_id=owner_id,
         notes=notes,
+        visible_stamp=_parse_bool(visible_stamp),
     )
 
     clean_name = "".join(c for c in recipient_name if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
@@ -62,6 +72,7 @@ async def batch_embed_watermarks(
     recipients: str = Form(..., description="Comma-separated or JSON list of recipient names (e.g. 'Liam, Jake, Sarah')"),
     owner_id: Optional[str] = Form("usr_safemate", description="SafeMate user ID"),
     notes: Optional[str] = Form(None, description="Optional sharing context"),
+    visible_stamp: Any = Form(True, description="Whether to burn visible recipient security banner"),
 ):
     """Batch embed watermarks for multiple recipients and return a ZIP file."""
     # Parse comma-separated or JSON array of names
@@ -90,6 +101,7 @@ async def batch_embed_watermarks(
         recipients=recipient_list,
         owner_id=owner_id,
         notes=notes,
+        visible_stamp=_parse_bool(visible_stamp),
     )
 
     return Response(

@@ -132,3 +132,43 @@ def test_watermark_health(client):
     response = client.get("/api/v1/watermark/health")
     assert response.status_code == 200
     assert response.json()["service"] == "forensic_leak_tracer"
+
+
+def test_embed_stealth_mode_without_visible_stamp(client):
+    """Verify stealth mode (visible_stamp='false') embeds invisible watermark and extracts accurately."""
+    sample_bytes = _create_sample_image(300, 300)
+    files = {"file": ("stealth.png", sample_bytes, "image/png")}
+    data = {
+        "recipient_name": "Stealth Recipient",
+        "visible_stamp": "false",
+    }
+    res = client.post("/api/v1/watermark/embed", files=files, data=data)
+    assert res.status_code == 200
+    assert res.headers["x-watermark-recipient"] == "Stealth Recipient"
+
+    # Extract back
+    extract_res = client.post(
+        "/api/v1/watermark/extract",
+        files={"file": ("stealth_leak.png", res.content, "image/png")},
+    )
+    assert extract_res.status_code == 200
+    report = extract_res.json()
+    assert report["detected"] is True
+    assert report["recipient_name"] == "Stealth Recipient"
+    assert report["confidence_score"] == 1.0
+
+
+def test_cors_watermark_headers_exposed(client):
+    """Verify CORS preflight / headers expose watermark tracking fields."""
+    sample_bytes = _create_sample_image()
+    res = client.post(
+        "/api/v1/watermark/embed",
+        files={"file": ("test.png", sample_bytes, "image/png")},
+        data={"recipient_name": "CORS Check"},
+        headers={"Origin": "http://localhost:5173"},
+    )
+    assert res.status_code == 200
+    exposed = res.headers.get("access-control-expose-headers", "")
+    assert "x-watermark-fingerprint" in exposed.lower()
+    assert "x-watermark-id" in exposed.lower()
+    assert "content-disposition" in exposed.lower()
