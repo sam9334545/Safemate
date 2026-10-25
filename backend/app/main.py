@@ -12,7 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import auth, chatbot, deepfake, detect, emergency, evidence, health, model_info, safewalk, watermark
+from app.api.routes import auth, chatbot, deepfake, detect, emergency, evidence, health, model_info, routes, safewalk, watermark
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from app.schemas.errors import AppException
@@ -186,6 +186,7 @@ def create_app() -> FastAPI:
     app.include_router(chatbot.router)
     app.include_router(auth.router)
     app.include_router(watermark.router)
+    app.include_router(routes.router)
 
     # Mount static assets for chatbot UI
     static_dir = Path(__file__).resolve().parent / "static"

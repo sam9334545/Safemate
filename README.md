@@ -83,6 +83,17 @@ When walking home at night through poorly lit alleys or unsafe transit corridors
 
 ---
 
+#### Scene 5B: Navigating the Night — SafeRoute Safety-Aware Route Planner
+When travelling home at night, the shortest path on GPS is not always the route with active human presence or reliable emergency assistance. SafeRoute compares candidate route alternatives using real OpenStreetMap geospatial data and deterministic **Night Activity Scoring**:
+
+* **Transparent Night Activity Score (0–100):** Evaluates open establishments (shops, 24/7 pharmacies, petrol pumps), spatial distribution across 250m corridor bins, longest low-activity stretches in meters, road classifications (primary, secondary, pedestrian-accessible), and proximity to police and medical assistance nodes.
+* **Interactive MapLibre GL + OpenStreetMap:** Real raster maps with live route geometry polylines, distinct accessible category markers (shops, pharmacies, hospitals, police, fuel, transit), and interactive click-to-highlight synchronization.
+* **Walking vs. Driving Mode Profiles:** Dedicated algorithmic weighting profiles for pedestrian travelers vs drivers.
+* **Honest Data Boundaries:** Never claims "100% safe" or predicts crime; clearly identifies missing or incomplete OSM opening-hours tags as "hours unknown" rather than assuming closed, and excludes unverified CCTV data via dynamic weight renormalization.
+* **Seamless SafeWalk Handoff:** The traveler reviews alternatives (e.g. Fastest vs. Higher Night Activity), selects their preferred route, and clicks **"Start SafeWalk with this Route"** to pre-fill destination and expected duration into the SafeWalk escort workflow for explicit confirmation.
+
+---
+
 ### Act III: Tell-Once — Breaking the Trauma of Repetition
 
 #### Scene 6: The Safe Space Intake Sanctuary

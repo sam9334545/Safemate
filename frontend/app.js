@@ -3863,6 +3863,9 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
       // Auto-focus first input or button inside the modal
       const focusTarget = modal.querySelector('input:not([type="hidden"]), textarea, button.btn-primary');
       if (focusTarget) setTimeout(() => focusTarget.focus(), 120);
+      if (modalId === 'modal-feature-saferoute') {
+        if (window.onSafeRouteModalOpened) window.onSafeRouteModalOpened();
+      }
     }
   }
 
@@ -4130,11 +4133,745 @@ Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary IS
 
   window.selectFeatureFilter = selectFeatureFilter;
 
-  const filterTabs = document.querySelectorAll('.filter-tab');
-  filterTabs.forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      selectFeatureFilter(tab);
+  // ---------------------------------------------------------------------------
+  // 13. SafeRoute — Safety-Aware Route Planning for Women Engine
+  // ---------------------------------------------------------------------------
+  function initSafeRoute() {
+    const originInput = document.getElementById('saferoute-origin-input');
+    const originLatEl = document.getElementById('saferoute-origin-lat');
+    const originLonEl = document.getElementById('saferoute-origin-lon');
+    const originSuggestions = document.getElementById('saferoute-origin-suggestions');
+
+    const destInput = document.getElementById('saferoute-dest-input');
+    const destLatEl = document.getElementById('saferoute-dest-lat');
+    const destLonEl = document.getElementById('saferoute-dest-lon');
+    const destSuggestions = document.getElementById('saferoute-dest-suggestions');
+
+    const btnMyLocation = document.getElementById('btn-saferoute-my-location');
+    const btnModeWalking = document.getElementById('btn-mode-walking');
+    const btnModeDriving = document.getElementById('btn-mode-driving');
+    const radioTimeNow = document.getElementById('radio-time-now');
+    const radioTimeCustom = document.getElementById('radio-time-custom');
+    const customTimeInput = document.getElementById('saferoute-custom-time');
+
+    const btnPlanRoutes = document.getElementById('btn-plan-routes');
+    const btnPlanRoutesText = document.getElementById('btn-plan-routes-text');
+    const statusBox = document.getElementById('saferoute-status-box');
+    const cardsList = document.getElementById('saferoute-cards-list');
+    const mapStatusPill = document.getElementById('saferoute-map-status');
+    const activeRouteBadge = document.getElementById('saferoute-active-route-badge');
+    const btnRecenterMap = document.getElementById('btn-recenter-map');
+    const btnNavSafeRoute = document.getElementById('btn-nav-saferoute');
+    const btnCardSafeRoute = document.getElementById('openSafeRouteBtn');
+
+    let currentMode = 'walking';
+    let saferouteMap = null;
+    let mapMarkers = [];
+    let currentAlternatives = [];
+    let selectedRouteIndex = 0;
+    let originMarker = null;
+    let destMarker = null;
+
+    // Direct modal openers
+    if (btnNavSafeRoute) {
+      btnNavSafeRoute.addEventListener('click', (e) => {
+        e.preventDefault();
+        openWorkspaceModal('modal-feature-saferoute');
+      });
+    }
+    if (btnCardSafeRoute) {
+      btnCardSafeRoute.addEventListener('click', (e) => {
+        e.preventDefault();
+        openWorkspaceModal('modal-feature-saferoute');
+      });
+    }
+
+    // Initialize MapLibre GL Map
+    function initMap() {
+      if (saferouteMap) return;
+      const mapContainer = document.getElementById('saferoute-map');
+      if (!mapContainer || typeof maplibregl === 'undefined') {
+        return;
+      }
+
+      try {
+        saferouteMap = new maplibregl.Map({
+          container: 'saferoute-map',
+          style: {
+            version: 8,
+            sources: {
+              'osm-raster-tiles': {
+                type: 'raster',
+                tiles: [
+                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+                ],
+                tileSize: 256,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+              }
+            },
+            layers: [
+              {
+                id: 'osm-tiles',
+                type: 'raster',
+                source: 'osm-raster-tiles',
+                minzoom: 0,
+                maxzoom: 19
+              }
+            ]
+          },
+          center: [77.2167, 28.6315], // Default Connaught Place, New Delhi
+          zoom: 13
+        });
+
+        saferouteMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+
+        saferouteMap.on('load', () => {
+          if (mapStatusPill) mapStatusPill.textContent = 'Map Ready (OSM)';
+        });
+      } catch (err) {
+        console.error('SafeRoute: Map initialization error:', err);
+      }
+    }
+
+    window.onSafeRouteModalOpened = () => {
+      initMap();
+      if (saferouteMap) {
+        setTimeout(() => saferouteMap.resize(), 160);
+      }
+    };
+
+    // Mode Toggle
+    if (btnModeWalking && btnModeDriving) {
+      btnModeWalking.addEventListener('click', () => {
+        currentMode = 'walking';
+        btnModeWalking.classList.add('active');
+        btnModeDriving.classList.remove('active');
+      });
+      btnModeDriving.addEventListener('click', () => {
+        currentMode = 'driving';
+        btnModeDriving.classList.add('active');
+        btnModeWalking.classList.remove('active');
+      });
+    }
+
+    // Departure Time Toggle
+    if (radioTimeNow && radioTimeCustom && customTimeInput) {
+      radioTimeNow.addEventListener('change', () => {
+        if (radioTimeNow.checked) customTimeInput.style.display = 'none';
+      });
+      radioTimeCustom.addEventListener('change', () => {
+        if (radioTimeCustom.checked) {
+          customTimeInput.style.display = 'inline-block';
+          if (!customTimeInput.value) {
+            const now = new Date();
+            customTimeInput.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+          }
+        }
+      });
+    }
+
+    // Geocoding Autocomplete Logic
+    function setupGeocoding(inputEl, latEl, lonEl, suggestionsEl) {
+      if (!inputEl || !suggestionsEl) return;
+      let debounceTimer = null;
+
+      inputEl.addEventListener('input', () => {
+        const query = inputEl.value.trim();
+        clearTimeout(debounceTimer);
+        if (query.length < 3) {
+          suggestionsEl.style.display = 'none';
+          suggestionsEl.innerHTML = '';
+          return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+          try {
+            const res = await fetch(`${API_BASE_URL}/api/v1/routes/geocode?q=${encodeURIComponent(query)}`);
+            if (!res.ok) return;
+            const items = await res.json();
+            if (!Array.isArray(items) || items.length === 0) {
+              suggestionsEl.style.display = 'none';
+              return;
+            }
+
+            suggestionsEl.innerHTML = items.map(item => `
+              <div class="saferoute-suggestion-item" data-lat="${item.lat}" data-lon="${item.lon}" data-name="${item.name.replace(/"/g, '&quot;')}">
+                <strong>${item.name}</strong>
+                ${item.display_name && item.display_name !== item.name ? `<small>${item.display_name}</small>` : ''}
+              </div>
+            `).join('');
+            suggestionsEl.style.display = 'block';
+
+            suggestionsEl.querySelectorAll('.saferoute-suggestion-item').forEach(el => {
+              el.addEventListener('click', () => {
+                inputEl.value = el.getAttribute('data-name');
+                if (latEl) latEl.value = el.getAttribute('data-lat');
+                if (lonEl) lonEl.value = el.getAttribute('data-lon');
+                suggestionsEl.style.display = 'none';
+              });
+            });
+          } catch (e) {
+            console.warn('SafeRoute geocode error:', e);
+          }
+        }, 320);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!inputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
+          suggestionsEl.style.display = 'none';
+        }
+      });
+    }
+
+    setupGeocoding(originInput, originLatEl, originLonEl, originSuggestions);
+    setupGeocoding(destInput, destLatEl, destLonEl, destSuggestions);
+
+    // Use My Location
+    if (btnMyLocation) {
+      btnMyLocation.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('Geolocation is not supported by your browser.');
+          return;
+        }
+        btnMyLocation.disabled = true;
+        btnMyLocation.innerHTML = '<span>Locating...</span>';
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            if (originLatEl) originLatEl.value = lat;
+            if (originLonEl) originLonEl.value = lon;
+            if (originInput) originInput.value = `My Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+
+            try {
+              const res = await fetch(`${API_BASE_URL}/api/v1/routes/geocode?q=${lat},${lon}`);
+              if (res.ok) {
+                const items = await res.json();
+                if (items.length > 0 && items[0].name) {
+                  originInput.value = items[0].name;
+                }
+              }
+            } catch (err) {}
+
+            btnMyLocation.disabled = false;
+            btnMyLocation.innerHTML = `
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+              <span>Current GPS Set</span>
+            `;
+          },
+          (err) => {
+            btnMyLocation.disabled = false;
+            btnMyLocation.innerHTML = `
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+              <span>Use My Location</span>
+            `;
+            if (statusBox) {
+              statusBox.style.display = 'block';
+              statusBox.className = 'saferoute-status-callout callout-warning';
+              statusBox.textContent = 'Location permission denied or unavailable. You can enter your starting address manually.';
+            }
+          },
+          { timeout: 8000, enableHighAccuracy: true }
+        );
+      });
+    }
+
+    // Popular Preset Destination Chips
+    document.querySelectorAll('.btn-preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const name = chip.getAttribute('data-name');
+        const lat = chip.getAttribute('data-lat');
+        const lon = chip.getAttribute('data-lon');
+        if (destInput) destInput.value = name;
+        if (destLatEl) destLatEl.value = lat;
+        if (destLonEl) destLonEl.value = lon;
+      });
     });
-  });
+
+    // Helper: Category Marker HTML
+    function getCategoryMarkerHtml(category) {
+      const catColors = {
+        shop: '#f59e0b',
+        pharmacy: '#10b981',
+        hospital: '#0284c7',
+        police: '#dc2626',
+        fuel: '#8b5cf6',
+        transit: '#6366f1',
+        cctv: '#94a3b8'
+      };
+      const color = catColors[category] || '#64748b';
+      return `<div style="background:${color}; width:20px; height:20px; border-radius:50%; border:2px solid #ffffff; box-shadow:0 2px 6px rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; cursor:pointer;" title="${category}"></div>`;
+    }
+
+    // Clear Map Layers and Markers
+    function clearMapLayersAndMarkers() {
+      mapMarkers.forEach(m => m.remove());
+      mapMarkers = [];
+      if (originMarker) { originMarker.remove(); originMarker = null; }
+      if (destMarker) { destMarker.remove(); destMarker = null; }
+
+      if (!saferouteMap) return;
+
+      for (let i = 0; i < 10; i++) {
+        if (saferouteMap.getLayer(`route-layer-${i}`)) {
+          saferouteMap.removeLayer(`route-layer-${i}`);
+        }
+        if (saferouteMap.getSource(`route-source-${i}`)) {
+          saferouteMap.removeSource(`route-source-${i}`);
+        }
+      }
+    }
+
+    // Highlight Selected Route on Map & in Cards
+    function highlightRoute(index) {
+      selectedRouteIndex = index;
+      if (!saferouteMap || !currentAlternatives || currentAlternatives.length === 0) return;
+
+      currentAlternatives.forEach((alt, idx) => {
+        const layerId = `route-layer-${idx}`;
+        if (saferouteMap.getLayer(layerId)) {
+          if (idx === index) {
+            saferouteMap.setPaintProperty(layerId, 'line-color', '#be123c');
+            saferouteMap.setPaintProperty(layerId, 'line-width', 6);
+            saferouteMap.setPaintProperty(layerId, 'line-opacity', 0.95);
+          } else {
+            saferouteMap.setPaintProperty(layerId, 'line-color', '#64748b');
+            saferouteMap.setPaintProperty(layerId, 'line-width', 3.5);
+            saferouteMap.setPaintProperty(layerId, 'line-opacity', 0.55);
+          }
+        }
+      });
+
+      if (activeRouteBadge && currentAlternatives[index]) {
+        activeRouteBadge.textContent = `Selected: ${currentAlternatives[index].name}`;
+      }
+
+      document.querySelectorAll('.saferoute-card').forEach((card, idx) => {
+        if (idx === index) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+    }
+
+    // Render Routes & Nearby Places on Map
+    function renderRoutesOnMap(planData) {
+      if (!saferouteMap) return;
+      clearMapLayersAndMarkers();
+
+      const alternatives = planData.alternatives || [];
+      currentAlternatives = alternatives;
+      if (alternatives.length === 0) return;
+
+      const bounds = new maplibregl.LngLatBounds();
+
+      // Add Origin Marker
+      if (planData.origin) {
+        const oEl = document.createElement('div');
+        oEl.className = 'saferoute-map-pin pin-origin';
+        oEl.innerHTML = `<span style="background:#059669; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">START</span>`;
+        originMarker = new maplibregl.Marker({ element: oEl })
+          .setLngLat([planData.origin.lon, planData.origin.lat])
+          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Origin:</strong> ${planData.origin.name}`))
+          .addTo(saferouteMap);
+        bounds.extend([planData.origin.lon, planData.origin.lat]);
+      }
+
+      // Add Destination Marker
+      if (planData.destination) {
+        const dEl = document.createElement('div');
+        dEl.className = 'saferoute-map-pin pin-destination';
+        dEl.innerHTML = `<span style="background:#be123c; color:#fff; padding:4px 8px; border-radius:12px; font-size:11px; font-weight:800; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3);">DEST</span>`;
+        destMarker = new maplibregl.Marker({ element: dEl })
+          .setLngLat([planData.destination.lon, planData.destination.lat])
+          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>Destination:</strong> ${planData.destination.name}`))
+          .addTo(saferouteMap);
+        bounds.extend([planData.destination.lon, planData.destination.lat]);
+      }
+
+      // Draw Route Polylines
+      alternatives.forEach((alt, idx) => {
+        const coords = alt.geometry.coordinates;
+        if (!coords || coords.length === 0) return;
+
+        coords.forEach(pt => bounds.extend(pt));
+
+        const sourceId = `route-source-${idx}`;
+        const layerId = `route-layer-${idx}`;
+
+        saferouteMap.addSource(sourceId, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: alt.geometry
+          }
+        });
+
+        saferouteMap.addLayer({
+          id: layerId,
+          type: 'line',
+          source: sourceId,
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': idx === selectedRouteIndex ? '#be123c' : '#64748b',
+            'line-width': idx === selectedRouteIndex ? 6 : 3.5,
+            'line-opacity': idx === selectedRouteIndex ? 0.95 : 0.55
+          }
+        });
+
+        saferouteMap.on('click', layerId, () => {
+          highlightRoute(idx);
+        });
+      });
+
+      // Draw Nearby Places Markers
+      const selectedAlt = alternatives[selectedRouteIndex] || alternatives[0];
+      const places = selectedAlt?.nearby_places || [];
+
+      places.forEach(place => {
+        const markerEl = document.createElement('div');
+        markerEl.innerHTML = getCategoryMarkerHtml(place.category);
+
+        let statusText = 'Operating Status Unknown';
+        let statusColor = '#64748b';
+        if (place.is_open === true) {
+          statusText = 'Likely Open';
+          statusColor = '#059669';
+        } else if (place.is_open === false) {
+          statusText = 'Likely Closed';
+          statusColor = '#dc2626';
+        } else if (place.hours_unknown) {
+          statusText = 'Hours Unknown (Incomplete OSM Tag)';
+          statusColor = '#d97706';
+        }
+
+        const popupContent = `
+          <div style="font-family:Inter,sans-serif; font-size:12px; max-width:210px; line-height:1.4;">
+            <strong style="font-size:13px; color:#0f172a; display:block; margin-bottom:2px;">${place.name}</strong>
+            <span style="display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; background:${statusColor}15; color:${statusColor}; margin-bottom:4px;">${statusText}</span>
+            <div style="color:#64748b; font-size:11px;">Category: <strong>${place.category}</strong></div>
+            <div style="color:#64748b; font-size:11px;">Distance to route: ~${Math.round(place.distance_to_route_meters)}m</div>
+            ${place.opening_hours ? `<div style="color:#475569; font-size:11px; margin-top:2px;">Hours: <code>${place.opening_hours}</code></div>` : ''}
+          </div>
+        `;
+
+        const marker = new maplibregl.Marker({ element: markerEl })
+          .setLngLat([place.lon, place.lat])
+          .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(popupContent))
+          .addTo(saferouteMap);
+
+        mapMarkers.push(marker);
+      });
+
+      try {
+        saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+      } catch (err) {}
+    }
+
+    // Recenter Map Handler
+    if (btnRecenterMap) {
+      btnRecenterMap.addEventListener('click', () => {
+        if (!saferouteMap || !currentAlternatives || currentAlternatives.length === 0) return;
+        const bounds = new maplibregl.LngLatBounds();
+        currentAlternatives.forEach(alt => {
+          (alt.geometry.coordinates || []).forEach(pt => bounds.extend(pt));
+        });
+        saferouteMap.fitBounds(bounds, { padding: 45, maxZoom: 16 });
+      });
+    }
+
+    // Render Route Comparison Cards
+    function renderComparisonCards(planData) {
+      if (!cardsList) return;
+      const alternatives = planData.alternatives || [];
+      if (alternatives.length === 0) {
+        cardsList.innerHTML = `<div class="saferoute-empty-notice">No route alternatives returned. Please adjust coordinates or travel mode.</div>`;
+        return;
+      }
+
+      cardsList.innerHTML = alternatives.map((alt, idx) => {
+        const score = alt.night_activity_score;
+        let scoreColor = '#64748b';
+        let scoreLabel = 'Score Unavailable';
+        if (score !== null) {
+          if (score >= 70) {
+            scoreColor = '#10b981';
+            scoreLabel = 'High Night Activity';
+          } else if (score >= 45) {
+            scoreColor = '#f59e0b';
+            scoreLabel = 'Moderate Night Activity';
+          } else {
+            scoreColor = '#ef4444';
+            scoreLabel = 'Low Mapped Activity';
+          }
+        }
+
+        const isSelected = idx === selectedRouteIndex;
+
+        return `
+          <div class="saferoute-card ${isSelected ? 'selected' : ''}" data-route-index="${idx}">
+            <div class="card-header-row">
+              <div class="card-title-group">
+                <h5 class="card-route-name">${alt.name}</h5>
+                <div class="card-badges-row">
+                  ${alt.is_fastest ? `<span class="route-badge badge-fastest">Fastest</span>` : ''}
+                  ${alt.is_highest_activity ? `<span class="route-badge badge-highest-activity">Higher Night Activity</span>` : ''}
+                  ${!alt.is_fastest && !alt.is_highest_activity ? `<span class="route-badge badge-alt">Alternative Route</span>` : ''}
+                </div>
+              </div>
+              <div class="card-metrics-quick">
+                <span class="quick-duration">${Math.round(alt.duration_minutes)} min</span>
+                <span class="quick-distance">${alt.distance_km.toFixed(1)} km</span>
+              </div>
+            </div>
+
+            <!-- Night Activity Score Visual Bar -->
+            <div class="score-display-box">
+              <div class="score-header-strip">
+                <span class="score-title">Night Activity Score:</span>
+                <strong class="score-number" style="color:${scoreColor}">${score !== null ? `${score}/100` : 'Data Unavailable'}</strong>
+                <span class="score-tag-pill" style="background:${scoreColor}20; color:${scoreColor}">${scoreLabel}</span>
+              </div>
+              <div class="score-progress-track">
+                <div class="score-progress-bar" style="width:${score !== null ? score : 0}%; background:${scoreColor};"></div>
+              </div>
+              <p class="score-disclaimer">
+                ${alt.score_breakdown.score_explanation || 'Summarizes mapped activity and support indicators. Does not predict crime or guarantee personal safety.'}
+              </p>
+            </div>
+
+            <!-- Contributing Indicators Breakdown Grid -->
+            <div class="score-components-breakdown">
+              <span class="breakdown-title">Contributing Indicators:</span>
+              <div class="components-grid">
+                ${alt.score_breakdown.components.map(c => `
+                  <div class="component-pill ${c.available ? '' : 'unavailable'}">
+                    <span class="comp-name">${c.name}:</span>
+                    <strong class="comp-val">${c.available ? `${Math.round(c.score)}/100` : 'Unavailable'}</strong>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Key Ground Indicators Table -->
+            <div class="route-ground-indicators">
+              <div class="ground-item">
+                <span class="ground-label">Open Establishments:</span>
+                <strong class="ground-val">${alt.open_establishments_count} likely open</strong>
+              </div>
+              <div class="ground-item">
+                <span class="ground-label">Unknown Hours:</span>
+                <span class="ground-val">${alt.unknown_hours_count} places (unspecified OSM)</span>
+              </div>
+              <div class="ground-item">
+                <span class="ground-label">Assistance Nodes:</span>
+                <strong class="ground-val">${alt.assistance_nodes_count} nearby (Police/Medical)</strong>
+              </div>
+              <div class="ground-item">
+                <span class="ground-label">Longest Low-Activity Segment:</span>
+                <strong class="ground-val ${alt.longest_low_activity_segment_meters > 500 ? 'text-warn' : ''}">~${Math.round(alt.longest_low_activity_segment_meters)}m</strong>
+              </div>
+              <div class="ground-item full-width">
+                <span class="ground-label">Road Hierarchy:</span>
+                <span class="ground-val">${alt.road_characteristics}</span>
+              </div>
+            </div>
+
+            <!-- Comparative Trade-Off Explanation -->
+            ${alt.trade_off_statement ? `
+              <div class="saferoute-tradeoff-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>${alt.trade_off_statement}</span>
+              </div>
+            ` : ''}
+
+            <!-- SafeWalk Handoff Action Button -->
+            <div class="card-footer-action">
+              <button type="button" class="btn-handoff-safewalk" data-route-index="${idx}">
+                <span>Start SafeWalk with this Route</span>
+                <span class="arrow">&rarr;</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Card Click Handler (Select Route)
+      cardsList.querySelectorAll('.saferoute-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.btn-handoff-safewalk')) return;
+          const idx = parseInt(card.getAttribute('data-route-index'), 10);
+          highlightRoute(idx);
+        });
+      });
+
+      // SafeWalk Handoff Button Handler (Phase 9 integration)
+      cardsList.querySelectorAll('.btn-handoff-safewalk').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.getAttribute('data-route-index'), 10);
+          const chosenRoute = alternatives[idx];
+          if (!chosenRoute) return;
+
+          // 1. Pre-fill SafeWalk Destination
+          const targetDestName = planData.destination ? planData.destination.name : (destInput ? destInput.value : 'Chosen Destination');
+          const safewalkDestInput = document.getElementById('safewalk-destination');
+          if (safewalkDestInput) {
+            safewalkDestInput.value = targetDestName;
+          }
+
+          // 2. Pre-fill SafeWalk Duration
+          const safewalkDurationEl = document.getElementById('safewalk-duration-select');
+          if (safewalkDurationEl) {
+            const minutes = Math.max(5, Math.ceil(chosenRoute.duration_minutes || 20));
+            let matchFound = false;
+            for (let opt of safewalkDurationEl.options) {
+              if (parseInt(opt.value, 10) === minutes) {
+                safewalkDurationEl.value = opt.value;
+                matchFound = true;
+                break;
+              }
+            }
+            if (!matchFound) {
+              const newOpt = new Option(`${minutes} Minutes (From SafeRoute)`, String(minutes));
+              safewalkDurationEl.add(newOpt);
+              safewalkDurationEl.value = String(minutes);
+            }
+          }
+
+          // 3. Close SafeRoute modal and open SafeWalk modal
+          if (window.closeWorkspaceModal) window.closeWorkspaceModal('modal-feature-saferoute');
+          if (window.openWorkspaceModal) window.openWorkspaceModal('modal-feature-safewalk');
+
+          // 4. Update SafeWalk Status Box with Confirmation Notice
+          const safewalkStatus = document.getElementById('safewalk-status-box');
+          if (safewalkStatus) {
+            safewalkStatus.style.display = 'block';
+            safewalkStatus.className = 'status-callout callout-info';
+            safewalkStatus.innerHTML = `
+              <strong>SafeRoute Destination Connected:</strong><br/>
+              Selected <em>${chosenRoute.name}</em> to <strong>${targetDestName}</strong> (~${Math.round(chosenRoute.duration_minutes)} mins).<br/>
+              Review your expected duration and press <strong>"Start SafeWalk Escort"</strong> below to begin verified live tracking.
+            `;
+          }
+        });
+      });
+    }
+
+    // "Find My Routes" Submission Handler
+    if (btnPlanRoutes) {
+      btnPlanRoutes.addEventListener('click', async () => {
+        const originName = (originInput ? originInput.value : '').trim();
+        const originLat = parseFloat(originLatEl ? originLatEl.value : '28.6315');
+        const originLon = parseFloat(originLonEl ? originLonEl.value : '77.2167');
+
+        const destName = (destInput ? destInput.value : '').trim();
+        const destLat = parseFloat(destLatEl ? destLatEl.value : '28.6129');
+        const destLon = parseFloat(destLonEl ? destLonEl.value : '77.2295');
+
+        if (!originName || isNaN(originLat) || isNaN(originLon)) {
+          alert('Please enter or select a valid starting point.');
+          if (originInput) originInput.focus();
+          return;
+        }
+
+        if (!destName || isNaN(destLat) || isNaN(destLon)) {
+          alert('Please enter or select a valid destination.');
+          if (destInput) destInput.focus();
+          return;
+        }
+
+        if (Math.abs(originLat - destLat) < 0.0001 && Math.abs(originLon - destLon) < 0.0001) {
+          alert('Origin and destination are identical. Please specify different starting and ending points.');
+          return;
+        }
+
+        // Determine Departure Time
+        let departureTime = new Date().toISOString();
+        if (radioTimeCustom && radioTimeCustom.checked && customTimeInput && customTimeInput.value) {
+          const [hours, minutes] = customTimeInput.value.split(':');
+          const d = new Date();
+          d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+          departureTime = d.toISOString();
+        }
+
+        // Loading UI state
+        btnPlanRoutes.disabled = true;
+        if (btnPlanRoutesText) btnPlanRoutesText.textContent = 'Comparing Routes...';
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.className = 'saferoute-status-callout callout-info';
+          statusBox.textContent = 'Retrieving route corridors, OpenStreetMap establishments, and calculating Night Activity Scores...';
+        }
+
+        try {
+          const payload = {
+            origin_name: originName,
+            origin_lat: originLat,
+            origin_lon: originLon,
+            destination_name: destName,
+            destination_lat: destLat,
+            destination_lon: destLon,
+            travel_mode: currentMode,
+            departure_time: departureTime
+          };
+
+          const token = await getAuthToken();
+          const headers = { 'Content-Type': 'application/json' };
+          if (token && !token.startsWith('demo_')) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+
+          const response = await fetch(`${API_BASE_URL}/api/v1/routes/plan`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.detail || `Server error (${response.status})`);
+          }
+
+          const planData = await response.json();
+
+          if (statusBox) {
+            statusBox.style.display = 'block';
+            statusBox.className = 'saferoute-status-callout callout-success';
+            statusBox.innerHTML = `
+              <strong>Routes Analyzed:</strong> Retrieved ${planData.alternatives.length} candidate route(s).
+              ${planData.data_coverage && planData.data_coverage.cctv_available === false ? '<small style="display:block; margin-top:2px; color:#64748b;">(Note: CCTV dataset unavailable for this area; excluded from score normalization)</small>' : ''}
+            `;
+          }
+
+          renderRoutesOnMap(planData);
+          renderComparisonCards(planData);
+
+          const highestActivityIdx = planData.alternatives.findIndex(a => a.is_highest_activity);
+          highlightRoute(highestActivityIdx >= 0 ? highestActivityIdx : 0);
+
+        } catch (error) {
+          console.error('SafeRoute plan error:', error);
+          if (statusBox) {
+            statusBox.style.display = 'block';
+            statusBox.className = 'saferoute-status-callout callout-danger';
+            statusBox.textContent = `Unable to plan route: ${error.message}. Please check network or try alternative coordinates.`;
+          }
+        } finally {
+          btnPlanRoutes.disabled = false;
+          if (btnPlanRoutesText) btnPlanRoutesText.textContent = 'Find My Routes';
+        }
+      });
+    }
+
+    // Auto-initialize map
+    initMap();
+  }
+
+  initSafeRoute();
 });
