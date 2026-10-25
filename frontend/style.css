@@ -5214,4 +5214,49 @@ body {
   font-style: italic;
 }
 
+/* ==========================================================================
+   AI Deepfake & Manipulation Forensic Verdict Card Styles
+   ========================================================================== */
+#deepfake-verdict-card {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 14px 0;
+  box-sizing: border-box;
+  animation: verdictReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s ease;
+}
+
+@keyframes verdictReveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.verdict-pulse-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: pulseBeacon 1.8s infinite;
+}
+
+.verdict-metric-tile {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 14px;
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+
+.verdict-metric-tile:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+
 
