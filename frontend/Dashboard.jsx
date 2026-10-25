@@ -228,52 +228,49 @@ export default function Dashboard({
         </div>
 
         {/* Access Mode Switcher & Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isDemo ? (
             <>
-              <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', border: '1.5px solid #F59E0B', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span>⚖️</span>
-                <span>Judge Demo Mode</span>
+              <span style={{ backgroundColor: '#fffbeb', color: '#92400e', border: '1px solid #f59e0b', padding: '6px 12px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                Demo Mode
               </span>
               <button
                 type="button"
                 onClick={() => authState.exitDemoMode()}
-                style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '8px 13px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Exit Demo
               </button>
             </>
           ) : auth.accessMode === 'guest' ? (
             <>
-              <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', border: '1.5px solid #38BDF8', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span>🌐</span>
-                <span>Guest Mode</span>
+              <span style={{ backgroundColor: '#f0f9ff', color: '#0369a1', border: '1px solid #38bdf8', padding: '6px 12px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                Guest Mode
               </span>
               <button
                 type="button"
                 onClick={() => authState.enterDemoMode()}
-                style={{ backgroundColor: '#F59E0B', color: '#000000', border: '1.5px solid #D97706', borderRadius: '6px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                style={{ backgroundColor: '#0f172a', color: '#ffffff', border: '1px solid #0f172a', borderRadius: '4px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}
               >
-                ⚖️ Try Demo
+                Try Demo Mode
               </button>
               <button
                 type="button"
                 onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); }}
-                style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '8px 13px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Sign In
               </button>
             </>
           ) : auth.accessMode === 'authenticated' ? (
             <>
-              <span style={{ backgroundColor: '#ECFDF5', color: '#065F46', border: '1.5px solid #10B981', padding: '5px 12px', borderRadius: '9999px', fontSize: '0.76rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span>👤</span>
-                <span>{auth.user?.email || 'Personal Account'}</span>
+              <span style={{ backgroundColor: '#ecfdf5', color: '#065f46', border: '1px solid #34d399', padding: '6px 12px', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 700 }}>
+                {auth.user?.email || 'Personal Account'}
               </span>
               <button
                 type="button"
                 onClick={() => authState.logout()}
-                style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '8px 13px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Sign Out
               </button>
@@ -283,22 +280,21 @@ export default function Dashboard({
               <button
                 type="button"
                 onClick={() => authState.enterDemoMode()}
-                style={{ backgroundColor: '#F59E0B', color: '#000000', border: '1.5px solid #D97706', borderRadius: '6px', padding: '7px 14px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ backgroundColor: '#0f172a', color: '#ffffff', border: '1px solid #0f172a', borderRadius: '4px', padding: '8px 14px', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.02em', cursor: 'pointer', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.12)' }}
               >
-                <span>⚖️</span>
-                <span>Try Demo Mode</span>
+                Try Demo Mode
               </button>
               <button
                 type="button"
                 onClick={() => authState.enterGuestMode()}
-                style={{ backgroundColor: '#f1f5f9', color: '#0369A1', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '7px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ backgroundColor: '#f8fafc', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '8px 13px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
               >
-                <span>🌐</span> Guest
+                Guest Mode
               </button>
               <button
                 type="button"
                 onClick={() => { setAuthTab('login'); setIsAuthModalOpen(true); }}
-                style={{ backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '7px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                style={{ backgroundColor: 'transparent', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '8px 13px', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
               >
                 Sign In
               </button>
@@ -308,9 +304,8 @@ export default function Dashboard({
           <button 
             type="button" 
             onClick={handleOpenSos}
-            style={{ backgroundColor: isDemo ? '#78350f' : '#881337', color: '#ffffff', border: 'none', borderRadius: '6px', padding: '8px 16px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ backgroundColor: isDemo ? '#78350f' : '#881337', color: '#ffffff', border: '1.5px solid', borderColor: isDemo ? '#78350f' : '#881337', borderRadius: '4px', padding: '8px 16px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', boxShadow: '0 2px 8px rgba(136, 19, 55, 0.25)' }}
           >
-            <span>🚨</span>
             <span>{isDemo ? 'Simulated SOS' : 'Emergency 112'}</span>
           </button>
         </div>
@@ -321,7 +316,7 @@ export default function Dashboard({
         <div style={{ backgroundColor: '#FFFBEB', borderBottom: '2px solid #F59E0B', padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{ backgroundColor: '#F59E0B', color: '#000000', fontWeight: 900, fontSize: '0.72rem', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>
-              ⚖️ JUDGE DEMO MODE ACTIVE
+              DEMO MODE
             </span>
             <span style={{ fontSize: '0.84rem', color: '#78350F', fontWeight: 600 }}>
               Operating with verified fictional sample data. Emergency SOS is simulated and will NOT contact real emergency services or contacts.
@@ -597,16 +592,16 @@ export default function Dashboard({
                 <button
                   type="button"
                   onClick={() => { authState.enterDemoMode(); setIsAuthModalOpen(false); }}
-                  style={{ background: '#F59E0B', border: '1px solid #D97706', color: '#000000', padding: '8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer' }}
+                  style={{ background: '#0f172a', border: '1px solid #0f172a', color: '#ffffff', padding: '9px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s ease' }}
                 >
-                  ⚖️ Try Demo Mode
+                  Try Demo Mode
                 </button>
                 <button
                   type="button"
                   onClick={() => { authState.enterGuestMode(); setIsAuthModalOpen(false); }}
-                  style={{ background: '#ffffff', border: '1px solid #0284C7', color: '#0369A1', padding: '8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer' }}
+                  style={{ background: '#f8fafc', border: '1px solid #cbd5e1', color: '#334155', padding: '9px 12px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease' }}
                 >
-                  🌐 Explore as Guest
+                  Explore as Guest
                 </button>
               </div>
             </div>

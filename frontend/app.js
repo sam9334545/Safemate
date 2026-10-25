@@ -114,11 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (judgeDemoBanner) judgeDemoBanner.style.display = 'flex';
       navAccessGroup.innerHTML = `
         <span class="access-mode-pill demo" title="Operating with simulated evaluator sample data">
-          <span>⚖️</span>
-          <span>Judge Demo Mode</span>
+          Judge Demo Mode
         </span>
         <button type="button" class="btn-nav-auth" id="btn-navbar-exit-demo" title="Exit Demo and return to sign-in">
-          <span>Exit Demo</span>
+          Exit Demo
         </button>
       `;
       const exitBtn = document.getElementById('btn-navbar-exit-demo');
@@ -129,14 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
       navAccessGroup.innerHTML = `
         <span class="access-mode-pill guest" title="Ephemeral guest session active">
-          <span>🌐</span>
-          <span>Guest Mode</span>
+          Guest Mode
         </span>
         <button type="button" class="btn-nav-demo-highlight" id="btn-navbar-switch-demo" title="Instant evaluator demo mode">
-          <span>⚖️ Try Demo</span>
+          Try Demo Mode
         </button>
         <button type="button" class="btn-nav-auth" id="btn-navbar-open-auth" title="Sign in to personal account">
-          <span>Sign In</span>
+          Sign In
         </button>
       `;
       const switchDemoBtn = document.getElementById('btn-navbar-switch-demo');
@@ -148,13 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (state.accessMode === 'authenticated') {
       if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
       const userEmail = (state.user && state.user.email) ? state.user.email : 'Personal Account';
+      const displayEmail = userEmail.length > 20 ? userEmail.substring(0, 18) + '...' : userEmail;
       navAccessGroup.innerHTML = `
         <span class="access-mode-pill authenticated" title="Authenticated personal account: ${userEmail}">
-          <span>👤</span>
-          <span>${userEmail.length > 20 ? userEmail.substring(0, 18) + '...' : userEmail}</span>
+          ${displayEmail}
         </span>
         <button type="button" class="btn-nav-auth" id="btn-navbar-logout" title="Sign out of your account">
-          <span>Sign Out</span>
+          Sign Out
         </button>
       `;
       const logoutBtn = document.getElementById('btn-navbar-logout');
@@ -166,15 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
       navAccessGroup.innerHTML = `
         <button type="button" class="btn-nav-demo-highlight" id="btn-navbar-enter-demo" title="Zero-friction evaluator demo mode (no login required)">
-          <span>⚖️</span>
-          <span>Try Demo Mode</span>
+          Try Demo Mode
         </button>
-        <button type="button" class="btn-nav-auth" id="btn-navbar-enter-guest" title="Explore features as guest">
-          <span>🌐</span>
-          <span>Guest</span>
+        <button type="button" class="btn-nav-guest" id="btn-navbar-enter-guest" title="Explore features as guest">
+          Guest Mode
         </button>
         <button type="button" class="btn-nav-auth" id="btn-navbar-login-open" title="Sign in or register">
-          <span>Sign In</span>
+          Sign In
         </button>
       `;
       const enterDemoBtn = document.getElementById('btn-navbar-enter-demo');
@@ -531,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.SafeMateAuth && window.SafeMateAuth.isDemoMode()) {
           sosStatusBox.innerHTML = `
             <div style="color:#d97706; font-weight:800; font-size:0.95rem; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em; display:flex; align-items:center; gap:8px;">
-              <span>⚖️</span> <span>SIMULATED SOS DISPATCH (JUDGE DEMO MODE)</span>
+              <span>SIMULATED SOS DISPATCH (DEMO MODE)</span>
             </div>
             <div class="simulated-callout" style="background:#fffbeb; border-left:4px solid #f59e0b; padding:10px 14px; margin-bottom:12px; color:#78350f; font-size:0.82rem; line-height:1.5;">
               <strong>NON-NEGOTIABLE SAFETY NOTICE:</strong> Demo mode: This action is simulated. No emergency alert, SMS, email, or telephone call has been sent to real contacts or emergency services (112).
