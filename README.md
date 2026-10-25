@@ -136,7 +136,14 @@ In parallel, Tell-Once formats a structured legal brief for legal defense advoca
 #### Scene 9: ACTION & OUTPUT — Disproving Morphed Blackmail Images (AI Still-Image Scanner)
 Extortionists frequently manipulate innocent photographs into sexually explicit deepfakes to terrorize survivors. SafeMate provides in-memory forensic screening to prove manipulation:
 
-![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scan_result.png)
+![AI Image Screening: Staged Image with In-Memory SHA-256 Fingerprint](docs/screenshots/18_deepfake_image_upload_staged.png)
+
+* **Client-Side SHA-256 Custody Hash:** Calculates an immutable cryptographic fingerprint (`b0ae04187386c...`) in volatile RAM prior to inspection to maintain evidentiary provenance under BSA Section 63.
+* **Instant Forensic Samples:** Test directly with real photographic fixtures or drag-and-drop suspect images (JPG, PNG, WEBP).
+
+When the survivor or evaluator triggers the scan, SafeMate renders the full forensic verdict card:
+
+![AI Deepfake and Media Manipulation Screening Engine Verdict](docs/screenshots/09_deepfake_scan_result.png)
 
 * **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) trained to isolate diffusion noise residuals and generator artifacts.
 * **Forensic Verdict Card:** A dedicated, non-collapsing verdict hub presenting **Critical Alert** or **Verified Authentic** status, 96.8% quantitative confidence, and comparative dual meters (Synthetic Likelihood vs Natural Authenticity).
