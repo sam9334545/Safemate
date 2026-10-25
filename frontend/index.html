@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alice&family=Karma:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261025_05">
   <!-- MapLibre GL JS for real OpenStreetMap Interactive Maps -->
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
@@ -875,8 +875,26 @@
         </div>
 
         <!-- Structured Confidence Verdict Breakdown Container -->
-        <div id="deepfake-verdict-card" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
-          <!-- Dynamic Content Populated by JavaScript -->
+        <div id="deepfake-verdict-card" style="display: block; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); margin-top: 4px;">
+          <!-- Default / Initial Standby State (Populated dynamically) -->
+          <div id="verdict-card-placeholder" style="padding: 16px 20px; background: #f8fafc; border-left: 4px solid #0B132B; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: #0B132B; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.05em; flex-shrink: 0;">
+                SCAN
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 0.86rem; color: #0B132B;" id="verdict-placeholder-title">
+                  Forensic Verdict: Awaiting Media Inspection
+                </div>
+                <div style="font-size: 0.74rem; color: #64748b;" id="verdict-placeholder-sub">
+                  Upload an image or video above and click "Execute Image Manipulation Scan" to inspect visual vectors, spatial diffusion, and facial boundaries.
+                </div>
+              </div>
+            </div>
+            <span id="verdict-placeholder-badge" style="background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; color: #475569;">
+              ● Standby Mode
+            </span>
+          </div>
         </div>
 
         <!-- Primary Action Button: Obsidian High-Contrast -->
@@ -1913,6 +1931,6 @@
     window.SafeMateAuth = authState;
     window.dispatchEvent(new CustomEvent('safemate-auth-ready', { detail: { authState, demoData } }));
   </script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261025_05"></script>
 </body>
 </html>
