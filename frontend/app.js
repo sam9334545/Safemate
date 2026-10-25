@@ -29,31 +29,304 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // 0. Privacy-First Session Token Management (Auto-Provisioned JWT)
+  // 0. Privacy-First Session & Access Mode Management (Safemate 3-Mode Shield)
   // ---------------------------------------------------------------------------
+  const authManager = window.SafeMateAuth;
+  const demoDataStore = window.SafeMateDemoData;
+
   async function getAuthToken() {
+    if (window.SafeMateAuth) {
+      const state = window.SafeMateAuth.getState();
+      if (state.accessMode === 'demo') return 'demo_jwt_simulated_token_not_for_backend';
+      if (state.token) return state.token;
+    }
     let token = localStorage.getItem('safemate_jwt_token');
     if (token) return token;
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/auth/guest-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        token = data.access_token;
-        localStorage.setItem('safemate_jwt_token', token);
-        return token;
+    if (window.SafeMateAuth) {
+      try {
+        await window.SafeMateAuth.enterGuestMode();
+        return window.SafeMateAuth.getState().token;
+      } catch (e) {
+        console.warn('Guest mode acquisition failed:', e);
       }
-    } catch (err) {
-      console.warn('Backend offline or guest auth failed, falling back to local storage session:', err);
     }
     return null;
   }
 
-  // Pre-fetch session token in background
-  getAuthToken().catch(() => {});
+  // Navbar and UI Access Mode Wiring
+  const navAccessGroup = document.getElementById('nav-access-group');
+  const judgeDemoBanner = document.getElementById('judge-demo-banner');
+  const authModal = document.getElementById('auth-modal');
+  const authAlertBox = document.getElementById('auth-alert-box');
+  const tabAuthLogin = document.getElementById('tab-auth-login');
+  const tabAuthRegister = document.getElementById('tab-auth-register');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+  const authModalCloseBtn = document.getElementById('auth-modal-close-btn');
+
+  function openAuthModal(defaultTab = 'login') {
+    if (!authModal) return;
+    authModal.style.display = 'flex';
+    authModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (authAlertBox) {
+      authAlertBox.style.display = 'none';
+      authAlertBox.textContent = '';
+      authAlertBox.className = 'auth-alert';
+    }
+    switchAuthTab(defaultTab);
+  }
+
+  function closeAuthModal() {
+    if (!authModal) return;
+    authModal.style.display = 'none';
+    authModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function switchAuthTab(tab) {
+    if (!tabAuthLogin || !tabAuthRegister) return;
+    if (tab === 'login') {
+      tabAuthLogin.classList.add('active');
+      tabAuthRegister.classList.remove('active');
+      if (formLogin) formLogin.style.display = 'block';
+      if (formRegister) formRegister.style.display = 'none';
+    } else {
+      tabAuthLogin.classList.remove('active');
+      tabAuthRegister.classList.add('active');
+      if (formLogin) formLogin.style.display = 'none';
+      if (formRegister) formRegister.style.display = 'block';
+    }
+  }
+
+  function setAuthAlert(msg, type = 'error') {
+    if (!authAlertBox) return;
+    authAlertBox.style.display = 'block';
+    authAlertBox.className = `auth-alert ${type}`;
+    authAlertBox.innerHTML = msg;
+  }
+
+  function renderNavbarAccessMode(state) {
+    if (!navAccessGroup) return;
+
+    if (state.accessMode === 'demo') {
+      if (judgeDemoBanner) judgeDemoBanner.style.display = 'flex';
+      navAccessGroup.innerHTML = `
+        <span class="access-mode-pill demo" title="Operating with simulated evaluator sample data">
+          Judge Demo Mode
+        </span>
+        <button type="button" class="btn-nav-auth" id="btn-navbar-exit-demo" title="Exit Demo and return to sign-in">
+          Exit Demo
+        </button>
+      `;
+      const exitBtn = document.getElementById('btn-navbar-exit-demo');
+      if (exitBtn) exitBtn.addEventListener('click', () => {
+        if (window.SafeMateAuth) window.SafeMateAuth.exitDemoMode();
+      });
+    } else if (state.accessMode === 'guest') {
+      if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
+      navAccessGroup.innerHTML = `
+        <span class="access-mode-pill guest" title="Ephemeral guest session active">
+          Guest Mode
+        </span>
+        <button type="button" class="btn-nav-demo-highlight" id="btn-navbar-switch-demo" title="Instant evaluator demo mode">
+          Try Demo Mode
+        </button>
+        <button type="button" class="btn-nav-auth" id="btn-navbar-open-auth" title="Sign in to personal account">
+          Sign In
+        </button>
+      `;
+      const switchDemoBtn = document.getElementById('btn-navbar-switch-demo');
+      if (switchDemoBtn) switchDemoBtn.addEventListener('click', () => {
+        if (window.SafeMateAuth) window.SafeMateAuth.enterDemoMode();
+      });
+      const openAuthBtn = document.getElementById('btn-navbar-open-auth');
+      if (openAuthBtn) openAuthBtn.addEventListener('click', () => openAuthModal('login'));
+    } else if (state.accessMode === 'authenticated') {
+      if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
+      const userEmail = (state.user && state.user.email) ? state.user.email : 'Personal Account';
+      const displayEmail = userEmail.length > 20 ? userEmail.substring(0, 18) + '...' : userEmail;
+      navAccessGroup.innerHTML = `
+        <span class="access-mode-pill authenticated" title="Authenticated personal account: ${userEmail}">
+          ${displayEmail}
+        </span>
+        <button type="button" class="btn-nav-auth" id="btn-navbar-logout" title="Sign out of your account">
+          Sign Out
+        </button>
+      `;
+      const logoutBtn = document.getElementById('btn-navbar-logout');
+      if (logoutBtn) logoutBtn.addEventListener('click', () => {
+        if (window.SafeMateAuth) window.SafeMateAuth.logout();
+      });
+    } else {
+      // Unauthenticated
+      if (judgeDemoBanner) judgeDemoBanner.style.display = 'none';
+      navAccessGroup.innerHTML = `
+        <button type="button" class="btn-nav-demo-highlight" id="btn-navbar-enter-demo" title="Zero-friction evaluator demo mode (no login required)">
+          Try Demo Mode
+        </button>
+        <button type="button" class="btn-nav-guest" id="btn-navbar-enter-guest" title="Explore features as guest">
+          Guest Mode
+        </button>
+        <button type="button" class="btn-nav-auth" id="btn-navbar-login-open" title="Sign in or register">
+          Sign In
+        </button>
+      `;
+      const enterDemoBtn = document.getElementById('btn-navbar-enter-demo');
+      if (enterDemoBtn) enterDemoBtn.addEventListener('click', () => {
+        if (window.SafeMateAuth) window.SafeMateAuth.enterDemoMode();
+      });
+      const enterGuestBtn = document.getElementById('btn-navbar-enter-guest');
+      if (enterGuestBtn) enterGuestBtn.addEventListener('click', () => {
+        if (window.SafeMateAuth) window.SafeMateAuth.enterGuestMode();
+      });
+      const loginOpenBtn = document.getElementById('btn-navbar-login-open');
+      if (loginOpenBtn) loginOpenBtn.addEventListener('click', () => openAuthModal('login'));
+    }
+  }
+
+  // Setup Modal Actions and Event Handlers
+  if (authModalCloseBtn) authModalCloseBtn.addEventListener('click', closeAuthModal);
+  if (tabAuthLogin) tabAuthLogin.addEventListener('click', () => switchAuthTab('login'));
+  if (tabAuthRegister) tabAuthRegister.addEventListener('click', () => switchAuthTab('register'));
+
+  const btnModalDemoMode = document.getElementById('btn-modal-demo-mode');
+  if (btnModalDemoMode) {
+    btnModalDemoMode.addEventListener('click', () => {
+      if (window.SafeMateAuth) window.SafeMateAuth.enterDemoMode();
+      closeAuthModal();
+    });
+  }
+
+  const btnModalGuestMode = document.getElementById('btn-modal-guest-mode');
+  if (btnModalGuestMode) {
+    btnModalGuestMode.addEventListener('click', async () => {
+      if (window.SafeMateAuth) await window.SafeMateAuth.enterGuestMode();
+      closeAuthModal();
+    });
+  }
+
+  const btnBannerSwitchAccount = document.getElementById('btn-banner-switch-account');
+  if (btnBannerSwitchAccount) btnBannerSwitchAccount.addEventListener('click', () => openAuthModal('login'));
+
+  const btnBannerExitDemo = document.getElementById('btn-banner-exit-demo');
+  if (btnBannerExitDemo) {
+    btnBannerExitDemo.addEventListener('click', () => {
+      if (window.SafeMateAuth) window.SafeMateAuth.exitDemoMode();
+    });
+  }
+
+  // Password visibility toggles
+  document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+        btn.textContent = input.type === 'password' ? '👁' : '🔒';
+      }
+    });
+  });
+
+  // Login Form Submission
+  if (formLogin) {
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('login-email')?.value || '').trim();
+      const password = document.getElementById('login-password')?.value || '';
+      const submitBtn = document.getElementById('btn-login-submit');
+
+      if (!email || !password) {
+        setAuthAlert('Please enter both email and password.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying credentials...';
+      }
+
+      try {
+        if (!window.SafeMateAuth) throw new Error('Authentication manager not initialized.');
+        await window.SafeMateAuth.login(email, password);
+        closeAuthModal();
+      } catch (err) {
+        setAuthAlert(`
+          <strong>Sign In Failed:</strong> ${err.message || 'Invalid email or password.'}<br>
+          <div style="margin-top:6px; font-size:0.75rem;">
+            If you are evaluating the platform or backend services are offline, click <strong>"Try Demo Mode"</strong> above to explore immediately.
+          </div>
+        `, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In to Personal Account';
+        }
+      }
+    });
+  }
+
+  // Register Form Submission
+  if (formRegister) {
+    formRegister.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = (document.getElementById('register-name')?.value || '').trim();
+      const email = (document.getElementById('register-email')?.value || '').trim();
+      const password = document.getElementById('register-password')?.value || '';
+      const confirmPassword = document.getElementById('register-confirm-password')?.value || '';
+      const submitBtn = document.getElementById('btn-register-submit');
+
+      if (password !== confirmPassword) {
+        setAuthAlert('Passwords do not match. Please re-enter.');
+        return;
+      }
+      if (password.length < 8) {
+        setAuthAlert('Password must be at least 8 characters long.');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+      }
+
+      try {
+        if (!window.SafeMateAuth) throw new Error('Authentication manager not initialized.');
+        await window.SafeMateAuth.register(email, password, name);
+        closeAuthModal();
+      } catch (err) {
+        setAuthAlert(`
+          <strong>Registration Failed:</strong> ${err.message || 'Unable to register.'}<br>
+          <div style="margin-top:6px; font-size:0.75rem;">
+            You can also click <strong>"Try Demo Mode"</strong> above to explore without registration.
+          </div>
+        `, 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Confidential Account';
+        }
+      }
+    });
+  }
+
+  // Attach auth listener when authManager is ready
+  function initAuthWiring() {
+    if (window.SafeMateAuth) {
+      window.SafeMateAuth.subscribe((state) => {
+        renderNavbarAccessMode(state);
+      });
+      window.SafeMateAuth.init().catch(e => console.warn('SafeMateAuth init failed:', e));
+    }
+  }
+
+  if (window.SafeMateAuth) {
+    initAuthWiring();
+  } else {
+    window.addEventListener('safemate-auth-ready', initAuthWiring, { once: true });
+  }
 
   // ---------------------------------------------------------------------------
   // 1. Stealth Panic Screen (Recipe Book Disguise)
@@ -200,6 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function logEmergencyCall(destinationName, phone) {
+    if (window.SafeMateAuth && window.SafeMateAuth.isDemoMode()) {
+      console.info(`[Demo Mode Simulation] Logged simulated call to ${destinationName} (${phone}) - no real telephony initiated.`);
+      return;
+    }
     try {
       await fetch(`${API_BASE_URL}/api/v1/emergency/call`, {
         method: 'POST',
@@ -215,10 +492,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnCall112) {
-    btnCall112.addEventListener('click', () => logEmergencyCall('National Emergency (112)', '112'));
+    btnCall112.addEventListener('click', (e) => {
+      if (window.SafeMateAuth && window.SafeMateAuth.isDemoMode()) {
+        e.preventDefault();
+        alert('Demo Mode: Call to National Emergency 112 is simulated. No real phone call was placed.');
+        return;
+      }
+      logEmergencyCall('National Emergency (112)', '112');
+    });
   }
   if (btnCallContact) {
-    btnCallContact.addEventListener('click', () => logEmergencyCall(contactName, contactPhone));
+    btnCallContact.addEventListener('click', (e) => {
+      if (window.SafeMateAuth && window.SafeMateAuth.isDemoMode()) {
+        e.preventDefault();
+        alert(`Demo Mode: Call to ${contactName} is simulated. No real phone call was placed.`);
+        return;
+      }
+      logEmergencyCall(contactName, contactPhone);
+    });
   }
 
   if (btnSendSos) {
@@ -231,6 +522,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeNow = new Date().toLocaleTimeString();
         const distressText = `EMERGENCY SOS: I need urgent help! My live location: ${mapsUrl} (recorded at ${timeNow})`;
         const cleanPhone = sanitizePhone(contactPhone);
+
+        // NON-NEGOTIABLE SAFETY ISOLATION IN DEMO MODE
+        if (window.SafeMateAuth && window.SafeMateAuth.isDemoMode()) {
+          sosStatusBox.innerHTML = `
+            <div style="color:#d97706; font-weight:800; font-size:0.95rem; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em; display:flex; align-items:center; gap:8px;">
+              <span>SIMULATED SOS DISPATCH (DEMO MODE)</span>
+            </div>
+            <div class="simulated-callout" style="background:#fffbeb; border-left:4px solid #f59e0b; padding:10px 14px; margin-bottom:12px; color:#78350f; font-size:0.82rem; line-height:1.5;">
+              <strong>NON-NEGOTIABLE SAFETY NOTICE:</strong> Demo mode: This action is simulated. No emergency alert, SMS, email, or telephone call has been sent to real contacts or emergency services (112).
+            </div>
+            <div style="font-size:0.83rem; line-height:1.6; color:#0B132B; background:#fef3c7; border:1.5px solid #f59e0b; padding:12px; margin-bottom:10px;">
+              <strong>Simulated GPS:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)} (±${accuracy}m simulated fix)<br>
+              <strong>Event Timestamp:</strong> ${timeNow}<br>
+              <strong>Simulated Safety Circle:</strong><br>
+              • Priya Sharma (Sister & Primary Guardian) — [SIMULATED ALERT]<br>
+              • Advocate Rajesh Nair (Legal Counsel) — [SIMULATED STANDBY]<br>
+              • Campus Women's Emergency Cell — [SIMULATED LOGGED]<br>
+              <strong>Status:</strong> <span style="color:#059669; font-weight:700;">Simulated Workflow Verified (Safe Test)</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button type="button" class="btn-primary" style="background:#78350f; border-color:#78350f; text-align:center; padding:10px; font-size:12px; font-weight:800; cursor:pointer;" onclick="alert('Demo Mode: Live phone dialer call suppressed for safety.')">
+                Simulation Complete (No Real Call Placed)
+              </button>
+            </div>
+          `;
+          return;
+        }
 
         let backendDispatched = false;
         let alertedContacts = [];

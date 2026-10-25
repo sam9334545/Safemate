@@ -117,9 +117,10 @@ async def create_trip(
     shareable_link = f"https://aegis.app/trip/{trip_token}"
 
     # 4. Persist active trip session to PostgreSQL/SQLAlchemy database
+    resolved_user_id = payload.user_id if payload.user_id else str(current_user.id)
     new_trip = SafeWalkTrip(
         trip_token=trip_token,
-        user_id=payload.user_id,
+        user_id=resolved_user_id,
         destination=payload.destination,
         duration_minutes=payload.duration_minutes,
         latitude=None,
@@ -156,7 +157,7 @@ async def create_trip(
         shareable_link=shareable_link,
         expected_arrival=expected_arrival,
         expected_arrival_time=expected_arrival,
-        user_id=payload.user_id,
+        user_id=resolved_user_id,
         destination=payload.destination,
         duration_minutes=payload.duration_minutes,
         created_at=created_at,
@@ -192,6 +193,28 @@ async def get_trip(
     check_and_update_overdue(trip, db)
 
     return to_session_detail(trip)
+
+
+@router.get(
+    "/my-trips",
+    response_model=List[TripSessionDetail],
+    summary="List Authenticated User SafeWalk Trips",
+    description="Returns all persistent SafeWalk trip sessions belonging to the authenticated user.",
+)
+async def list_my_trips(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> List[TripSessionDetail]:
+    """Retrieve all trips owned by the current user."""
+    search_keys = [str(current_user.id), current_user.email]
+    trips = (
+        db.query(SafeWalkTrip)
+        .filter(SafeWalkTrip.user_id.in_(search_keys))
+        .order_by(SafeWalkTrip.id.desc())
+        .all()
+    )
+    return [to_session_detail(t) for t in trips]
+
 
 
 @router.post(

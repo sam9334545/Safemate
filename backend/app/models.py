@@ -58,6 +58,7 @@ class EvidenceRecord(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     evidence_id = Column(String(64), unique=True, index=True, nullable=False)
     user_id = Column(String(128), index=True, nullable=False)
+    owner_id = Column(Integer, index=True, nullable=True)
     file_name = Column(String(512), nullable=False)
     file_path = Column(String(1024), nullable=False)
     file_size = Column(Integer, nullable=False)

@@ -19,7 +19,7 @@ from app.schemas.errors import AppException
 from app.services.model_service import model_service
 from app.services.video_deepfake_service import video_deepfake_service
 from app import models
-from app.database import engine
+from app.database import engine, safe_migrate_tables
 from app.utils.request_id import get_request_id, set_request_id
 
 logger = logging.getLogger(__name__)
@@ -33,11 +33,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"Configured CORS origins: {settings.CORS_ORIGINS}")
     logger.info(f"Configured max upload: {settings.MAX_UPLOAD_MB} MB")
 
-    # Initialize database tables
+    # Initialize database tables & apply safe schema migrations
     logger.info("Initializing database tables on startup...")
     try:
         models.Base.metadata.create_all(bind=engine)
-        logger.info("Database tables initialized successfully.")
+        safe_migrate_tables(engine, models.Base)
+        logger.info("Database tables initialized and schema verified successfully.")
     except Exception as exc:
         logger.warning(f"Database table initialization warning: {type(exc).__name__}: {exc}")
 
@@ -78,6 +79,7 @@ def create_app() -> FastAPI:
     # Ensure database tables exist
     try:
         models.Base.metadata.create_all(bind=engine)
+        safe_migrate_tables(engine, models.Base)
         logger.info("Database tables verified/created via create_app.")
     except Exception as exc:
         logger.warning(f"Database table initialization warning: {type(exc).__name__}: {exc}")
@@ -229,6 +231,7 @@ def create_app() -> FastAPI:
             "safewalk_complete_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/complete",
             "safewalk_cancel_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/cancel",
             "safewalk_escalate_trip": f"{settings.API_V1_PREFIX}/safewalk/trip/{{token}}/escalate",
+            "safewalk_my_trips": f"{settings.API_V1_PREFIX}/safewalk/my-trips",
             "evidence_upload": f"{settings.API_V1_PREFIX}/evidence/upload",
             "evidence_download": f"{settings.API_V1_PREFIX}/evidence/download/{{evidence_id}}",
             "evidence_record": f"{settings.API_V1_PREFIX}/evidence/record/{{evidence_id}}",
