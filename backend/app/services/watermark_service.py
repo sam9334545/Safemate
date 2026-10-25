@@ -14,7 +14,7 @@ import zipfile
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 from app.schemas.errors import AppException, ValidationException
 from app.schemas.watermark import WatermarkAuditReport, WatermarkExtractResponse
@@ -37,9 +37,10 @@ class WatermarkService:
         return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     def _get_permutation(self, total_pixels: int) -> np.ndarray:
-        """Deterministic pseudorandom pixel index sequence based on constant seed."""
+        """Deterministic pseudorandom pixel index sequence based on constant seed (fast bounded choice)."""
         rng = np.random.default_rng(seed=20261024)
-        return rng.permutation(total_pixels)
+        sample_size = min(total_pixels, MAX_EMBED_BITS)
+        return rng.choice(total_pixels, size=sample_size, replace=False)
 
     def embed(
         self,
@@ -79,9 +80,13 @@ class WatermarkService:
                 b = (byte >> (7 - i)) & 1
                 bits.extend([b, b, b])
 
-        # Load image via PIL
+        # Load image via PIL with mobile EXIF correction and smartphone camera optimization
         try:
             with Image.open(io.BytesIO(image_bytes)) as pil_img:
+                pil_img = ImageOps.exif_transpose(pil_img)
+                # Optimize oversized phone camera photos (e.g. 48MP) to 2048px max dimension
+                if pil_img.width > 2048 or pil_img.height > 2048:
+                    pil_img.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
                 img_rgb = pil_img.convert("RGB")
         except Exception as exc:
             raise ValidationException(f"Unsupported or corrupted image file: {exc}")
@@ -186,6 +191,7 @@ class WatermarkService:
 
         try:
             with Image.open(io.BytesIO(image_bytes)) as pil_img:
+                pil_img = ImageOps.exif_transpose(pil_img)
                 img_rgb = pil_img.convert("RGB")
         except Exception as exc:
             raise ValidationException(f"Invalid image file: {exc}")

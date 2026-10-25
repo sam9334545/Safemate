@@ -18,8 +18,10 @@ window.readAloudQuestion = window.readAloudQuestion || function(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Dynamic API Configuration
-  const API_BASE_URL = window.API_BASE_URL || (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:8000' : '');
+  // Dynamic API Configuration (use root-relative paths on port 8000 to prevent cross-origin 127.0.0.1 vs localhost issues)
+  const API_BASE_URL = window.API_BASE_URL !== undefined
+    ? window.API_BASE_URL
+    : (window.location.port === '8000' ? '' : (['localhost', '127.0.0.1'].includes(window.location.hostname) ? 'http://localhost:8000' : ''));
 
   // Persistent Anonymous User ID
   let currentUserId = localStorage.getItem('safemate_user_id');
@@ -1302,8 +1304,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const leakPanelEmbed = document.getElementById('leak-panel-embed');
   const leakPanelExtract = document.getElementById('leak-panel-extract');
 
+  const btnCameraLeakImg = document.getElementById('btn-camera-leak-img');
+  const leakCameraInput = document.getElementById('leak-camera-input');
   const btnSelectLeakImg = document.getElementById('btn-select-leak-img');
   const leakFileInput = document.getElementById('leak-file-input');
+  const leakPreviewContainer = document.getElementById('leak-preview-container');
+  const leakPreviewImg = document.getElementById('leak-preview-img');
   const leakSelectedFilename = document.getElementById('leak-selected-filename');
   const leakRecipientsInput = document.getElementById('leak-recipients-input');
   const btnGenLeakTrace = document.getElementById('btn-generate-leak-trace');
@@ -1316,6 +1322,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let chosenEmbedFile = null;
   let chosenExtractFile = null;
+
+  function handlePhotoPicked(file) {
+    if (!file) return;
+    chosenEmbedFile = file;
+    if (leakPreviewContainer && leakPreviewImg) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        leakPreviewImg.src = e.target.result;
+        leakPreviewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+    if (leakSelectedFilename) {
+      leakSelectedFilename.style.display = 'block';
+      leakSelectedFilename.textContent = `📸 Photo Ready: ${file.name || 'Camera Snap'} (${(file.size / 1024).toFixed(1)} KB)`;
+    }
+  }
 
   if (leakTabEmbed && leakTabExtract) {
     leakTabEmbed.addEventListener('click', () => {
@@ -1335,13 +1358,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Camera snap in 1 go
+  if (btnCameraLeakImg && leakCameraInput) {
+    btnCameraLeakImg.addEventListener('click', () => leakCameraInput.click());
+    leakCameraInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handlePhotoPicked(e.target.files[0]);
+      }
+    });
+  }
+
+  // Gallery select
   if (btnSelectLeakImg && leakFileInput) {
     btnSelectLeakImg.addEventListener('click', () => leakFileInput.click());
     leakFileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
-        chosenEmbedFile = e.target.files[0];
-        leakSelectedFilename.style.display = 'block';
-        leakSelectedFilename.textContent = `Selected: ${chosenEmbedFile.name} (${(chosenEmbedFile.size / 1024).toFixed(1)} KB)`;
+        handlePhotoPicked(e.target.files[0]);
       }
     });
   }
@@ -1370,29 +1402,42 @@ document.addEventListener('DOMContentLoaded', () => {
         recipientList.push('Liam', 'Jake', 'Sarah');
       }
 
-      leakTracerStatusBox.innerHTML = `
-        <div style="color:#0284c7; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
-          <span class="pulse-dot"></span>
-          <span>Generating cryptographically signed forensic watermarks for: <strong>${recipientList.join(', ')}</strong>...</span>
-        </div>
-      `;
-
       try {
         let fileToUpload = chosenEmbedFile;
         if (!fileToUpload) {
+          leakTracerStatusBox.innerHTML = `
+            <div style="color:#0284c7; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+              <span>Loading sample evidence photo...</span>
+            </div>
+          `;
           const sampleRes = await fetch('assets/real_phone_message.jpg');
           const sampleBlob = await sampleRes.blob();
-          fileToUpload = new File([sampleBlob], 'private_photo.jpg', { type: 'image/jpeg' });
+          fileToUpload = new File([sampleBlob], 'sample_evidence.jpg', { type: 'image/jpeg' });
         }
 
-        // 1. Generate individual watermarked copies in parallel (ideal for mobile direct download & share)
-        const recipientResults = await Promise.all(
-          recipientList.map(async (name) => {
-            const formData = new FormData();
-            formData.append('file', fileToUpload);
-            formData.append('recipient_name', name);
-            formData.append('owner_id', currentUserId);
+        const recipientResults = [];
+        const errors = [];
 
+        // Sequential processing so mobile connections never time out or choke
+        for (let i = 0; i < recipientList.length; i++) {
+          const name = recipientList[i];
+          leakTracerStatusBox.innerHTML = `
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px; color:#0369a1; font-size:0.85rem;">
+              <div style="font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                <span>⏳</span> <span>Generating copy ${i + 1} of ${recipientList.length}: <strong>${name}</strong>...</span>
+              </div>
+              <div style="font-size:0.75rem; color:#64748b;">
+                Computing HMAC-SHA256 signature and embedding into blue channel pixels...
+              </div>
+            </div>
+          `;
+
+          const formData = new FormData();
+          formData.append('file', fileToUpload);
+          formData.append('recipient_name', name);
+          formData.append('owner_id', currentUserId);
+
+          try {
             const res = await fetch(`${API_BASE_URL}/api/v1/watermark/embed`, {
               method: 'POST',
               body: formData,
@@ -1400,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!res.ok) {
               const errData = await res.json().catch(() => ({}));
-              throw new Error(errData?.error?.message || `Failed to embed watermark for ${name}`);
+              throw new Error(errData?.error?.message || `HTTP ${res.status}`);
             }
 
             const blob = await res.blob();
@@ -1411,31 +1456,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const fingerprint = res.headers.get('X-Watermark-Fingerprint') || '';
             const recId = res.headers.get('X-Watermark-ID') || '';
 
-            return { name, cleanName, filename, file, blob, url, fingerprint, recId };
-          })
-        );
-
-        // 2. Also generate ZIP bundle in background for desktop users
-        let zipDownloadUrl = null;
-        try {
-          const zipForm = new FormData();
-          zipForm.append('file', fileToUpload);
-          zipForm.append('recipients', recipientList.join(', '));
-          zipForm.append('owner_id', currentUserId);
-
-          const zipRes = await fetch(`${API_BASE_URL}/api/v1/watermark/batch-embed`, {
-            method: 'POST',
-            body: zipForm,
-          });
-          if (zipRes.ok) {
-            const zipBlob = await zipRes.blob();
-            zipDownloadUrl = URL.createObjectURL(zipBlob);
+            recipientResults.push({ name, cleanName, filename, file, blob, url, fingerprint, recId });
+          } catch (embedErr) {
+            console.error(`Failed to embed watermark for ${name}:`, embedErr);
+            errors.push(`${name}: ${embedErr.message}`);
           }
-        } catch (zErr) {
-          console.warn('ZIP bundle creation non-critical error:', zErr);
         }
 
-        // 3. Render mobile-optimized individual download & share cards
+        if (recipientResults.length === 0) {
+          throw new Error(`Failed to generate watermarked copies: ${errors.join(', ')}`);
+        }
+
+        // Render mobile-optimized individual download & share cards
         let cardsHtml = `
           <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:12px; margin-bottom:12px;">
             <div style="color:#15803d; font-weight:800; font-size:0.92rem; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
@@ -1445,7 +1477,7 @@ document.addEventListener('DOMContentLoaded', () => {
               Every copy looks identical to the original image, but contains an imperceptible cryptographic HMAC-SHA256 signature scattered in the blue channel pixels.
             </p>
             <div style="font-size:0.75rem; color:#0369a1; background:#e0f2fe; padding:6px 10px; border-radius:6px; font-weight:600;">
-              📱 <strong>Mobile Tip:</strong> Tap "Save Photo" to save directly to your Phone Photos / Gallery, or tap &amp; hold the image to save. Tap "Share" to send directly via WhatsApp or AirDrop.
+              📱 <strong>Mobile:</strong> Tap "Save Photo" or tap &amp; hold the image to save directly to Photos. Tap "Share" to send via WhatsApp or AirDrop.
             </div>
           </div>
 
@@ -1454,7 +1486,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recipientResults.forEach((item, idx) => {
           cardsHtml += `
-            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+            <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-weight:800; font-size:0.88rem; color:#0f172a;">
                   👤 Send to: <strong style="color:#0284c7;">${item.name}</strong>
@@ -1481,16 +1513,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cardsHtml += `</div>`;
 
-        if (zipDownloadUrl) {
-          cardsHtml += `
-            <div style="text-align:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
-              <a href="${zipDownloadUrl}" download="safemate_protected_bundle.zip" class="btn-outline" style="display:inline-block; padding:8px 16px; font-size:0.78rem; text-decoration:none; color:#0f172a; border:1px solid #0f172a; font-weight:700; border-radius:6px;">
-                📦 Download All in One ZIP Archive (Laptop / Desktop)
-              </a>
-            </div>
-          `;
-        }
-
         leakTracerStatusBox.innerHTML = cardsHtml;
 
         // Attach Web Share API triggers for each recipient button
@@ -1513,7 +1535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
               }
             } else {
-              // Fallback for browsers without Web Share: open in new tab for direct long-press
+              // Fallback for browsers without Web Share: open image for long-press save
               const w = window.open(item.url, '_blank');
               if (!w) {
                 const a = document.createElement('a');
@@ -2439,6 +2461,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnRestartTellOnce = document.getElementById('btn-restart-tell-once');
 
   let tellOnceIntakeId = null;
+  let currentTellOnceStep = 1;
   let tellOnceLanguage = 'en';
   let tellOnceDossierData = null;
   let activeDossierTab = 'fir';
@@ -2447,6 +2470,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let isVoiceModeActive = true; // Auto-Voice Ask & Answer Loop
   let voiceSilenceTimer = null;
   let speechKeepAliveTimer = null;
+  let isSubmittingTellOnceTurn = false;
+  let intakeInitPromise = null;
+  let tellOnceAnswersHistory = {};
 
   let currentVoiceVolume = 1.0;
   let currentVoiceRate = 0.95;
@@ -2471,6 +2497,148 @@ document.addEventListener('DOMContentLoaded', () => {
     'चरण 6/6: समाधान और वैधानिक फाइलिंग',
   ];
 
+  // Comprehensive 6-step bilingual sanctuary content
+  const TELL_ONCE_STEPS_LOCAL = [
+    {
+      step_name: 'safety_check',
+      en: {
+        prompt: 'Welcome to Tell-Once Intake. You are in a safe, judgment-free space. First: Are you in a physically safe place right now?',
+        affirmation: 'Take a breath. You are in full control of this conversation.',
+        audio: 'Welcome to SafeMate Tell-Once Intake. Are you in a physically safe place right now?',
+        chips: ['Yes, I am in a safe place', 'I am somewhat safe, but worried', 'Call 112 Emergency'],
+      },
+      hi: {
+        prompt: 'टेल-वन्स (Tell-Once) सहायता में आपका स्वागत है। क्या आप अभी किसी सुरक्षित स्थान पर हैं?',
+        affirmation: 'कृपया शांत रहें। आप पूरी तरह सुरक्षित हैं।',
+        audio: 'टेल-वन्स में आपका स्वागत है। क्या आप अभी किसी सुरक्षित स्थान पर हैं?',
+        chips: ['हाँ, मैं सुरक्षित हूँ', 'मुझे चिंता हो रही है', 'मुझे 112 सहायता चाहिए'],
+      },
+    },
+    {
+      step_name: 'what_happened',
+      en: {
+        prompt: 'Take all the time you need. In your own words, what is happening or what has someone done? (e.g., online harassment, blackmail, extortion, threats, morphed photos)',
+        affirmation: 'We believe you and we are standing by you every step of the way.',
+        audio: 'In your own words, what has occurred or what trouble are you facing?',
+        chips: [
+          'Online blackmail & extortion',
+          'Morphed / fake photos threat',
+          'Cyber stalking & repeated threats',
+          'Impersonation & fake profile slander',
+        ],
+      },
+      hi: {
+        prompt: 'कृपया आराम से बताएं कि आपके साथ क्या हुआ था या आप किस परेशानी का सामना कर रही हैं? (जैसे ब्लैकमेल, फर्जी फोटो, पीछा करना या धमकी)',
+        affirmation: 'हम आपकी बात को समझ रहे हैं और हर कदम पर आपके साथ हैं।',
+        audio: 'कृपया आराम से बताएं कि आपके साथ क्या हुआ था?',
+        chips: [
+          'ऑनलाइन ब्लैकमेल और वसूली',
+          'मोर्फ़ / नकली फोटो वायरल करने की धमकी',
+          'पीछा करना और धमकी भरे संदेश',
+          'नकली प्रोफाइल से बदनामी',
+        ],
+      },
+    },
+    {
+      step_name: 'timeline_and_platform',
+      en: {
+        prompt: 'Roughly when did this start, and on which platform or location did it take place (such as WhatsApp, Instagram, Telegram, phone calls, or in person)?',
+        affirmation: 'Every detail you provide strengthens your statutory legal protections.',
+        audio: 'Roughly when did this start, and on which platform did it happen?',
+        chips: [
+          'Started recently on Instagram & WhatsApp',
+          'Ongoing for several weeks on Telegram',
+          'Phone calls & SMS messages',
+          'In-person / workplace / street',
+        ],
+      },
+      hi: {
+        prompt: 'यह घटना लगभग कब शुरू हुई, और किस ऐप या जगह पर हुई (जैसे इंस्टाग्राम, व्हाट्सएप, टेलीग्राम या फोन पर)?',
+        affirmation: 'हर जानकारी आपके कानूनी अधिकारों को मजबूत बनाती है।',
+        audio: 'यह घटना कब शुरू हुई, और किस ऐप या जगह पर हुई?',
+        chips: [
+          'हाल ही में इंस्टाग्राम व व्हाट्सएप पर',
+          'पिछले कुछ हफ्तों से टेलीग्राम पर',
+          'फोन कॉल्स और मैसेज पर',
+          'व्यक्तिगत / कार्यस्थल पर',
+        ],
+      },
+    },
+    {
+      step_name: 'perpetrator_details',
+      en: {
+        prompt: 'Do you have any information about who might be doing this, such as usernames, phone numbers, email addresses, or profile links? If unknown, simply write "Unknown".',
+        affirmation: 'It is completely normal not to have all the details right now.',
+        audio: 'Do you have any details about who is doing this, such as usernames or phone numbers?',
+        chips: [
+          'Unknown / anonymous username',
+          'Known acquaintance / ex-partner',
+          'I have their phone number and handle',
+          'Multiple fake accounts',
+        ],
+      },
+      hi: {
+        prompt: 'क्या आपके पास उत्पीड़क के बारे में कोई जानकारी है (जैसे यूज़रनेम, फोन नंबर, सोशल मीडिया लिंक या नाम)? यदि नहीं पता, तो बस "अज्ञात" लिखें।',
+        affirmation: 'अगर पूरी जानकारी नहीं है, तो भी चिंता की कोई बात नहीं है।',
+        audio: 'क्या आपके पास उत्पीड़क का यूज़रनेम या फोन नंबर है? नहीं पता तो अज्ञात लिखें।',
+        chips: [
+          'अज्ञात यूज़रनेम / अकाउंट',
+          'कोई परिचित व्यक्ति',
+          'मेरे पास उनका फोन नंबर और हैंडल है',
+          'मुझे ठीक से नहीं पता',
+        ],
+      },
+    },
+    {
+      step_name: 'demands_and_evidence',
+      en: {
+        prompt: 'Has this person made any specific demands or threats (such as asking for money or media)? Have you preserved any screenshots, call logs, or messages?',
+        affirmation: 'Preserving digital records is the strongest step toward holding them accountable.',
+        audio: 'Has this person made any demands or threats? Have you saved screenshots or messages?',
+        chips: [
+          'Extorting money via UPI / bank',
+          'Threatening to circulate photos if I do not comply',
+          'I have preserved screenshots and messages',
+          'No demands yet, but persistent harassment',
+        ],
+      },
+      hi: {
+        prompt: 'क्या उत्पीड़क ने कोई पैसे की मांग या फोटो वायरल करने की धमकी दी है? क्या आपने स्क्रीनशॉट या चैट सुरक्षित रखे हैं?',
+        affirmation: 'डिजिटल सबूत सुरक्षित रखना उत्पीड़क को पकड़वाने का सबसे मजबूत कदम है।',
+        audio: 'क्या उत्पीड़क ने कोई मांग की है और क्या आपके पास सबूत हैं?',
+        chips: [
+          'पैसे या UPI से वसूली की मांग',
+          'फोटो वायरल करने की धमकी',
+          'मैंने स्क्रीनशॉट और मैसेज सुरक्षित रखे हैं',
+          'कोई मांग नहीं, लेकिन लगातार प्रताड़ना',
+        ],
+      },
+    },
+    {
+      step_name: 'action_resolution',
+      en: {
+        prompt: 'You have answered all primary details. We will now synthesize your formal Zero FIR (BNSS Sec 173), Cyber 1930 Helpline Escalation, and Counsel Brief. Would you like to compile your dossier?',
+        affirmation: 'You have shown immense strength. You will never have to repeat your story again.',
+        audio: 'You have completed all primary details. Click compile to prepare your official legal dossier.',
+        chips: [
+          'Compile Multi-Agency Dossier',
+          'View Police Zero FIR Draft',
+          'View Cyber 1930 Escalation Brief',
+        ],
+      },
+      hi: {
+        prompt: 'आपने सभी जरूरी जानकारी साझा कर दी है। अब हम आपकी आधिकारिक Zero FIR, 1930 साइबर हेल्पलाइन ब्रीफ, और कानूनी सारांश तैयार कर रहे हैं।',
+        affirmation: 'शाबाश! आपने आज अपनी सुरक्षा के लिए बहुत बड़ा कदम उठाया है।',
+        audio: 'आपने सभी विवरण पूरे कर लिए हैं। आपका आधिकारिक कानूनी डॉजियर तैयार हो रहा है।',
+        chips: [
+          'मल्टी-एजेंसी डॉजियर तैयार करें',
+          'पुलिस Zero FIR ड्राफ्ट देखें',
+          'साइबर 1930 रिपोर्ट देखें',
+        ],
+      },
+    },
+  ];
+
   // ---------------------------------------------------------------------------
   // Web Audio Context & Gentle Ambient Chime Engine
   // ---------------------------------------------------------------------------
@@ -2478,9 +2646,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function unlockAudioContext() {
     try {
-      if (!audioCtxInstance) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtxInstance = new AudioContextClass();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtxInstance && AudioContextClass) {
+        audioCtxInstance = new AudioContextClass();
       }
       if (audioCtxInstance && audioCtxInstance.state === 'suspended') {
         audioCtxInstance.resume();
@@ -2502,39 +2670,57 @@ document.addEventListener('DOMContentLoaded', () => {
   function playGentleChime(type = 'bell') {
     if (currentVoiceVolume <= 0) return;
     try {
-      unlockAudioContext();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtxInstance && AudioContextClass) {
+        audioCtxInstance = new AudioContextClass();
+      }
       if (!audioCtxInstance) return;
+      if (audioCtxInstance.state === 'suspended') {
+        audioCtxInstance.resume();
+      }
 
-      const now = audioCtxInstance.currentTime;
+      const now = audioCtxInstance.currentTime || 0;
       const osc1 = audioCtxInstance.createOscillator();
       const osc2 = audioCtxInstance.createOscillator();
       const gainNode = audioCtxInstance.createGain();
 
       gainNode.connect(audioCtxInstance.destination);
       gainNode.gain.setValueAtTime(0.001, now);
-      const targetGain = 0.14 * currentVoiceVolume;
+      const targetGain = 0.45 * Math.max(0.3, currentVoiceVolume);
 
       if (type === 'test') {
-        // Soothing warm major triad
-        osc1.frequency.setValueAtTime(523.25, now); // C5
-        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.18); // E5
-        osc2.frequency.setValueAtTime(659.25, now);
-        osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.22); // G5
-        gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.04);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+        // Melodic triple chime C5 -> E5 -> G5 (clear audible feedback)
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+        osc1.frequency.setValueAtTime(523.25, now);
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.16);
+        osc1.frequency.exponentialRampToValueAtTime(783.99, now + 0.35);
+
+        osc2.frequency.setValueAtTime(261.63, now);
+        osc2.frequency.exponentialRampToValueAtTime(392.00, now + 0.35);
+
+        gainNode.gain.linearRampToValueAtTime(targetGain, now + 0.04);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
+
         osc1.start(now);
         osc2.start(now);
-        osc1.stop(now + 0.9);
-        osc2.stop(now + 0.9);
+        osc1.stop(now + 1.0);
+        osc2.stop(now + 1.0);
       } else {
-        // Subtle attention chime before asking question
-        osc1.frequency.setValueAtTime(440, now); // A4
-        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
-        gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.03);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+        // Soft cue chime (A4 -> E5)
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(440, now);
+        osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
+        osc2.frequency.setValueAtTime(880, now + 0.05);
+
+        gainNode.gain.linearRampToValueAtTime(targetGain * 0.75, now + 0.03);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+
         osc1.start(now);
         osc2.start(now);
-        osc1.stop(now + 0.6);
+        osc1.stop(now + 0.7);
+        osc2.stop(now + 0.7);
       }
     } catch (err) {
       console.warn('Audio chime notice:', err);
@@ -2542,11 +2728,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
-  // Speech Synthesis (Text-to-Speech) with Smart Voice Fallback
+  // Speech Synthesis (Text-to-Speech) with Smart Offline-First Voice Fallback
   // ---------------------------------------------------------------------------
   function loadAvailableVoices() {
     if (!('speechSynthesis' in window)) return;
-    cachedSystemVoices = window.speechSynthesis.getVoices() || [];
+    try {
+      cachedSystemVoices = window.speechSynthesis.getVoices() || [];
+    } catch (e) {
+      cachedSystemVoices = [];
+    }
   }
 
   if ('speechSynthesis' in window) {
@@ -2557,6 +2747,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getBestSpeechVoice(lang) {
+    if (!('speechSynthesis' in window)) return null;
     if (!cachedSystemVoices || cachedSystemVoices.length === 0) {
       loadAvailableVoices();
     }
@@ -2564,34 +2755,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (voices.length === 0) return null;
 
     if (lang === 'hi') {
-      // Look for Hindi voices
-      const hiVoice = voices.find(
-        (v) =>
-          v.lang.toLowerCase().startsWith('hi') ||
-          v.name.toLowerCase().includes('hindi') ||
-          v.name.toLowerCase().includes('swara') ||
-          v.name.toLowerCase().includes('kalpana') ||
-          v.name.toLowerCase().includes('hemant')
+      const localHi = voices.find(
+        (v) => (v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi')) && v.localService !== false
       );
-      if (hiVoice) return hiVoice;
-      const enInVoice = voices.find((v) => v.lang.toLowerCase().includes('in') || v.name.toLowerCase().includes('india'));
-      if (enInVoice) return enInVoice;
+      if (localHi) return localHi;
+
+      const anyHi = voices.find(
+        (v) => v.lang.toLowerCase().startsWith('hi') || v.name.toLowerCase().includes('hindi') || v.name.toLowerCase().includes('swara') || v.name.toLowerCase().includes('kalpana')
+      );
+      if (anyHi) return anyHi;
+
+      const enIn = voices.find((v) => v.lang.toLowerCase().includes('in'));
+      if (enIn) return enIn;
     }
 
-    // English natural voice priority
-    const preferredEnglish = voices.find(
+    // English: Prioritize LOCAL offline Windows voices so network drops never silence audio!
+    const localEnglish = voices.find(
       (v) =>
-        v.name.includes('Natural') ||
-        v.name.includes('Zira') ||
-        v.name.includes('Jenny') ||
-        v.name.includes('Google UK English Female') ||
-        v.name.includes('Google US English') ||
-        v.name.includes('Samantha') ||
-        v.lang === 'en-IN' ||
-        v.lang === 'en-US' ||
-        v.lang === 'en-GB'
+        v.localService === true &&
+        (v.name.includes('David') || v.name.includes('Zira') || v.name.includes('Mark') || v.name.includes('Google') || v.lang.startsWith('en'))
     );
-    if (preferredEnglish) return preferredEnglish;
+    if (localEnglish) return localEnglish;
+
+    const desktopVoice = voices.find((v) => v.name.includes('Desktop') && v.lang.startsWith('en'));
+    if (desktopVoice) return desktopVoice;
+
+    const anyLocal = voices.find((v) => v.localService === true && v.lang.startsWith('en'));
+    if (anyLocal) return anyLocal;
+
+    const standardVoice = voices.find(
+      (v) =>
+        v.name.includes('David') ||
+        v.name.includes('Zira') ||
+        v.name.includes('Natural') ||
+        v.lang === 'en-US' ||
+        v.lang === 'en-GB' ||
+        v.lang === 'en-IN'
+    );
+    if (standardVoice) return standardVoice;
 
     return voices.find((v) => v.lang.toLowerCase().startsWith('en')) || voices[0] || null;
   }
@@ -2600,6 +2801,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tellOnceModal) return;
     unlockAudioContext();
     tellOnceLanguage = lang;
+    currentTellOnceStep = 1;
     updateLanguageButtons();
 
     // Ensure conversation view is shown and dossier view is hidden
@@ -2610,14 +2812,13 @@ document.addEventListener('DOMContentLoaded', () => {
     tellOnceModal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // If no active intake, or if previous session was completed, start fresh at Step 1!
-    if (!tellOnceIntakeId || tellOnceDossierData) {
-      tellOnceIntakeId = null;
-      tellOnceDossierData = null;
-      initiateTellOnceIntake(tellOnceLanguage);
-    } else if (tellOncePromptText && isVoiceModeActive) {
-      speakQuestionAndListen(tellOncePromptText.textContent);
-    }
+    // Play welcoming cue chime synchronously
+    playGentleChime('bell');
+
+    // Fresh intake start
+    tellOnceIntakeId = null;
+    tellOnceDossierData = null;
+    intakeInitPromise = initiateTellOnceIntake(tellOnceLanguage);
   }
 
   function closeTellOnceModal() {
@@ -2626,7 +2827,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tellOnceModal.classList.remove('active');
     }
     document.body.style.overflow = '';
-    stopSpeechRecognition();
+    stopSpeechRecognition(true);
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     clearInterval(speechKeepAliveTimer);
     hideVoiceStatus();
@@ -2681,41 +2882,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     unlockAudioContext();
-    window.speechSynthesis.cancel();
-    stopSpeechRecognition();
-    clearInterval(speechKeepAliveTimer);
 
     const cleanText = (questionText || '').replace(/[*#_\[\]`]/g, '').trim();
     if (!cleanText) return;
 
     currentLastQuestionPrompt = cleanText;
 
-    // Play soft cue chime
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+    stopSpeechRecognition(true);
+    clearInterval(speechKeepAliveTimer);
+
+    // Play chime immediately so user hears sound
     playGentleChime('bell');
 
-    if (btnTellOnceAudioReadLabel) {
-      btnTellOnceAudioReadLabel.textContent = 'Speaking...';
-    }
-    if (btnTellOnceAudioRead) {
-      btnTellOnceAudioRead.classList.add('speaking');
-    }
+    if (btnTellOnceAudioReadLabel) btnTellOnceAudioReadLabel.textContent = 'Speaking...';
+    if (btnTellOnceAudioRead) btnTellOnceAudioRead.classList.add('speaking');
 
     const headline = tellOnceLanguage === 'hi' ? 'सेफमेट सवाल पूछ रही है...' : 'SafeMate is speaking...';
-    const sub = tellOnceLanguage === 'hi' ? 'सवाल पूरा होते ही माइक्रोफ़ोन आपकी आवाज सुनेगा' : 'Listening will start automatically when question completes';
+    const sub = tellOnceLanguage === 'hi' ? 'सवाल पूरा होते ही आप बोल सकते हैं' : 'Listen carefully. You can speak or type your answer below.';
     setVoiceStatus('speaking', headline, sub);
 
+    // 40ms delay prevents the Chrome speechSynthesis cancel-race bug
     setTimeout(() => {
       try {
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : 'en-US';
-        utterance.rate = currentVoiceRate;
-        utterance.volume = currentVoiceVolume;
+        utterance.rate = Math.max(0.75, Math.min(1.25, currentVoiceRate));
+        utterance.volume = Math.max(0.3, currentVoiceVolume);
         utterance.pitch = 1.0;
 
-        const bestVoice = getBestSpeechVoice(tellOnceLanguage);
-        if (bestVoice) {
-          utterance.voice = bestVoice;
+        const voice = getBestSpeechVoice(tellOnceLanguage);
+        if (voice) {
+          utterance.voice = voice;
         }
+
+        utterance.onstart = () => {
+          if (btnTellOnceAudioReadLabel) btnTellOnceAudioReadLabel.textContent = 'Speaking...';
+          if (btnTellOnceAudioRead) btnTellOnceAudioRead.classList.add('speaking');
+        };
 
         utterance.onend = () => {
           clearInterval(speechKeepAliveTimer);
@@ -2731,8 +2937,9 @@ document.addEventListener('DOMContentLoaded', () => {
             tellOnceConversationView.style.display !== 'none'
           ) {
             setTimeout(() => {
-              startSpeechRecognitionWithAutoSubmit();
-            }, 300);
+              playGentleChime('bell');
+              startSpeechRecognitionWithAutoSubmit(true);
+            }, 350);
           } else {
             hideVoiceStatus();
           }
@@ -2742,22 +2949,21 @@ document.addEventListener('DOMContentLoaded', () => {
           clearInterval(speechKeepAliveTimer);
           if (btnTellOnceAudioReadLabel) btnTellOnceAudioReadLabel.textContent = 'Read Question Aloud';
           if (btnTellOnceAudioRead) btnTellOnceAudioRead.classList.remove('speaking');
-          console.warn('SpeechSynthesis notice:', e);
-          if (isVoiceModeActive && autoListenAfter) {
-            setTimeout(() => startSpeechRecognitionWithAutoSubmit(), 200);
-          } else {
+          console.warn('SpeechSynthesis notice:', e.error || e);
+          if (e.error !== 'canceled' && e.error !== 'interrupted') {
             hideVoiceStatus();
           }
         };
 
+        // Long text Chrome keepalive
         speechKeepAliveTimer = setInterval(() => {
-          if (window.speechSynthesis.speaking) {
+          if (window.speechSynthesis && window.speechSynthesis.speaking) {
             window.speechSynthesis.pause();
             window.speechSynthesis.resume();
           } else {
             clearInterval(speechKeepAliveTimer);
           }
-        }, 7000);
+        }, 5000);
 
         window.speechSynthesis.resume();
         window.speechSynthesis.speak(utterance);
@@ -2765,7 +2971,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Could not launch speech utterance:', err);
         hideVoiceStatus();
       }
-    }, 60);
+    }, 40);
   }
 
   // Real-time microphone audio visualizer
@@ -2782,8 +2988,8 @@ document.addEventListener('DOMContentLoaded', () => {
         micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       }
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!micAudioContext) micAudioContext = new AudioCtx();
-      if (micAudioContext.state === 'suspended') await micAudioContext.resume();
+      if (!micAudioContext && AudioCtx) micAudioContext = new AudioCtx();
+      if (micAudioContext && micAudioContext.state === 'suspended') await micAudioContext.resume();
 
       const source = micAudioContext.createMediaStreamSource(micAudioStream);
       micAnalyserNode = micAudioContext.createAnalyser();
@@ -2831,7 +3037,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       hideVoiceStatus();
-      alert('Voice microphone input is not supported in this browser. Please type directly into the input bar.');
       return;
     }
 
@@ -2845,21 +3050,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       speechRecInstance = new SpeechRecognition();
-      if (tellOnceLanguage === 'hi') {
-        speechRecInstance.lang = 'hi-IN';
-      } else {
-        speechRecInstance.lang = (navigator.language && navigator.language.startsWith('en')) ? navigator.language : 'en-IN';
-      }
+      speechRecInstance.lang = tellOnceLanguage === 'hi' ? 'hi-IN' : ((navigator.language && navigator.language.startsWith('en')) ? navigator.language : 'en-IN');
       speechRecInstance.continuous = true;
       speechRecInstance.interimResults = true;
       speechRecInstance.maxAlternatives = 1;
 
       const headline = tellOnceLanguage === 'hi'
-        ? '🎙️ सेफमेट आपकी आवाज़ सुन रही है... बोलिए...'
+        ? '🎙️ सेफमेट सुन रही है... बोलिए...'
         : '🎙️ SafeMate is listening to your voice... Speak freely...';
       const sub = tellOnceLanguage === 'hi'
-        ? 'बोलने के बाद रुकें या "Done Speaking" पर क्लिक करें'
-        : 'Speak at your own pace. Click "Done Speaking" or wait when finished.';
+        ? 'बोलने के बाद रुकें या Next पर क्लिक करें'
+        : 'Speak at your own pace, or type your answer below.';
       setVoiceStatus('listening', headline, sub);
 
       if (btnTellOnceMic) btnTellOnceMic.classList.add('listening');
@@ -2895,7 +3096,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `"${currentFull.slice(-65)}"`
           );
 
-          // Generous 5-second silence buffer before auto-submitting
+          // Generous 6-second silence buffer before auto-submitting
           voiceSilenceTimer = setTimeout(() => {
             if (isListeningSpeech && currentFull.trim()) {
               stopSpeechRecognition();
@@ -2906,23 +3107,32 @@ document.addEventListener('DOMContentLoaded', () => {
               );
               submitTellOnceTurn(currentFull.trim());
             }
-          }, 5000);
+          }, 6000);
         }
       };
 
       speechRecInstance.onerror = (e) => {
-        console.warn('SpeechRecognition status:', e.error);
+        console.warn('SpeechRecognition event:', e.error);
         if (e.error === 'no-speech') {
           setVoiceStatus(
             'listening',
-            tellOnceLanguage === 'hi' ? '🎙️ हम सुन रहे हैं... आप जब चाहें आराम से बोलें' : '🎙️ SafeMate is listening... Speak whenever you are ready'
+            tellOnceLanguage === 'hi' ? '🎙️ हम सुन रहे हैं... आप जब चाहें आराम से बोलें' : '🎙️ SafeMate is listening... Speak whenever you are ready',
+            tellOnceLanguage === 'hi' ? 'या नीचे दिए गए बॉक्स में अपनी बात लिखें' : 'Or type your reply directly in the input box below'
           );
-        } else if (e.error === 'not-allowed') {
-          stopSpeechRecognition();
+        } else if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') {
+          // TERMINAL MIC ERROR: IMMEDIATELY HALT LISTENING AND NEVER LOOP!
+          isListeningSpeech = false;
+          stopSpeechRecognition(true);
+          setVoiceStatus(
+            'idle',
+            tellOnceLanguage === 'hi' ? 'माइक्रोफ़ोन अनुमति नहीं मिली' : 'Microphone Permission Needed',
+            tellOnceLanguage === 'hi' ? 'कृपया नीचे अपनी बात टाइप करें और Next दबाएं' : 'You can type your answer in the text box below and click Next'
+          );
+          setTimeout(() => hideVoiceStatus(), 4500);
+        } else if (e.error === 'network' || e.error === 'aborted') {
+          isListeningSpeech = false;
+          stopSpeechRecognition(true);
           hideVoiceStatus();
-          alert('Microphone access was denied. Please allow microphone permissions in your browser URL bar.');
-        } else if (e.error === 'network') {
-          console.warn('Speech recognition network notice, reconnecting...');
         }
       };
 
@@ -2931,12 +3141,14 @@ document.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             if (isListeningSpeech && tellOnceModal && tellOnceModal.classList.contains('active')) {
               try {
-                startSpeechRecognitionWithAutoSubmit(false);
+                speechRecInstance.start();
               } catch (err) {
-                console.warn('Re-start speech error:', err);
+                isListeningSpeech = false;
+                stopSpeechRecognition(true);
+                hideVoiceStatus();
               }
             }
-          }, 150);
+          }, 300);
         } else {
           isListeningSpeech = false;
           if (btnTellOnceMic) btnTellOnceMic.classList.remove('listening');
@@ -2949,7 +3161,8 @@ document.addEventListener('DOMContentLoaded', () => {
       speechRecInstance.start();
     } catch (err) {
       console.warn('Could not launch speech recognition:', err);
-      stopSpeechRecognition();
+      isListeningSpeech = false;
+      stopSpeechRecognition(true);
       hideVoiceStatus();
     }
   }
@@ -2970,9 +3183,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function initiateTellOnceIntake(lang = 'en') {
     tellOnceLanguage = lang;
+    currentTellOnceStep = 1;
+    tellOnceAnswersHistory = {};
     updateLanguageButtons();
     if (tellOnceConversationView) tellOnceConversationView.style.display = 'flex';
     if (tellOnceDossierView) tellOnceDossierView.style.display = 'none';
+
+    // Display Step 1 immediately while fetch is in-flight so screen is NEVER blank
+    renderLocalTellOnceFallback(1, lang);
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/start?language=${encodeURIComponent(lang)}`, {
@@ -2981,15 +3199,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       tellOnceIntakeId = data.intake_id;
+      currentTellOnceStep = data.step_index || 1;
       renderTellOnceTurn(data);
+      return data;
     } catch (err) {
-      console.warn('Tell-Once backend unreachable, falling back to local trauma-informed engine:', err);
-      renderLocalTellOnceFallback(1, lang);
+      console.warn('Tell-Once backend unreachable, using robust local sanctuary engine:', err);
+      return null;
     }
   }
 
   function renderTellOnceTurn(data) {
-    const stepIdx = data.step_index || 1;
+    const stepIdx = data.step_index || currentTellOnceStep || 1;
+    currentTellOnceStep = stepIdx;
     const total = data.total_steps || 6;
     const pct = Math.min(100, Math.round((stepIdx / total) * 100));
 
@@ -3014,10 +3235,13 @@ document.addEventListener('DOMContentLoaded', () => {
         chipBtn.type = 'button';
         chipBtn.className = 'tell-once-chip';
         chipBtn.textContent = chipText;
-        chipBtn.addEventListener('click', () => {
-          if (data.is_completed || chipText.includes('Dossier') || chipText.includes('View')) {
+        chipBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (isSubmittingTellOnceTurn) return;
+          if (data.is_completed || chipText.includes('Dossier') || chipText.includes('View') || chipText.includes('FIR') || chipText.includes('तयार')) {
             loadTellOnceDossier();
           } else {
+            if (tellOnceUserInput) tellOnceUserInput.value = chipText;
             submitTellOnceTurn(chipText);
           }
         });
@@ -3054,18 +3278,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function submitTellOnceTurn(responseText, isBreather = false) {
-    if (!tellOnceIntakeId) {
-      await initiateTellOnceIntake(tellOnceLanguage);
+    if (isSubmittingTellOnceTurn) return;
+    isSubmittingTellOnceTurn = true;
+
+    // Visual loading state on Next button
+    if (btnTellOnceNext) {
+      btnTellOnceNext.disabled = true;
+      btnTellOnceNext.style.opacity = '0.6';
+      btnTellOnceNext.innerHTML = '<span>Saving...</span>';
     }
 
-    stopSpeechRecognition();
+    stopSpeechRecognition(true);
 
     try {
+      // Ensure intakeId is initialized
+      if (!tellOnceIntakeId) {
+        if (intakeInitPromise) {
+          await intakeInitPromise;
+        } else {
+          intakeInitPromise = initiateTellOnceIntake(tellOnceLanguage);
+          await intakeInitPromise;
+        }
+      }
+
+      if (!tellOnceIntakeId) {
+        tellOnceIntakeId = 'local_tell_once_' + Math.random().toString(36).substring(2, 8);
+      }
+
+      // Record answer into local history
+      const stepNames = ['safety_check', 'what_happened', 'timeline_and_platform', 'perpetrator_details', 'demands_and_evidence', 'action_resolution'];
+      const currentStepKey = stepNames[currentTellOnceStep - 1] || `step_${currentTellOnceStep}`;
+      if (responseText && !isBreather) {
+        tellOnceAnswersHistory[currentStepKey] = responseText;
+      }
+
       const payload = {
         intake_id: tellOnceIntakeId,
-        user_response: responseText,
+        user_response: responseText || '',
         language: tellOnceLanguage,
-        take_breather: isBreather,
+        take_breather: Boolean(isBreather),
       };
 
       const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/turn`, {
@@ -3076,15 +3327,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      tellOnceIntakeId = data.intake_id;
+      currentTellOnceStep = data.step_index || (currentTellOnceStep + 1);
       renderTellOnceTurn(data);
     } catch (err) {
-      console.warn('Turn submission network error, rendering local advance:', err);
-      loadTellOnceDossier();
+      console.warn('Turn submission network notice, advancing smoothly with local engine:', err);
+      advanceStepLocally(responseText, isBreather);
+    } finally {
+      isSubmittingTellOnceTurn = false;
+      if (btnTellOnceNext) {
+        btnTellOnceNext.disabled = false;
+        btnTellOnceNext.style.opacity = '1';
+        btnTellOnceNext.innerHTML = '<span>Next</span> <span>&rarr;</span>';
+      }
+      if (tellOnceUserInput) {
+        tellOnceUserInput.focus();
+      }
     }
   }
 
+  function advanceStepLocally(userText, isBreather = false) {
+    if (isBreather) {
+      const isHi = tellOnceLanguage === 'hi';
+      const breatherData = {
+        intake_id: tellOnceIntakeId || 'local_tell_once',
+        step_index: currentTellOnceStep,
+        total_steps: 6,
+        step_name: 'breather',
+        gentle_prompt: isHi
+          ? 'कृपया एक गहरी सांस लें। आप पूरी तरह सुरक्षित हैं। 4 सेकंड सांस अंदर लें, रोकें और धीरे-धीरे छोड़ें। कोई जल्दी नहीं है।'
+          : 'Take all the time you need. Breathe in slowly for 4 seconds, hold for 4 seconds, and gently exhale. There is no rush at all.',
+        calm_affirmation: isHi
+          ? 'सांस अंदर लें... धीरे से छोड़ें... आप सुरक्षित हैं।'
+          : 'Breathe in... Breathe out... You are safe.',
+        suggested_chips: isHi
+          ? ['मैं आगे बताने के लिए तैयार हूँ', 'एक और गहरी सांस लें']
+          : ['I feel ready to continue', 'Take another breath'],
+        is_completed: false,
+      };
+      renderTellOnceTurn(breatherData);
+      return;
+    }
+
+    const nextStep = currentTellOnceStep + 1;
+    if (nextStep > 6) {
+      loadTellOnceDossier();
+      return;
+    }
+
+    currentTellOnceStep = nextStep;
+    renderLocalTellOnceFallback(nextStep, tellOnceLanguage);
+  }
+
+  function renderLocalTellOnceFallback(step, lang) {
+    const isHi = lang === 'hi';
+    const stepIdx = Math.max(0, Math.min(step - 1, TELL_ONCE_STEPS_LOCAL.length - 1));
+    const stepData = TELL_ONCE_STEPS_LOCAL[stepIdx];
+    const content = isHi ? stepData.hi : stepData.en;
+
+    const fallbackData = {
+      intake_id: tellOnceIntakeId || ('local_tell_once_' + Math.random().toString(36).substring(2, 8)),
+      step_index: step,
+      total_steps: 6,
+      step_name: stepData.step_name,
+      gentle_prompt: content.prompt,
+      calm_affirmation: content.affirmation,
+      audio_summary: content.audio,
+      suggested_chips: content.chips,
+      is_completed: step === 6 && (stepData.step_name === 'action_resolution'),
+    };
+    tellOnceIntakeId = fallbackData.intake_id;
+    renderTellOnceTurn(fallbackData);
+    return fallbackData;
+  }
+
   async function loadTellOnceDossier() {
-    if (!tellOnceIntakeId) return;
+    if (!tellOnceIntakeId) {
+      generateClientDossierFallback();
+      return;
+    }
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/chatbot/tell-once/${encodeURIComponent(tellOnceIntakeId)}/dossier`);
@@ -3098,7 +3419,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderDossierView(dossier) {
-    stopSpeechRecognition();
+    stopSpeechRecognition(true);
     hideVoiceStatus();
     if (tellOnceConversationView) tellOnceConversationView.style.display = 'none';
     if (tellOnceDossierView) tellOnceDossierView.style.display = 'flex';
@@ -3159,45 +3480,62 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function generateClientDossierFallback() {
+    const answers = tellOnceAnswersHistory || {};
+    const whatHappened = answers.what_happened || 'Online cyber harassment and blackmail threats reported by survivor.';
+    const platform = answers.timeline_and_platform || 'Online communications platform / social media';
+    const perpetrator = answers.perpetrator_details || 'Unknown online user / handle pending statutory disclosure';
+    const demands = answers.demands_and_evidence || 'Extortion demands and threats; digital evidence preserved';
+
     tellOnceDossierData = {
       intake_id: tellOnceIntakeId || 'local_intake',
-      police_complaint_letter: 'FORMAL ZERO FIR COMPLAINT UNDER SECTION 173 BNSS...\nStatus: Stored securely in SafeMate local cache.',
-      cyber_helpline_brief: 'NATIONAL CYBER CRIME REPORTING PORTAL (1930) BRIEF...\nStatus: Verified.',
-      lawyer_case_summary: 'CONFIDENTIAL LEGAL BRIEF FOR ADVOCATE...\nStatus: Prepared.',
+      created_at: new Date().toISOString(),
+      complainant_name: 'Concerned Citizen (Confidential)',
+      incident_type: 'Statutory Zero FIR & Cyber Harassment',
+      city_state: 'New Delhi, India',
+      police_complaint_letter: `TO THE STATION HOUSE OFFICER (SHO),
+ANY POLICE STATION UNDER JURISDICTION OF ZERO FIR (SEC 173 BNSS)
+
+SUBJECT: MANDATORY ZERO FIR COMPLAINT FOR CYBER HARASSMENT & EXTORTION
+
+Respected Sir/Madam,
+
+I am submitting this statutory complaint under Section 173 Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 (formerly Section 154 CrPC) mandating immediate registration of a Zero FIR.
+
+1. INCIDENT DETAILS: ${whatHappened}
+2. PLATFORM & TIMELINE: ${platform}
+3. SUSPECT INFORMATION: ${perpetrator}
+4. DEMANDS & EVIDENCE: ${demands}
+
+Statutory Provisions Invoked: Section 351 BNSS (Criminal Intimidation), Section 308 BNSS (Extortion), and Information Technology Act Sections 66E and 67A.
+
+Respectfully submitted,
+Concerned Citizen`,
+      cyber_helpline_brief: `NATIONAL CYBER CRIME REPORTING PORTAL (1930) OPERATIONAL BRIEF
+
+Category: Women / Cyber Crime Against Person
+Platform: ${platform}
+Suspect Handle: ${perpetrator}
+Summary: ${whatHappened}
+Evidence Preserved: Screenshots, URLs, timestamps stored with cryptographic SHA-256 verification.`,
+      lawyer_case_summary: `CONFIDENTIAL LEGAL COUNSEL BRIEF FOR ADVOCATE
+
+Case Type: Digital gender-based harassment, blackmail, and unconsented media threat.
+Factual Matrix: ${whatHappened}
+Key Demands: Urgent injunctive relief, Section 91 CrPC notice to intermediary ISP, preservation of digital server logs.`,
       evidence_checklist: [
         'Preserve raw uncropped screenshots with URL and timestamp.',
         'Do not delete threatening messages.',
         'Store files in the SafeMate Encrypted Vault.',
+        'Obtain Section 65B Indian Evidence Act certificate for digital records.',
       ],
       emergency_contacts: [
-        { service: 'Police Emergency', number: '112', action: 'Immediate police response' },
+        { service: 'Police Emergency', number: '112', action: 'Immediate police response & PCR dispatch' },
         { service: 'National Cyber Crime Portal', number: '1930', action: 'Financial freeze and cyber complaints' },
+        { service: 'National Commission for Women', number: '7827170170', action: 'NCW 24/7 Helpline' },
       ],
       support_message: 'Your Multi-Agency Dossier is ready. You never have to repeat your story again.',
     };
     renderDossierView(tellOnceDossierData);
-  }
-
-  function renderLocalTellOnceFallback(step, lang) {
-    const isHi = lang === 'hi';
-    const fallbackData = {
-      intake_id: 'local_tell_once_' + Math.random().toString(36).substring(2, 8),
-      step_index: step,
-      total_steps: 6,
-      step_name: 'safety_check',
-      gentle_prompt: isHi
-        ? 'टेल-वन्स (Tell-Once) सहायता में आपका स्वागत है। क्या आप अभी किसी सुरक्षित स्थान पर हैं?'
-        : 'Welcome to Tell-Once Intake. You are in a safe, judgment-free space. Are you in a physically safe place right now?',
-      calm_affirmation: isHi
-        ? 'कृपया शांत रहें। आप पूरी तरह सुरक्षित हैं।'
-        : 'Take a breath. You are in full control of this conversation.',
-      suggested_chips: isHi
-        ? ['हाँ, मैं सुरक्षित हूँ', 'मुझे चिंता हो रही है', 'मुझे 112 सहायता चाहिए']
-        : ['Yes, I am in a safe place', 'I am somewhat safe, but worried', 'Call 112 Emergency'],
-      is_completed: false,
-    };
-    tellOnceIntakeId = fallbackData.intake_id;
-    renderTellOnceTurn(fallbackData);
   }
 
   // Event Listeners for Tell-Once
@@ -3222,7 +3560,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!isVoiceModeActive) {
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        stopSpeechRecognition();
+        stopSpeechRecognition(true);
         hideVoiceStatus();
       } else {
         const prompt = (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
@@ -3233,7 +3571,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Audio Deck Controls
   if (btnVoiceTest) {
-    btnVoiceTest.addEventListener('click', () => {
+    btnVoiceTest.addEventListener('click', (e) => {
+      e.preventDefault();
       unlockAudioContext();
       playGentleChime('test');
       const testMsg = tellOnceLanguage === 'hi'
@@ -3244,7 +3583,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnVoiceReplay) {
-    btnVoiceReplay.addEventListener('click', () => {
+    btnVoiceReplay.addEventListener('click', (e) => {
+      e.preventDefault();
+      unlockAudioContext();
       const prompt = currentLastQuestionPrompt || (tellOncePromptText ? tellOncePromptText.textContent : '').trim();
       if (prompt) speakQuestionAndListen(prompt, isVoiceModeActive);
     });
@@ -3286,7 +3627,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnVoicePause) {
     btnVoicePause.addEventListener('click', () => {
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      stopSpeechRecognition();
+      stopSpeechRecognition(true);
       hideVoiceStatus();
     });
   }
@@ -3304,7 +3645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       if (isListeningSpeech) {
-        stopSpeechRecognition();
+        stopSpeechRecognition(true);
         hideVoiceStatus();
       } else {
         startSpeechRecognitionWithAutoSubmit(false);
@@ -3312,7 +3653,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     } catch (err) {
       console.error('Speech recognition toggle error:', err);
-      stopSpeechRecognition();
+      stopSpeechRecognition(true);
       hideVoiceStatus();
       return false;
     }
@@ -3382,10 +3723,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnTellOnceNext) {
-    btnTellOnceNext.addEventListener('click', () => {
+    btnTellOnceNext.addEventListener('click', (e) => {
+      e.preventDefault();
       const val = (tellOnceUserInput ? tellOnceUserInput.value : '').trim();
       if (!val) {
-        if (tellOnceUserInput) tellOnceUserInput.focus();
+        if (tellOnceUserInput) {
+          tellOnceUserInput.focus();
+          tellOnceUserInput.classList.add('input-shake');
+          setTimeout(() => tellOnceUserInput.classList.remove('input-shake'), 600);
+        }
         return;
       }
       submitTellOnceTurn(val);
@@ -3395,6 +3741,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tellOnceUserInput) {
     tellOnceUserInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
         const val = tellOnceUserInput.value.trim();
         if (val) submitTellOnceTurn(val);
       }

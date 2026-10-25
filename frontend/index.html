@@ -887,11 +887,25 @@
 
         <!-- Embed Panel -->
         <div id="leak-panel-embed" style="background: #ffffff; padding: 22px; border: 1.5px solid #cbd5e1;">
+          <!-- Camera Input: Opens camera directly in one go on mobile phones -->
+          <input type="file" id="leak-camera-input" accept="image/*" capture="environment" style="display: none;">
+          <!-- Gallery / File Input: Chooses from photos / device files -->
           <input type="file" id="leak-file-input" accept="image/*" style="display: none;">
-          <button type="button" class="btn-outline" id="btn-select-leak-img" style="width: 100%; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 14px; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
-            Select Photo to Protect
-          </button>
-          <div id="leak-selected-filename" style="font-size: 0.85rem; color: #0284c7; margin-bottom: 12px; display: none; font-weight: 700;"></div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+            <button type="button" class="btn-primary" id="btn-camera-leak-img" style="padding: 12px; font-size: 13px; font-weight: 800; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>📸</span> <span>Take Photo in 1 Go</span>
+            </button>
+            <button type="button" class="btn-outline" id="btn-select-leak-img" style="padding: 12px; font-size: 13px; font-weight: 700; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>🖼️</span> <span>Choose Gallery</span>
+            </button>
+          </div>
+
+          <!-- Instant Live Photo Preview (Confirms image taken/selected) -->
+          <div id="leak-preview-container" style="display: none; margin-bottom: 14px; background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 12px; text-align: center;">
+            <img id="leak-preview-img" style="max-height: 180px; max-width: 100%; object-fit: contain; border: 1px solid #cbd5e1; display: inline-block; background: #ffffff;" alt="Selected Photo Preview">
+            <div id="leak-selected-filename" style="font-size: 0.82rem; color: #0284c7; font-weight: 700; margin-top: 8px;"></div>
+          </div>
           
           <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Recipients (comma separated):</label>
           <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
