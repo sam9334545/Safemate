@@ -9,7 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alice&family=Karma:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261025_07">
+  <!-- MapLibre GL JS for real OpenStreetMap Interactive Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 </head>
 <body>
 
@@ -46,6 +49,14 @@
           Sign In
         </button>
       </div>
+
+      <!-- SafeRoute Safety-Aware Route Planner Navigation -->
+      <button type="button" class="btn-nav-saferoute" id="btn-nav-saferoute" title="Compare routes using available night-time activity and support information" data-open-workspace="modal-feature-saferoute" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-saferoute');">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+        <span>SafeRoute</span>
+      </button>
 
       <!-- Stealth Panic Switch (Recipe Disguise) -->
       <button class="btn-panic" id="panic-disguise-btn" title="Instantly hide this page with a recipe blog (ESC)">
@@ -207,6 +218,7 @@
     <button type="button" class="filter-tab" data-filter="tell-once" data-target="tell-once-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Tell-Once</button>
     <button type="button" class="filter-tab" data-filter="emergency" data-target="sos-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Emergency SOS</button>
     <button type="button" class="filter-tab" data-filter="safewalk" data-target="safewalk-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">SafeWalk</button>
+    <button type="button" class="filter-tab" data-filter="saferoute" data-target="saferoute-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">SafeRoute</button>
     <button type="button" class="filter-tab" data-filter="deepfake" data-target="deepfake-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Deepfake Scan</button>
     <button type="button" class="filter-tab" data-filter="vault" data-target="vault-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Evidence Vault</button>
     <button type="button" class="filter-tab" data-filter="leak" data-target="leak-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Leak Tracer</button>
@@ -346,6 +358,31 @@
           </div>
           <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-safewalk">
             <span>Open SafeWalk Escort</span>
+            <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature: SafeRoute Safety-Aware Route Planner -->
+      <div class="feature-card-tile" id="saferoute-section" data-feature-cat="saferoute" data-target-modal="modal-feature-saferoute">
+        <div class="feature-tile-img-box">
+          <img src="assets/real_safewalk.jpg" alt="Woman planning safety-aware route home">
+          <span class="feature-tile-badge" style="background:#be123c;">Geospatial Night Safety</span>
+        </div>
+        <div class="feature-tile-body">
+          <div>
+            <h3 class="feature-tile-title">SafeRoute — Safety-Aware Route Planner</h3>
+            <p class="feature-tile-desc">
+              Compare routes using available night-time activity and support information. Identify open businesses, police and medical assistance nodes, and longest low-activity stretches before travelling.
+            </p>
+            <div class="feature-tile-tags">
+              <span class="feature-tag-chip">Night Activity Score</span>
+              <span class="feature-tag-chip">Interactive OSM Map</span>
+              <span class="feature-tag-chip">SafeWalk Handoff</span>
+            </div>
+          </div>
+          <button type="button" class="btn-open-workspace" id="openSafeRouteBtn" data-target-modal="modal-feature-saferoute">
+            <span>Compare Safe Routes</span>
             <span class="btn-arrow">&rarr;</span>
           </button>
         </div>
@@ -838,8 +875,26 @@
         </div>
 
         <!-- Structured Confidence Verdict Breakdown Container -->
-        <div id="deepfake-verdict-card" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
-          <!-- Dynamic Content Populated by JavaScript -->
+        <div id="deepfake-verdict-card" style="display: block; width: 100%; flex-shrink: 0; min-height: fit-content; height: auto; overflow: visible; background: #ffffff; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); margin-top: 6px;">
+          <!-- Default / Initial Standby State (Populated dynamically) -->
+          <div id="verdict-card-placeholder" style="padding: 16px 20px; background: #f8fafc; border-left: 4px solid #0B132B; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: #0B132B; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.72rem; letter-spacing: 0.05em; flex-shrink: 0;">
+                SCAN
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 0.86rem; color: #0B132B;" id="verdict-placeholder-title">
+                  Forensic Verdict: Awaiting Media Inspection
+                </div>
+                <div style="font-size: 0.74rem; color: #64748b;" id="verdict-placeholder-sub">
+                  Upload an image or video above and click "Execute Image Manipulation Scan" to inspect visual vectors, spatial diffusion, and facial boundaries.
+                </div>
+              </div>
+            </div>
+            <span id="verdict-placeholder-badge" style="background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; color: #475569;">
+              ● Standby Mode
+            </span>
+          </div>
         </div>
 
         <!-- Primary Action Button: Obsidian High-Contrast -->
@@ -1630,6 +1685,170 @@
     </div>
   </div>
 
+  <!-- Modal: SafeRoute Safety-Aware Route Planner Workspace -->
+  <div class="modal-overlay" id="modal-feature-saferoute" style="display: none; z-index: 99996;">
+    <div class="workspace-modal-card saferoute-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="workspace-modal-header" style="background: #0B132B; color: #ffffff;">
+        <div>
+          <div class="workspace-header-title" style="display:flex; align-items:center; gap:10px;">
+            <span class="saferoute-header-badge" style="background:#be123c; color:#ffffff; font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:4px; letter-spacing:0.06em;">SAFEROUTE</span>
+            <span style="font-size:1.15rem; font-weight:700;">SafeRoute — Safety-Aware Route Planner</span>
+          </div>
+          <div class="workspace-header-sub" style="color:#94a3b8; font-size:0.8rem; margin-top:3px;">
+            Compare routes using available night-time activity and support information. Never an absolute guarantee of safety.
+          </div>
+        </div>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-saferoute" aria-label="Close SafeRoute">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="workspace-modal-body saferoute-modal-body">
+        
+        <!-- Top Route Planning Form Card -->
+        <div class="saferoute-form-card">
+          <div class="saferoute-form-grid">
+            <!-- Starting Point -->
+            <div class="saferoute-input-group">
+              <label for="saferoute-origin-input" class="saferoute-label">
+                <span>Starting Point (Origin)</span>
+                <button type="button" id="btn-saferoute-my-location" class="btn-saferoute-subaction" title="Request current device location">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+                  <span>Use My Location</span>
+                </button>
+              </label>
+              <div class="autocomplete-wrapper" style="position:relative;">
+                <input type="text" id="saferoute-origin-input" class="saferoute-input" placeholder="Enter starting address or landmark..." value="Connaught Place, New Delhi" autocomplete="off" />
+                <div id="saferoute-origin-suggestions" class="saferoute-suggestions-box" style="display:none;"></div>
+              </div>
+              <input type="hidden" id="saferoute-origin-lat" value="28.6315" />
+              <input type="hidden" id="saferoute-origin-lon" value="77.2167" />
+            </div>
+
+            <!-- Destination -->
+            <div class="saferoute-input-group">
+              <label for="saferoute-dest-input" class="saferoute-label">
+                <span>Where are you going? (Destination)</span>
+              </label>
+              <div class="autocomplete-wrapper" style="position:relative;">
+                <input type="text" id="saferoute-dest-input" class="saferoute-input" placeholder="Enter destination address or landmark..." value="India Gate, New Delhi" autocomplete="off" />
+                <div id="saferoute-dest-suggestions" class="saferoute-suggestions-box" style="display:none;"></div>
+              </div>
+              <input type="hidden" id="saferoute-dest-lat" value="28.6129" />
+              <input type="hidden" id="saferoute-dest-lon" value="77.2295" />
+            </div>
+          </div>
+
+          <!-- Quick Suggestion Landmarks Strip -->
+          <div class="saferoute-presets-strip">
+            <span class="presets-label">Popular Destinations:</span>
+            <button type="button" class="btn-preset-chip" data-name="India Gate, New Delhi" data-lat="28.6129" data-lon="77.2295">India Gate</button>
+            <button type="button" class="btn-preset-chip" data-name="Select Citywalk Saket" data-lat="28.5283" data-lon="77.2190">Saket Mall</button>
+            <button type="button" class="btn-preset-chip" data-name="Hauz Khas Village" data-lat="28.5494" data-lon="77.1936">Hauz Khas</button>
+            <button type="button" class="btn-preset-chip" data-name="South Extension Market" data-lat="28.5689" data-lon="77.2223">South Ex</button>
+            <button type="button" class="btn-preset-chip" data-name="Delhi University North Campus" data-lat="28.6903" data-lon="77.2066">North Campus</button>
+          </div>
+
+          <!-- Travel Controls & Execution Strip -->
+          <div class="saferoute-controls-bar">
+            <!-- Mode Switch -->
+            <div class="saferoute-mode-selector" role="group" aria-label="Travel Mode">
+              <button type="button" id="btn-mode-walking" class="btn-saferoute-mode active" data-mode="walking">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="5" r="2"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/></svg>
+                <span>Walking</span>
+              </button>
+              <button type="button" id="btn-mode-driving" class="btn-saferoute-mode" data-mode="driving">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.1 2 11.5 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                <span>Driving</span>
+              </button>
+            </div>
+
+            <!-- Departure Timing -->
+            <div class="saferoute-timing-selector">
+              <label class="radio-label">
+                <input type="radio" name="saferoute-timing" id="radio-time-now" value="now" checked />
+                <span>Leave Now</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="saferoute-timing" id="radio-time-custom" value="custom" />
+                <span>Custom Departure</span>
+              </label>
+              <input type="time" id="saferoute-custom-time" class="saferoute-time-picker" style="display:none;" />
+            </div>
+
+            <!-- Primary Plan Button -->
+            <button type="button" id="btn-plan-routes" class="btn-plan-routes-cta">
+              <span id="btn-plan-routes-text">Find My Routes</span>
+              <span class="btn-icon">&rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Callout Status / Error Box -->
+        <div id="saferoute-status-box" class="saferoute-status-callout" style="display:none;"></div>
+
+        <!-- Interactive Dual View Layout: Map + Route Comparison Panel -->
+        <div class="saferoute-workspace-layout" id="saferoute-workspace-layout">
+          
+          <!-- Map Container Card -->
+          <div class="saferoute-map-wrapper">
+            <div class="map-toolbar">
+              <div class="map-toolbar-left">
+                <span class="map-status-pill" id="saferoute-map-status">Interactive OSM Map</span>
+                <span class="map-route-selected-badge" id="saferoute-active-route-badge">Selected: Route B</span>
+              </div>
+              <div class="map-toolbar-actions">
+                <button type="button" class="btn-map-control" id="btn-recenter-map" title="Fit all candidate routes in view">
+                  Fit All Routes
+                </button>
+              </div>
+            </div>
+
+            <!-- Map Canvas Element -->
+            <div id="saferoute-map" class="saferoute-map-canvas"></div>
+
+            <!-- Accessible Map Legend -->
+            <div class="saferoute-map-legend">
+              <span class="legend-title">Map Legend:</span>
+              <span class="legend-item"><span class="legend-dot dot-shop"></span> Shop / Store</span>
+              <span class="legend-item"><span class="legend-dot dot-pharmacy"></span> 24/7 Pharmacy</span>
+              <span class="legend-item"><span class="legend-dot dot-hospital"></span> Hospital / Clinic</span>
+              <span class="legend-item"><span class="legend-dot dot-police"></span> Police Assistance</span>
+              <span class="legend-item"><span class="legend-dot dot-fuel"></span> Petrol Pump</span>
+              <span class="legend-item"><span class="legend-dot dot-transit"></span> Public Transit</span>
+              <span class="legend-item" title="CCTV data unavailable for this area"><span class="legend-dot dot-cctv"></span> CCTV (Unavailable)</span>
+            </div>
+          </div>
+
+          <!-- Route Comparison Cards Panel -->
+          <div class="saferoute-comparison-panel">
+            <div class="comparison-panel-header">
+              <h4 class="comparison-title">Route Alternatives & Safety Comparison</h4>
+              <span class="comparison-sub">Click a route to view details, inspect nearby establishments, or hand off to SafeWalk</span>
+            </div>
+
+            <!-- Dynamic Route Cards Container -->
+            <div id="saferoute-cards-list" class="saferoute-cards-list">
+              <!-- Populated via JavaScript dynamically -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="workspace-modal-footer">
+        <span class="modal-footer-disclaimer">
+          <strong>SafeRoute Protocol:</strong> Route metrics reflect open establishments, road hierarchies, and assistance points. This score does not predict crime or guarantee personal safety.
+        </span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-saferoute">
+          &larr; Back to Tools
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Unified Authentication & Access Mode Modal -->
   <div class="modal-overlay" id="auth-modal" style="display:none; z-index:10000; align-items:center; justify-content:center;">
     <div class="auth-modal-dialog">
@@ -1735,6 +1954,6 @@
     window.SafeMateAuth = authState;
     window.dispatchEvent(new CustomEvent('safemate-auth-ready', { detail: { authState, demoData } }));
   </script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261025_07"></script>
 </body>
 </html>

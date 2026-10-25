@@ -83,6 +83,28 @@ When walking home at night through poorly lit alleys or unsafe transit corridors
 
 ---
 
+#### Scene 5B: Navigating the Night — SafeRoute Safety-Aware Route Planner
+When travelling home at night, the shortest path on GPS is not always the route with active human presence or reliable emergency assistance. SafeRoute compares candidate route alternatives using real OpenStreetMap geospatial data and deterministic **Night Activity Scoring**:
+
+![SafeRoute Safety-Aware Route Planner with MapLibre GL and Night Activity Scores](docs/screenshots/17_saferoute_safety_planner.png)
+
+* **Multi-Factor Contributing Indicators Breakdown:**
+  * **Open Establishments (80/100):** Calculates live presence of verified night-active venues (e.g. 9 likely open convenience stores, 24/7 pharmacies, petrol pumps).
+  * **Spatial Distribution (76/100):** Evaluates how evenly establishments are spaced across 250m corridor bins to flag isolated transit dead-zones.
+  * **Road Characteristics (88/100):** Prioritizes primary and secondary well-lit commercial transit arterials over unlit alleyways and service roads.
+  * **Assistance Points (85/100):** Detects proximities to immediate help nodes (e.g. 2 nearby Police stations / 24/7 Emergency Medical clinics).
+  * **Public Transport (74/100):** Factors in active metro stations, transit hubs, and designated bus stops.
+  * **Honest CCTV Disclosure (Unavailable):** Strictly acknowledges unmapped civic sensors rather than hallucinating surveillance presence.
+* **Granular Corridor Diagnostics:**
+  * **Longest Low-Activity Segment:** Pinpoints the single longest dark or quiet stretch (e.g. `~250m`) so the traveler knows exactly what to anticipate.
+  * **Comparative Trade-Off Matrix:** Displays real trade-offs between speed and safety (e.g. `Route B` provides `+25 pts` higher mapped night activity and active commercial density at an additional `36 min` walking buffer over the unlit fastest path).
+* **Interactive MapLibre GL + OpenStreetMap Canvas:** Interactive raster vector maps with live corridor polyline geometry, start/destination pins, and distinct color-coded category markers for shops, pharmacies, hospitals, police stations, and transit.
+* **Walking vs. Driving Mode Profiles:** Dedicated algorithmic weighting profiles tailored for pedestrian foot-travelers vs vehicular drivers.
+* **Seamless SafeWalk Handoff:** The traveler reviews alternatives, selects their preferred route, and clicks **"Start SafeWalk with this Route"** to pre-fill destination coordinates and expected duration into the active transit escort workflow.
+* **Strict Safety Disclaimer:** "SafeRoute metrics reflect open establishments, road hierarchies, and assistance points. This score does not predict crime or guarantee personal safety."
+
+---
+
 ### Act III: Tell-Once — Breaking the Trauma of Repetition
 
 #### Scene 6: The Safe Space Intake Sanctuary
@@ -123,17 +145,26 @@ In parallel, Tell-Once formats a structured legal brief for legal defense advoca
 #### Scene 9: ACTION & OUTPUT — Disproving Morphed Blackmail Images (AI Still-Image Scanner)
 Extortionists frequently manipulate innocent photographs into sexually explicit deepfakes to terrorize survivors. SafeMate provides in-memory forensic screening to prove manipulation:
 
-![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scan_result.png)
+![AI Image Screening: Staged Image with In-Memory SHA-256 Fingerprint](docs/screenshots/18_deepfake_image_upload_staged.png)
+
+* **Client-Side SHA-256 Custody Hash:** Calculates an immutable cryptographic fingerprint (`b0ae04187386c...`) in volatile RAM prior to inspection to maintain evidentiary provenance under BSA Section 63.
+* **Instant Forensic Samples:** Test directly with real photographic fixtures or drag-and-drop suspect images (JPG, PNG, WEBP).
+
+When the survivor or evaluator triggers the scan, SafeMate renders the full forensic verdict card:
+
+![AI Deepfake and Media Manipulation Screening Engine Verdict](docs/screenshots/09_deepfake_scan_result.png)
 
 * **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) trained to isolate diffusion noise residuals and generator artifacts.
-* **Quantitative Confidence Verdict:** Outputs a breakdown between natural optical patterns (5.8%) and synthetic diffusion probability (**94.2%**).
-* **Court Admissibility:** Structured under **Section 63 of the Bharatiya Sakshya Adhiniyam (BSA), 2023** and Section 65B of the Indian Evidence Act.
+* **Forensic Verdict Card:** A dedicated, non-collapsing verdict hub presenting **Critical Alert** or **Verified Authentic** status, 96.8% quantitative confidence, and comparative dual meters (Synthetic Likelihood vs Natural Authenticity).
+* **4-Tile Parameter Inspection Matrix:** Inspects Classifier Engine, Screening Scope, Volatile Audit ID, and Statutory Legal Standard.
+* **Court Admissibility & Certificate:** Generates a downloadable **Section 63 Bharatiya Sakshya Adhiniyam (BSA), 2023** / Sec 65B IEA audit certificate with cryptographic SHA-256 fingerprinting.
+* **Direct Zero-FIR Integration:** One-click handoff pre-fills a Section 173 BNSS cybercrime complaint with all forensic findings.
 * **100% In-Memory RAM Inspection:** Files are decoded in volatile memory (`io.BytesIO`) and purged in `finally` blocks—never stored on disk.
 
 ---
 
 #### Scene 10: ACTION & OUTPUT — Video Deepfake Screening (Face-Swap Neural Detection Across Video Frames)
-Beyond still photos, modern blackmailers synthesize video face-swaps to fabricate non-consensual recordings. SafeMate features a dedicated video forensic pipeline running on localhost:
+Beyond still photos, modern blackmailers synthesize video face-swaps to fabricate non-consensual recordings. SafeMate features a unified video forensic pipeline matching the still-image verdict hub:
 
 ![Video Deepfake Screening: Staged MP4 Video with In-Memory SHA-256 Fingerprint](docs/screenshots/15_video_deepfake_upload_staged.png)
 
@@ -144,9 +175,11 @@ When the evaluator executes the scan, SafeMate samples 20 video frames, isolates
 
 ![Video Deepfake Forensic Detection Verdict: 91.8% Synthetic Manipulation Detected](docs/screenshots/16_video_deepfake_detection_verdict.png)
 
-* **High-Confidence Neural Detection:** The model flags the uploaded video with **91.8% Confidence: [ALERT] POTENTIAL SYNTHETIC MANIPULATION DETECTED**.
-* **Temporal Blending Analysis:** Identifies facial boundary incoherence, micro-warping, and neural blending markers across temporal frames.
-* **Tamper-Evident Forensic Dossier:** Emits a traceable audit ID (`req_vid_effgcvit_9887ff77`) formatted for Section 63 BSA statutory cybercrime complaints.
+* **High-Confidence Neural Detection:** The model flags the uploaded video with **91.8% Confidence: [ALERT] NEURAL VIDEO DEEPFAKE / FACE-SWAP DETECTED**.
+* **Dual Comparative Likelihood Meters:** Visualizes the breakdown between Deepfake Video Likelihood (**91.8%**) and Authentic Camera Footage (**8.2%**).
+* **Temporal Blending Analysis:** Identifies facial boundary incoherence, micro-warping, and neural blending markers across 20 temporal frames and 18 isolated facial crops.
+* **Section 63 BSA Video Certificate:** Instant JSON download containing the full forensic chain, video hash, and model audit parameters.
+* **Direct Zero-FIR Cyber Complaint:** Auto-populates police complaint drafts with video deepfake forensic proof for swift cyber cell prosecution.
 
 ---
 
