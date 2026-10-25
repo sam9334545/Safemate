@@ -1032,7 +1032,7 @@ body {
 /* Header */
 .legal-modal-header {
   background: #0B132B;
-  border-bottom: 2px solid #D90429;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -1046,20 +1046,6 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.legal-brand-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 0px !important;
-  background: #1C2541;
-  border: 1px solid rgba(217, 4, 41, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #EF233C;
-  flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(217, 4, 41, 0.22);
 }
 
 .legal-header-info {
@@ -1076,29 +1062,23 @@ body {
 }
 
 .legal-modal-title {
-  font-family: 'Karma', 'Alice', Georgia, serif;
-  font-size: 1.28rem;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #F8F9FA;
+  color: #FFFFFF;
   margin: 0;
+  text-shadow: none;
 }
 
-.legal-tag-pill {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #EF233C;
-  background: rgba(217, 4, 41, 0.12);
-  border: 1px solid rgba(217, 4, 41, 0.35);
-  padding: 2px 8px;
-  border-radius: 0px !important;
+.legal-tag-pill,
+.legal-brand-badge {
+  display: none !important;
 }
 
 .legal-modal-sub {
   font-size: 0.78rem;
-  color: #CBD5E1;
+  color: #94A3B8;
   margin: 0;
 }
 
@@ -1111,9 +1091,9 @@ body {
 }
 
 .legal-select-pill {
-  background: #1C2541;
+  background: rgba(255, 255, 255, 0.06);
   color: #F8F9FA;
-  border: 1px solid rgba(141, 153, 174, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0px !important;
   padding: 6px 12px;
   font-size: 0.75rem;
@@ -1125,8 +1105,8 @@ body {
 
 .legal-select-pill:focus,
 .legal-select-pill:hover {
-  border-color: #EF233C;
-  box-shadow: 0 0 0 2px rgba(239, 35, 60, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
 .legal-select-pill option {
@@ -1135,8 +1115,8 @@ body {
 }
 
 .legal-close-btn {
-  background: #1C2541;
-  border: 1px solid rgba(141, 153, 174, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0px !important;
   color: #CBD5E1;
   width: 32px;
@@ -1151,9 +1131,9 @@ body {
 }
 
 .legal-close-btn:hover {
-  border-color: #EF233C;
-  color: #EF233C;
-  background: rgba(217, 4, 41, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Action Command Strip */
@@ -2473,7 +2453,7 @@ body {
   padding: 16px 20px;
   background: #0B132B;
   color: #FFFFFF;
-  border-bottom: 2px solid #D90429;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2622,7 +2602,7 @@ body {
 
 .tell-once-modal-header {
   background: #0B132B;
-  border-bottom: 2px solid #D90429;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: #FFFFFF;
   padding: 16px 24px;
   display: flex;
@@ -2638,33 +2618,25 @@ body {
 }
 
 .tell-once-header-title {
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.22rem;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: #FFFFFF;
-  font-family: 'Karma', Georgia, serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  text-shadow: none;
 }
 
 .tell-once-tag-pill {
-  background: rgba(217, 4, 41, 0.12);
-  border: 1px solid rgba(217, 4, 41, 0.45);
-  color: #EF233C;
-  font-family: inherit;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 0px !important;
+  display: none !important;
 }
 
 .tell-once-header-sub {
-  font-size: 0.76rem;
-  color: #CBD5E1;
+  font-size: 0.78rem;
+  color: #94A3B8;
 }
 
 .tell-once-header-actions {
@@ -2679,8 +2651,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #1C2541;
-  border: 1px solid rgba(141, 153, 174, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #F8F9FA;
   padding: 6px 12px;
   border-radius: 0px !important;
@@ -2693,14 +2665,14 @@ body {
 }
 
 .tell-once-voice-toggle-btn:hover {
-  background: #2A3B5C;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .tell-once-voice-toggle-btn.active {
-  background: #D90429;
-  border-color: #EF233C;
+  background: #1C2541;
+  border-color: rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
-  box-shadow: 0 0 12px rgba(217, 4, 41, 0.4);
+  box-shadow: none;
 }
 
 .voice-indicator-dot {
@@ -2713,8 +2685,8 @@ body {
 
 .tell-once-lang-toggle {
   display: flex;
-  background: #070B19;
-  border: 1px solid rgba(141, 153, 174, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0px !important;
   padding: 2px;
   gap: 2px;
@@ -2723,7 +2695,7 @@ body {
 .tell-once-lang-btn {
   background: transparent;
   border: none;
-  color: #CBD5E1;
+  color: #94A3B8;
   padding: 4px 10px;
   border-radius: 0px !important;
   font-size: 0.72rem;
@@ -2733,7 +2705,7 @@ body {
 }
 
 .tell-once-lang-btn.active {
-  background: #D90429;
+  background: #1C2541;
   color: #FFFFFF;
   border-radius: 0px !important;
   font-weight: 700;
@@ -2741,7 +2713,7 @@ body {
 
 .close-tell-once-btn {
   background: transparent;
-  border: 1px solid rgba(141, 153, 174, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #CBD5E1;
   font-size: 13px;
   font-weight: 700;
@@ -2756,9 +2728,9 @@ body {
 }
 
 .close-tell-once-btn:hover {
-  border-color: #EF233C;
-  color: #EF233C;
-  background: rgba(217, 4, 41, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Stepper Progress Bar */
@@ -3700,7 +3672,7 @@ body {
   border-radius: 0px !important;
 }
 
-/* Standardized Dark Navy & Crimson Header */
+/* Standardized Clean Dark Navy Header */
 .workspace-modal-header {
   background: #0B132B !important;
   color: #FFFFFF !important;
@@ -3708,15 +3680,15 @@ body {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  border-bottom: 2px solid #D90429 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-radius: 0px !important;
   flex-shrink: 0 !important;
   gap: 16px;
 }
 
 .workspace-header-title {
-  font-family: var(--font-serif), 'Karma', 'Alice', Georgia, serif !important;
-  font-size: 1.28rem !important;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 1.25rem !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   display: flex !important;
@@ -3724,25 +3696,17 @@ body {
   gap: 10px !important;
   color: #FFFFFF !important;
   margin: 0 !important;
+  text-shadow: none !important;
 }
 
 .workspace-header-badge {
-  font-family: var(--font-inter), sans-serif !important;
-  font-size: 0.62rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
-  background: rgba(217, 4, 41, 0.15) !important;
-  border: 1px solid rgba(217, 4, 41, 0.5) !important;
-  color: #EF233C !important;
-  padding: 2px 7px !important;
-  border-radius: 0px !important;
+  display: none !important;
 }
 
 .workspace-header-sub {
   font-family: var(--font-inter), sans-serif !important;
   font-size: 0.8rem !important;
-  color: #8D99AE !important;
+  color: #94A3B8 !important;
   margin-top: 4px !important;
   line-height: 1.4 !important;
 }
@@ -3750,7 +3714,7 @@ body {
 .workspace-close-btn {
   background: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: #8D99AE !important;
+  color: #CBD5E1 !important;
   font-size: 18px !important;
   font-weight: 700 !important;
   width: 32px !important;
@@ -3768,8 +3732,8 @@ body {
 
 .workspace-close-btn:hover {
   color: #FFFFFF !important;
-  border-color: #D90429 !important;
-  background: rgba(217, 4, 41, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Scrollable Internal Modal Body */
