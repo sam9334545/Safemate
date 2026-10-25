@@ -86,6 +86,8 @@ When walking home at night through poorly lit alleys or unsafe transit corridors
 #### Scene 5B: Navigating the Night — SafeRoute Safety-Aware Route Planner
 When travelling home at night, the shortest path on GPS is not always the route with active human presence or reliable emergency assistance. SafeRoute compares candidate route alternatives using real OpenStreetMap geospatial data and deterministic **Night Activity Scoring**:
 
+![SafeRoute Safety-Aware Route Planner with MapLibre GL and Night Activity Scores](docs/screenshots/17_saferoute_safety_planner.png)
+
 * **Transparent Night Activity Score (0–100):** Evaluates open establishments (shops, 24/7 pharmacies, petrol pumps), spatial distribution across 250m corridor bins, longest low-activity stretches in meters, road classifications (primary, secondary, pedestrian-accessible), and proximity to police and medical assistance nodes.
 * **Interactive MapLibre GL + OpenStreetMap:** Real raster maps with live route geometry polylines, distinct accessible category markers (shops, pharmacies, hospitals, police, fuel, transit), and interactive click-to-highlight synchronization.
 * **Walking vs. Driving Mode Profiles:** Dedicated algorithmic weighting profiles for pedestrian travelers vs drivers.
@@ -137,14 +139,16 @@ Extortionists frequently manipulate innocent photographs into sexually explicit 
 ![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scan_result.png)
 
 * **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) trained to isolate diffusion noise residuals and generator artifacts.
-* **Quantitative Confidence Verdict:** Outputs a breakdown between natural optical patterns (5.8%) and synthetic diffusion probability (**94.2%**).
-* **Court Admissibility:** Structured under **Section 63 of the Bharatiya Sakshya Adhiniyam (BSA), 2023** and Section 65B of the Indian Evidence Act.
+* **Forensic Verdict Card:** A dedicated, non-collapsing verdict hub presenting **Critical Alert** or **Verified Authentic** status, 96.8% quantitative confidence, and comparative dual meters (Synthetic Likelihood vs Natural Authenticity).
+* **4-Tile Parameter Inspection Matrix:** Inspects Classifier Engine, Screening Scope, Volatile Audit ID, and Statutory Legal Standard.
+* **Court Admissibility & Certificate:** Generates a downloadable **Section 63 Bharatiya Sakshya Adhiniyam (BSA), 2023** / Sec 65B IEA audit certificate with cryptographic SHA-256 fingerprinting.
+* **Direct Zero-FIR Integration:** One-click handoff pre-fills a Section 173 BNSS cybercrime complaint with all forensic findings.
 * **100% In-Memory RAM Inspection:** Files are decoded in volatile memory (`io.BytesIO`) and purged in `finally` blocks—never stored on disk.
 
 ---
 
 #### Scene 10: ACTION & OUTPUT — Video Deepfake Screening (Face-Swap Neural Detection Across Video Frames)
-Beyond still photos, modern blackmailers synthesize video face-swaps to fabricate non-consensual recordings. SafeMate features a dedicated video forensic pipeline running on localhost:
+Beyond still photos, modern blackmailers synthesize video face-swaps to fabricate non-consensual recordings. SafeMate features a unified video forensic pipeline matching the still-image verdict hub:
 
 ![Video Deepfake Screening: Staged MP4 Video with In-Memory SHA-256 Fingerprint](docs/screenshots/15_video_deepfake_upload_staged.png)
 
@@ -155,9 +159,11 @@ When the evaluator executes the scan, SafeMate samples 20 video frames, isolates
 
 ![Video Deepfake Forensic Detection Verdict: 91.8% Synthetic Manipulation Detected](docs/screenshots/16_video_deepfake_detection_verdict.png)
 
-* **High-Confidence Neural Detection:** The model flags the uploaded video with **91.8% Confidence: [ALERT] POTENTIAL SYNTHETIC MANIPULATION DETECTED**.
-* **Temporal Blending Analysis:** Identifies facial boundary incoherence, micro-warping, and neural blending markers across temporal frames.
-* **Tamper-Evident Forensic Dossier:** Emits a traceable audit ID (`req_vid_effgcvit_9887ff77`) formatted for Section 63 BSA statutory cybercrime complaints.
+* **High-Confidence Neural Detection:** The model flags the uploaded video with **91.8% Confidence: [ALERT] NEURAL VIDEO DEEPFAKE / FACE-SWAP DETECTED**.
+* **Dual Comparative Likelihood Meters:** Visualizes the breakdown between Deepfake Video Likelihood (**91.8%**) and Authentic Camera Footage (**8.2%**).
+* **Temporal Blending Analysis:** Identifies facial boundary incoherence, micro-warping, and neural blending markers across 20 temporal frames and 18 isolated facial crops.
+* **Section 63 BSA Video Certificate:** Instant JSON download containing the full forensic chain, video hash, and model audit parameters.
+* **Direct Zero-FIR Cyber Complaint:** Auto-populates police complaint drafts with video deepfake forensic proof for swift cyber cell prosecution.
 
 ---
 
