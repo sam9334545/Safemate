@@ -33,29 +33,7 @@
       </div>
     </a>
 
-    <ul class="nav-links">
-      <li><a href="#hero" class="nav-link">Home</a></li>
-      <li><a href="#sos-section" class="nav-link">Get Help</a></li>
-      <li><a href="#features" class="nav-link">Services</a></li>
-      <li><a href="#tell-once-section" class="nav-link nav-link-extra" style="color:#7c3aed; font-weight:700;">✨ Tell-Once</a></li>
-      <li><a href="#safewalk-section" class="nav-link nav-link-extra">SafeWalk</a></li>
-      <li><a href="#deepfake-section" class="nav-link">Deepfake</a></li>
-      <li><a href="#chatbot-section" class="nav-link">Safety Bot</a></li>
-      <li><a href="#movement" class="nav-link">About</a></li>
-    </ul>
-
     <div class="nav-actions">
-      <!-- Prominent Emergency 112 Pill Button (Inspired by Maitri's crimson pill button) -->
-      <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
-        <span class="pulse-indicator"></span>
-        <span>🚨 Emergency 112</span>
-      </a>
-
-      <!-- Tell-Once Quick Launch Button -->
-      <button class="btn-tell-once-nav btn-open-workspace" id="btn-nav-tell-once" data-target-modal="tell-once-modal" title="Tell-Once Trauma-Informed Intake (Speak or Type Once)">
-        🌸 Tell-Once
-      </button>
-
       <!-- Stealth Panic Switch (Recipe Disguise) -->
       <button class="btn-panic" id="panic-disguise-btn" title="Instantly hide this page with a recipe blog (ESC)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -66,12 +44,11 @@
         <span class="kbd-hint">ESC</span>
       </button>
 
-      <button class="btn-outline btn-escape-call-nav" id="btn-escape-call" title="Simulate an incoming rescue call">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-        </svg>
-        <span class="btn-call-text">Escape Call</span>
-      </button>
+      <!-- Prominent Emergency 112 Button -->
+      <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
+        <span class="pulse-indicator"></span>
+        <span>🚨 Emergency 112</span>
+      </a>
     </div>
   </header>
 
@@ -156,50 +133,39 @@
 
       <!-- Center Floating Motto & Mission Card -->
       <div class="maitri-motto-card">
-        <div class="motto-tag">Free, Confidential &amp; Trauma-Informed Platform</div>
+        <div class="motto-tag">FREE, CONFIDENTIAL &amp; TRAUMA-INFORMED PLATFORM</div>
         <p class="motto-text">
           SafeMate is a free, confidential, trauma-informed digital safety platform that primarily helps women, youth, and families facing domestic violence, intimate image abuse, deepfakes, cyberstalking, or immediate physical distress.
         </p>
-
-        <div class="motto-actions">
-          <button type="button" class="btn-motto-tell-once btn-open-workspace" data-target-modal="tell-once-modal" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color:#fff; border:none; padding:12px 22px; border-radius:9999px; font-weight:700; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35); display:inline-flex; align-items:center; gap:8px;">
-            <span>🌸 Tell-Once Intake</span>
-          </button>
-          <a href="tel:112" class="btn-motto-emergency" id="hero-motto-call">
-            <span class="motto-pulse"></span>
-            <span>🚨 Emergency Help (112)</span>
-          </a>
-          <button type="button" class="btn-motto-primary btn-open-workspace" data-target-modal="modal-feature-chatbot">
-            <span>🛡️ Safety Bot</span>
-          </button>
-          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-deepfake">
-            <span>🔍 Deepfake Scan</span>
-          </button>
-          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-safewalk">
-            <span>🚶 SafeWalk</span>
-          </button>
-        </div>
-
-        <div class="motto-trust-badges">
-          <span>🔒 100% Client-Side Privacy</span>
-          <span class="sep">•</span>
-          <span>🛡️ Zero Cloud Tracking</span>
-          <span class="sep">•</span>
-          <span>⚡ Instant Disguise (ESC)</span>
-          <span class="sep">•</span>
-          <span>📞 Real 112 Dispatch</span>
-        </div>
       </div>
     </div>
   </main>
 
-  <!-- Minimalist Trust Indicator Bar (Replaces text-heavy stats grid) -->
-  <section class="trust-pills-bar">
-    <div class="trust-pill"><span>🔒</span> 100% Client-Side Privacy</div>
-    <div class="trust-pill"><span>⚡</span> Instant 112 &amp; 1930 Hotlines</div>
-    <div class="trust-pill"><span>🌸</span> Trauma-Informed (Hindi &amp; English)</div>
-    <div class="trust-pill"><span>🛡️</span> Zero Cloud Footprint</div>
-  </section>
+  <!-- Functional Feature Sub-Bar (Directly Below Banner Section) -->
+  <nav class="feature-subnav-bar" id="feature-subnav" aria-label="Feature navigation sub-bar">
+    <div class="subnav-container">
+      <a href="#vault-section" class="subnav-pill" data-scroll-to="vault-section" title="Jump to Client-Side Privacy & Evidence Vault">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">100% Client-Side Privacy</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#sos-section" class="subnav-pill" data-scroll-to="sos-section" title="Jump to Instant 112 & 1930 Hotlines">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Instant 112 &amp; 1930 Hotlines</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#tell-once-section" class="subnav-pill" data-scroll-to="tell-once-section" title="Jump to Trauma-Informed Intake">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Trauma-Informed (Hindi &amp; English)</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#features" class="subnav-pill" data-scroll-to="features" title="Jump to Zero Cloud Footprint Tools Hub">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Zero Cloud Footprint</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+    </div>
+  </nav>
 
   <!-- Section Header & Filter Tabs -->
   <div class="section-header" id="features" style="margin-bottom:12px;">
@@ -210,16 +176,16 @@
     </p>
   </div>
 
-  <!-- Category Filter Bar -->
-  <div class="tools-filter-bar" id="tools-filter-bar">
-    <button type="button" class="filter-tab active" data-filter="all">🌟 All Tools (7)</button>
-    <button type="button" class="filter-tab" data-filter="tell-once">🌸 Tell-Once</button>
-    <button type="button" class="filter-tab" data-filter="emergency">🚨 Emergency SOS</button>
-    <button type="button" class="filter-tab" data-filter="safewalk">🚶 SafeWalk</button>
-    <button type="button" class="filter-tab" data-filter="deepfake">🔍 Deepfake Scan</button>
-    <button type="button" class="filter-tab" data-filter="vault">🔒 Evidence Vault</button>
-    <button type="button" class="filter-tab" data-filter="leak">🕵️ Leak Tracer</button>
-    <button type="button" class="filter-tab" data-filter="chatbot">⚖️ Legal Chatbot</button>
+  <!-- Category Filter Bar (No emojis, sleek minimal styling) -->
+  <div class="tools-filter-bar" id="tools-filter-bar" role="tablist" aria-label="Feature filter selector">
+    <button type="button" class="filter-tab active" data-filter="all" data-target="features" role="tab" aria-selected="true" onclick="selectFeatureFilter(this)">All Tools (7)</button>
+    <button type="button" class="filter-tab" data-filter="tell-once" data-target="tell-once-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Tell-Once</button>
+    <button type="button" class="filter-tab" data-filter="emergency" data-target="sos-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Emergency SOS</button>
+    <button type="button" class="filter-tab" data-filter="safewalk" data-target="safewalk-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">SafeWalk</button>
+    <button type="button" class="filter-tab" data-filter="deepfake" data-target="deepfake-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Deepfake Scan</button>
+    <button type="button" class="filter-tab" data-filter="vault" data-target="vault-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Evidence Vault</button>
+    <button type="button" class="filter-tab" data-filter="leak" data-target="leak-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Leak Tracer</button>
+    <button type="button" class="filter-tab" data-filter="chatbot" data-target="chatbot-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Legal Chatbot</button>
   </div>
 
   <!-- Clean, Uncluttered Features Grid (Click Card to Open Feature in Detail) -->
@@ -227,10 +193,10 @@
     <div class="features-grid" id="tools-grid">
 
       <!-- Feature 0: Tell-Once Intake -->
-      <div class="feature-card-tile" id="tell-once-section" data-feature-cat="tell-once" data-target-modal="tell-once-modal" style="border: 2px solid #ddd6fe;">
+      <div class="feature-card-tile" id="tell-once-section" data-feature-cat="tell-once" data-target-modal="tellOnceModal">
         <div class="feature-tile-img-box">
           <img src="assets/tell_once_counsel.jpg" alt="Tell-Once trauma-informed counseling">
-          <span class="feature-tile-badge" style="background:#7c3aed;">🌸 Tell-Once • Trauma-Informed</span>
+          <span class="feature-tile-badge" style="background:#881337;">Tell-Once • Trauma-Informed</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -239,39 +205,48 @@
               Speak or type once. Our trauma-informed assistant asks one gentle question at a time and automatically generates your Police Zero FIR, 1930 Cyber Brief, and Lawyer Summary.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🌸 Trauma-Informed</span>
+              <span class="feature-tag-chip"> Trauma-Informed</span>
               <span class="feature-tag-chip">🇮🇳 Hindi &amp; English</span>
-              <span class="feature-tag-chip">📁 3-in-1 Unified Dossier</span>
+              <span class="feature-tag-chip"> 3-in-1 Unified Dossier</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);">
+          <button type="button" class="btn-open-workspace" id="openTellOnceBtn" data-target-modal="tellOnceModal">
             <span>Open Tell-Once Intake</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
 
       <!-- Feature 1: Emergency SOS & Instant Real Calling -->
-      <div class="feature-card-tile" id="sos-section" data-feature-cat="emergency" data-target-modal="modal-feature-sos">
+      <div class="feature-card-tile" id="sos-section" data-feature-cat="emergency" data-target-modal="sosModal">
         <div class="feature-tile-img-box">
           <img src="assets/real_sos.jpg" alt="Woman holding phone for emergency SOS">
-          <span class="feature-tile-badge" style="background:#dc2626;">🚨 Emergency Response</span>
+          <span class="feature-tile-badge" style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.2);">Emergency Response</span>
         </div>
         <div class="feature-tile-body">
           <div>
-            <h3 class="feature-tile-title">Emergency SOS &amp; Instant Real Calling</h3>
+            <h3 class="feature-tile-title" style="font-family: var(--font-serif), 'Karma', 'Alice', Georgia, serif; font-size: 1.28rem; font-weight: 700; letter-spacing: -0.01em;">Emergency SOS &amp; Instant Real Calling</h3>
             <p class="feature-tile-desc">
               Direct connection to 112 emergency dispatchers or your trusted safety circle, with verified real-time GPS coordinate broadcasting.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">📞 Call 112</span>
-              <span class="feature-tag-chip">📍 Live GPS Broadcast</span>
-              <span class="feature-tag-chip">👥 Safe Circle</span>
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Call 112
+              </span>
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 12 8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+                Live GPS Broadcast
+              </span>
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Safe Circle
+              </span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" id="openSosBtn" data-target-modal="sosModal">
             <span>Open Emergency SOS</span>
-            <span>➜</span>
+            <span class="btn-arrow">→</span>
           </button>
         </div>
       </div>
@@ -280,7 +255,7 @@
       <div class="feature-card-tile" id="safewalk-section" data-feature-cat="safewalk" data-target-modal="modal-feature-safewalk">
         <div class="feature-tile-img-box">
           <img src="assets/real_safewalk.jpg" alt="Woman walking safely along city street">
-          <span class="feature-tile-badge" style="background:#0284c7;">🚶 Personal Escort</span>
+          <span class="feature-tile-badge" style="background:#0284c7;">Personal Escort</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -289,23 +264,23 @@
               Walking home alone? Generate a live route monitoring link for friends with an automatic countdown alert if you don't check in on arrival.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">⏱️ Auto Countdown</span>
-              <span class="feature-tag-chip">🔗 Shareable Trip Token</span>
-              <span class="feature-tag-chip">✓ Arrival Check-In</span>
+              <span class="feature-tag-chip"> Auto Countdown</span>
+              <span class="feature-tag-chip"> Shareable Trip Token</span>
+              <span class="feature-tag-chip"> Arrival Check-In</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-safewalk">
             <span>Open SafeWalk Escort</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
 
       <!-- Feature 3: AI Deepfake & Manipulation Detector -->
-      <div class="feature-card-tile" id="deepfake-section" data-feature-cat="deepfake" data-target-modal="modal-feature-deepfake">
+      <div class="feature-card-tile" id="deepfake-section" data-feature-cat="deepfake" data-target-modal="deepfakeModal">
         <div class="feature-tile-img-box">
           <img src="assets/real_evidence_phone.jpg" alt="Forensic media examination on laptop">
-          <span class="feature-tile-badge" style="background:#059669;">🔍 Neural AI Forensics</span>
+          <span class="feature-tile-badge" style="background:#059669;">Neural AI Forensics</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -314,14 +289,14 @@
               Verify whether received photos, morphed screenshots, or videos have been synthetically altered or face-swapped using neural classification.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🧠 Dual AI Models</span>
-              <span class="feature-tag-chip">📸 Image &amp; Video Scan</span>
-              <span class="feature-tag-chip">📊 Confidence Verdict</span>
+              <span class="feature-tag-chip"> Dual AI Models</span>
+              <span class="feature-tag-chip"> Image &amp; Video Scan</span>
+              <span class="feature-tag-chip"> Confidence Verdict</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
-            <span>Open Deepfake Scanner</span>
-            <span>➜</span>
+          <button type="button" class="btn-open-workspace" id="openDeepfakeBtn" data-target-modal="deepfakeModal">
+            <span>OPEN DEEPFAKE SCANNER</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -330,7 +305,7 @@
       <div class="feature-card-tile" id="leak-section" data-feature-cat="leak" data-target-modal="modal-feature-leak">
         <div class="feature-tile-img-box">
           <img src="assets/real_phone_message.jpg" alt="Sending protected private photos">
-          <span class="feature-tile-badge" style="background:#d97706;">🕵️ Leak Tracer</span>
+          <span class="feature-tile-badge" style="background:#d97706;"> Leak Tracer</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -339,14 +314,14 @@
               Embed imperceptible cryptographic recipient signatures before sharing photos. If a photo leaks, extract the watermark to pinpoint who shared it.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🔒 Invisible Signatures</span>
-              <span class="feature-tag-chip">📦 Batch ZIP Export</span>
-              <span class="feature-tag-chip">🔍 Leaker Attribution</span>
+              <span class="feature-tag-chip"> Invisible Signatures</span>
+              <span class="feature-tag-chip"> Batch ZIP Export</span>
+              <span class="feature-tag-chip"> Leaker Attribution</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-leak">
             <span>Open Leak Tracer</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -355,7 +330,7 @@
       <div class="feature-card-tile" id="vault-section" data-feature-cat="vault" data-target-modal="modal-feature-vault">
         <div class="feature-tile-img-box">
           <img src="assets/real_phone_message.jpg" alt="Covert evidence documentation">
-          <span class="feature-tile-badge" style="background:#475569;">🔒 Evidence Locker</span>
+          <span class="feature-tile-badge" style="background:#475569;"> Evidence Locker</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -364,14 +339,14 @@
               Discreetly record incident audio or upload files stamped with cryptographic SHA-256 signatures, hidden behind an innocent calculator disguise.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🎙️ Covert Audio</span>
-              <span class="feature-tag-chip">📍 GPS &amp; Timestamp Stamp</span>
-              <span class="feature-tag-chip">🧮 Calculator Disguise</span>
+              <span class="feature-tag-chip"> Covert Audio</span>
+              <span class="feature-tag-chip"> GPS &amp; Timestamp Stamp</span>
+              <span class="feature-tag-chip"> Calculator Disguise</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-vault">
             <span>Open Evidence Vault</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -380,7 +355,7 @@
       <div class="feature-card-tile" id="chatbot-section" data-feature-cat="chatbot" data-target-modal="modal-feature-chatbot">
         <div class="feature-tile-img-box">
           <img src="assets/image_3.jpg" alt="Confidential legal and safety companion">
-          <span class="feature-tile-badge" style="background:#2563eb;">⚖️ Legal Companion</span>
+          <span class="feature-tile-badge" style="background:#2563eb;"> Legal Companion</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -389,14 +364,14 @@
               Confidential guidance on cyber harassment, emergency restraining orders, drafting formal Zero FIR complaints, and direct helpline directories.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">⚖️ Zero FIR Generator</span>
-              <span class="feature-tag-chip">🌐 Multi-Country (IN/US/GB)</span>
-              <span class="feature-tag-chip">🗣️ Speech-to-Text &amp; TTS</span>
+              <span class="feature-tag-chip"> Zero FIR Generator</span>
+              <span class="feature-tag-chip"> Multi-Country (IN/US/GB)</span>
+              <span class="feature-tag-chip"> Speech-to-Text &amp; TTS</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-chatbot">
             <span>Open Legal Chatbot</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -406,19 +381,19 @@
 
   <!-- Sleek Minimal Movement Callout (No walls of text) -->
   <section class="cta-wrapper" id="movement" style="padding: 30px 6%;">
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-radius: 20px; padding: 32px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);">
+    <div style="background: #0f172a; border: 1.5px solid #1e293b; color: #ffffff; border-radius: 6px; padding: 32px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);">
       <div>
         <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px;">You are never alone.</h2>
         <p style="font-size: 0.9rem; color: #94a3b8; max-width: 500px;">
           SafeMate is built with zero surveillance, instant distress beacons, and stealth disguise modes to protect your peace of mind.
         </p>
       </div>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="btn-primary" id="cta-recipe-test" style="background: #334155; border-color: #475569; padding: 11px 18px; font-size: 13px;">
-          🛡️ Test Recipe Disguise (ESC)
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button type="button" class="btn-primary" id="cta-recipe-test" style="background: transparent; border: 1.5px solid #475569; color: #f1f5f9; padding: 11px 20px; font-size: 0.82rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase;">
+           Test Recipe Disguise (ESC)
         </button>
-        <button type="button" class="btn-primary" id="cta-tell-once-btn" style="background: #7c3aed; border-color: #7c3aed; padding: 11px 20px; font-size: 13px; font-weight: 700;">
-          🌸 Open Tell-Once Intake
+        <button type="button" class="btn-primary" id="cta-tell-once-btn" style="background: #881337; border: 1.5px solid #881337; color: #ffffff; padding: 11px 22px; font-size: 0.82rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase;">
+           Open Tell-Once Intake
         </button>
       </div>
     </div>
@@ -442,65 +417,92 @@
        DEDICATED FEATURE WORKSPACE MODALS (OPEN IN DETAIL)
        ======================================================== -->
 
-  <!-- Modal 1: Emergency SOS & Real Dialing Workspace -->
-  <div class="modal-overlay" id="modal-feature-sos" style="z-index: 99996;">
-    <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);">
+  <!-- Modal 1: Emergency SOS & Real Dialing Workspace (Clean, Sharp Architectural Interface) -->
+  <div class="modal-overlay" id="sosModal" style="display: none; z-index: 99996;">
+    <div class="workspace-modal-card" style="border: 1.5px solid #0f172a; border-radius: 6px; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4); max-width: 680px;">
+      
+      <!-- Obsidian Architectural Header -->
+      <div class="workspace-modal-header" style="background: #0f172a; border-bottom: 2px solid #881337; padding: 20px 24px;">
         <div>
-          <div class="workspace-header-title">
-            <span>🚨</span>
+          <div class="workspace-header-title" style="font-family: var(--font-serif), 'Karma', 'Alice', Georgia, serif; font-size: 1.35rem; color: #ffffff; letter-spacing: -0.01em;">
+            <svg style="width: 20px; height: 20px; color: #f43f5e; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             <span>Emergency SOS &amp; Instant Real Calling</span>
           </div>
-          <div class="workspace-header-sub" style="color: #fecaca;">
-            Direct connection to 112 emergency dispatchers or your trusted safety circle.
+          <div class="workspace-header-sub" style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">
+            Direct connection to 112 emergency dispatchers or your trusted safety circle with verified GPS broadcasting.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-sos">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeSosBtn" data-close-workspace="sosModal" aria-label="Close Modal" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: #cbd5e1;">✕</button>
       </div>
 
-      <div class="workspace-modal-body">
-        <!-- Active Contact Bar & Editor Toggle -->
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px 16px; border-radius:12px; border:1px solid #e2e8f0;">
+      <div class="workspace-modal-body" style="padding: 24px; gap: 16px;">
+        
+        <!-- Live Protocol Micro-Badges -->
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span class="feature-micro-badge" style="background: #fff1f2; border-color: #fecdd3; color: #881337;">
+            <svg class="micro-icon" style="color: #881337;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            Protocol Active: Encrypted
+          </span>
+          <span class="feature-micro-badge">
+            <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Zero-Footprint Client Broadcast
+          </span>
+          <span class="feature-micro-badge">
+            <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Instant Dispatcher Gateway
+          </span>
+        </div>
+
+        <!-- Active Contact Micro-Card -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 14px 18px; border-radius: 4px; border: 1.5px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
           <div>
-            <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; display:block; font-weight:700;">Active Emergency Contact</span>
-            <strong id="sos-active-contact-display" style="font-size:1.02rem; color:#0f172a;">Mom (+91-9876543210)</strong>
+            <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+              Active Safety Contact
+            </div>
+            <strong id="sos-active-contact-display" style="font-size: 1.05rem; color: #0f172a; letter-spacing: -0.01em; display: block; margin-top: 2px;">Mom (+91-9876543210)</strong>
           </div>
-          <button type="button" id="btn-toggle-contact-edit" class="btn-outline" style="padding:6px 12px; font-size:12px; cursor:pointer;">
-            ⚙️ Edit Contact
+          <button type="button" id="btn-toggle-contact-edit" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; padding: 7px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.16s ease;">
+            Edit Contact
           </button>
         </div>
 
-        <!-- Expandable Contact Editor -->
-        <div id="sos-contact-editor" style="display:none; background:#f1f5f9; padding:16px; border-radius:12px; border:1px solid #cbd5e1;">
-          <div style="font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">Set Real Emergency Contact</div>
-          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Mom, Maya, Sister)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
-          <input type="tel" id="input-emergency-phone" placeholder="Contact Phone Number (e.g. +91-9876543210)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
-          <button type="button" id="btn-save-contact" class="btn-primary" style="width:100%; padding:10px; font-size:13px; cursor:pointer;">
-            💾 Save Emergency Contact
+        <!-- Expandable Contact Editor Card -->
+        <div id="sos-contact-editor" style="display: none; background: #f8fafc; padding: 18px; border-radius: 4px; border: 1.5px solid #cbd5e1;">
+          <div style="font-size: 0.84rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em;">Update Trusted Emergency Contact</div>
+          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Maya, Sister, Father)" style="width: 100%; padding: 10px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 8px; box-sizing: border-box; background: #ffffff;">
+          <input type="tel" id="input-emergency-phone" placeholder="Phone Number (e.g. +91-9876543210)" style="width: 100%; padding: 10px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px; box-sizing: border-box; background: #ffffff;">
+          <button type="button" id="btn-save-contact" style="width: 100%; padding: 10px; font-size: 13px; font-weight: 700; background: #0f172a; color: #ffffff; border: 1px solid #0f172a; border-radius: 4px; cursor: pointer;">
+            Save Trusted Contact
           </button>
         </div>
 
-        <!-- Direct Real Call Buttons -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <a id="btn-call-112" href="tel:112" class="btn-primary" style="background:#dc2626; border-color:#dc2626; padding:14px; font-size:14px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-radius:12px;">
-            📞 Call 112 (Police)
+        <!-- Direct Connection Micro-Actions (Anti-Bubbly High-End Dual Grid) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <a id="btn-call-112" href="tel:112" style="background: #881337; color: #ffffff; border: 1.5px solid #881337; padding: 14px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 4px; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 2px 6px rgba(136, 19, 55, 0.2);">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call 112 (Dispatch)
           </a>
-          <a id="btn-call-contact" href="tel:+919876543210" class="btn-outline" style="padding:14px; font-size:14px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-color:#0284c7; color:#0284c7; border-radius:12px;">
-            📞 Call Saved Contact
+          <a id="btn-call-contact" href="tel:+919876543210" style="background: #ffffff; color: #0f172a; border: 1.5px solid #0f172a; padding: 14px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 4px; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <svg style="width: 16px; height: 16px; color: #0f172a;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Call Saved Contact
           </a>
         </div>
 
-        <!-- Full Emergency SOS Panic Trigger -->
-        <button type="button" class="btn-primary" id="btn-send-sos" style="width:100%; padding:15px; font-size:15px; background:linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border-color:#991b1b; cursor:pointer; font-weight:800; border-radius:12px; box-shadow:0 4px 18px rgba(185, 28, 28, 0.35);">
-          🚨 Trigger Full SOS (Broadcast Verified GPS + Dial Call)
+        <!-- Primary Action Button: Obsidian High-Contrast SOS Trigger -->
+        <button type="button" id="btn-send-sos" style="width: 100%; padding: 16px; font-size: 0.94rem; background: #0f172a; color: #ffffff; border: 1.5px solid #0f172a; border-radius: 4px; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+          <svg style="width: 18px; height: 18px; color: #f43f5e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Trigger Full SOS (Broadcast Verified GPS + Dial Call)</span>
+          <span style="font-size: 1.1rem; margin-left: 4px;">→</span>
         </button>
 
-        <div id="sos-status-box" class="status-callout" style="display:none;"></div>
+        <div id="sos-status-box" class="status-callout" style="display: none; border-radius: 4px; border: 1px solid #e2e8f0;"></div>
       </div>
 
-      <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">⚠️ In immediate danger? Always dial 112 directly.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-sos" style="font-size:12px; padding:6px 12px;">
+      <!-- Sharp Modal Footer -->
+      <div class="workspace-modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; border-radius: 0 0 4px 4px;">
+        <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">In immediate life danger? Always dial <strong>112</strong> directly.</span>
+        <button type="button" class="btn-outline close-sos-btn" id="closeSosFooterBtn" data-close-workspace="sosModal" style="font-size: 12px; padding: 6px 14px; border-radius: 4px; border-color: #cbd5e1; font-weight: 600;">
           ← Back to Tools
         </button>
       </div>
@@ -572,44 +574,156 @@
     </div>
   </div>
 
-  <!-- Modal 3: AI Deepfake Scanner Workspace -->
-  <div class="modal-overlay" id="modal-feature-deepfake" style="z-index: 99996;">
-    <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%);">
+  <!-- Modal 3: AI Deepfake & Manipulation Detector Workspace -->
+  <div class="modal-overlay" id="deepfakeModal" style="display: none; z-index: 99996; position: fixed; inset: 0; background-color: rgba(9, 13, 22, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 16px;">
+    <div class="workspace-modal-card" style="width: 100%; max-width: 780px; max-height: 94vh; background-color: #ffffff; border: 1.5px solid #090d16; border-radius: 12px; box-shadow: 0 25px 70px rgba(9, 13, 22, 0.45); overflow: hidden; display: flex; flex-direction: column;">
+      
+      <!-- Architectural Obsidian Header with Emerald Accent Line -->
+      <div class="workspace-modal-header" style="background-color: #090d16; border-bottom: 2px solid #059669; color: #ffffff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;">
         <div>
-          <div class="workspace-header-title">
-            <span>🔍</span>
-            <span>AI Deepfake &amp; Manipulation Detector</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981;"></span>
+            <h2 id="deepfake-workspace-title" style="font-family: 'Karma', 'Alice', Georgia, serif; font-size: 1.28rem; font-weight: 700; letter-spacing: -0.01em; color: #ffffff; margin: 0;">
+              AI Deepfake &amp; Manipulation Detector
+            </h2>
           </div>
-          <div class="workspace-header-sub" style="color: #a7f3d0;">
-            Dual-engine neural classification for image and video face-swaps.
-          </div>
+          <p style="font-size: 0.78rem; color: #94a3b8; margin: 4px 0 0 18px; font-family: 'Inter', sans-serif;">
+            Dual neural models for forensic image morphing and video deepfake verification.
+          </p>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-deepfake">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeDeepfakeBtn" data-close-workspace="deepfakeModal" aria-label="Close Deepfake Scanner" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: #94a3b8; font-size: 14px; font-weight: 700; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
       </div>
 
-      <div class="workspace-modal-body">
-        <input type="file" id="deepfake-file-input" accept="image/*,video/*" style="display:none;">
-        <div style="border: 2px dashed #cbd5e1; border-radius:14px; padding:28px 20px; text-align:center; background:#f8fafc; cursor:pointer;" id="dropzone-deepfake">
-          <div style="font-size:2rem; margin-bottom:8px;">📁</div>
-          <strong style="font-size:0.95rem; color:#0f172a; display:block; margin-bottom:4px;">Select Photo or Video to Screen</strong>
-          <span style="font-size:0.78rem; color:#64748b; display:block; margin-bottom:12px;">Supports JPG, PNG, WEBP, MP4, MOV (up to 50MB)</span>
-          <button type="button" class="btn-outline" id="btn-select-deepfake-file" style="padding:8px 16px; font-size:12px; cursor:pointer;">
-            Browse Files
+      <!-- Modal Body (Warm Alabaster Canvas) -->
+      <div class="workspace-modal-body" style="padding: 22px 26px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #fafaf9;">
+        
+        <!-- Dual-Mode Sharp Tab Switcher -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background-color: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0;" role="tablist">
+          <button type="button" id="tab-deepfake-image" role="tab" aria-selected="true" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; font-size: 0.82rem; font-weight: 700; color: #ffffff; background-color: #090d16; border: none; border-radius: 6px; cursor: pointer; transition: all 0.16s ease; box-shadow: 0 2px 8px rgba(9, 13, 22, 0.2);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Image Privacy &amp; Morphed Screenshot Scan</span>
           </button>
-          <div id="deepfake-selected-filename" style="font-size:0.85rem; color:#0284c7; margin-top:10px; display:none; font-weight:700;"></div>
+
+          <button type="button" id="tab-deepfake-video" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; font-size: 0.82rem; font-weight: 600; color: #475569; background-color: transparent; border: none; border-radius: 6px; cursor: pointer; transition: all 0.16s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+            <span>Video Deepfake Detector</span>
+          </button>
         </div>
 
-        <button type="button" class="btn-primary" id="btn-scan-deepfake" style="width:100%; padding:13px; font-size:14px; cursor:pointer; font-weight:700; border-radius:10px;">
-          🔍 Screen Media for Synthetic Manipulation
+        <!-- Model Specification Micro-Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; background-color: #ffffff; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: 0.74rem; color: #475569;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 700; color: #090d16;">Active Neural Engine:</span>
+            <span id="deepfake-active-engine-label">Swin-Transformer (umm-maybe/AI-image-detector)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>
+            <span style="color: #047857; font-weight: 600;">100% In-Memory RAM Inspection</span>
+          </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="deepfake-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;">
+
+        <!-- Drag & Drop Upload Zone -->
+        <div id="dropzone-deepfake" style="border: 1.5px dashed #cbd5e1; border-radius: 10px; padding: 24px 20px; text-align: center; background-color: #ffffff; cursor: pointer; transition: all 0.18s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px;">
+          
+          <!-- Staged File Card (hidden until file chosen) -->
+          <div id="deepfake-staged-file-card" style="display: none; align-items: center; gap: 14px; width: 100%; max-width: 520px; text-align: left;">
+            <img id="deepfake-staged-thumb" src="" alt="Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; display: none;">
+            <div id="deepfake-staged-icon" style="width: 64px; height: 64px; border-radius: 6px; background-color: #090d16; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 24px;">🎬</div>
+            <div style="flex: 1; min-width: 0;">
+              <div id="deepfake-staged-filename" style="font-size: 0.88rem; font-weight: 700; color: #090d16; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.jpg</div>
+              <div id="deepfake-staged-meta" style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">0.0 KB • Media File</div>
+              <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 0.72rem; color: #047857; font-weight: 600;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Staged for In-Memory Neural Scan</span>
+              </div>
+            </div>
+            <button type="button" id="btn-deepfake-change-file" style="padding: 6px 12px; font-size: 0.74rem; font-weight: 600; background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+              Change
+            </button>
+          </div>
+
+          <!-- Empty Dropzone Prompt -->
+          <div id="deepfake-dropzone-prompt">
+            <div id="deepfake-dropzone-icon" style="font-size: 1.8rem; margin-bottom: 6px;">🖼️</div>
+            <strong id="deepfake-dropzone-headline" style="font-size: 0.92rem; color: #090d16; display: block;">
+              Drag &amp; Drop Image or Click to Select
+            </strong>
+            <span id="deepfake-dropzone-sub" style="font-size: 0.75rem; color: #64748b; display: block; margin-top: 4px;">
+              Supports JPG, PNG, WEBP (Up to 10MB)
+            </span>
+            <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" id="btn-select-deepfake-file" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 700; background-color: #090d16; color: #ffffff; border: 1px solid #090d16; border-radius: 4px; cursor: pointer;">
+                Browse Files
+              </button>
+              <button type="button" id="btn-deepfake-demo-sample" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 600; background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+                Use Forensic Sample Media
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cryptographic SHA-256 Fingerprint Bar (Hidden until computed) -->
+        <div id="deepfake-hash-bar" style="display: none; align-items: center; justify-content: space-between; background-color: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px; border-radius: 6px; font-size: 0.72rem;">
+          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <span style="font-weight: 700; color: #090d16;">SHA-256 Fingerprint:</span>
+            <code id="deepfake-hash-code" style="color: #0284c7; font-family: monospace;">e3b0c44298fc1c149afbf4c8...</code>
+          </div>
+          <button type="button" id="btn-copy-deepfake-hash" style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.7rem; font-weight: 600; color: #475569; cursor: pointer;">
+            Copy Hash
+          </button>
+        </div>
+
+        <!-- Multi-Stage Processing Indicator -->
+        <div id="deepfake-progress-card" style="display: none; background-color: #ffffff; border: 1.5px solid #090d16; border-radius: 8px; padding: 16px 20px; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong style="font-size: 0.84rem; color: #090d16;">Running Forensic Neural Verification...</strong>
+            <span id="deepfake-progress-step-text" style="font-size: 0.74rem; color: #059669; font-weight: 700;">Step 1 of 3</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem;">
+            <div id="df-step-1" style="display: flex; align-items: center; gap: 8px; color: #090d16;">
+              <span class="df-step-mark">●</span>
+              <span>Ingesting volatile stream &amp; generating SHA-256 custody fingerprint</span>
+            </div>
+            <div id="df-step-2" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
+              <span class="df-step-mark">○</span>
+              <span id="df-step-2-text">Evaluating discrete cosine frequency &amp; diffusion patterns</span>
+            </div>
+            <div id="df-step-3" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
+              <span class="df-step-mark">○</span>
+              <span>Executing transformer classification across spatial attention heads</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Structured Confidence Verdict Breakdown Container -->
+        <div id="deepfake-verdict-card" style="display: none; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
+          <!-- Dynamic Content Populated by JavaScript -->
+        </div>
+
+        <!-- Primary Action Button: Obsidian High-Contrast -->
+        <button type="button" id="btn-scan-deepfake" style="width: 100%; padding: 15px 20px; font-size: 0.92rem; background-color: #090d16; color: #ffffff; border: 1.5px solid #090d16; border-radius: 8px; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(9, 13, 22, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.18s ease;">
+          <span id="btn-scan-deepfake-label">Execute Image Manipulation Scan</span>
+          <span style="font-size: 1.15rem;">→</span>
         </button>
 
-        <div id="deepfake-status-box" class="status-callout" style="display:none;"></div>
       </div>
 
-      <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">🔒 100% in-memory processing. Zero files are saved on cloud.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-deepfake" style="font-size:12px; padding:6px 12px;">
+      <!-- Sharp Modal Footer -->
+      <div class="workspace-modal-footer" style="background-color: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; font-family: 'Inter', sans-serif;">
+        <span style="font-size: 0.74rem; color: #64748b; font-weight: 500;">
+          🔒 <strong>Zero Cloud Footprint:</strong> Files are screened strictly in volatile memory. No media is stored on cloud servers.
+        </span>
+        <button type="button" class="btn-outline close-deepfake-btn" id="closeDeepfakeFooterBtn" data-close-workspace="deepfakeModal" style="background-color: transparent; color: #475569; border: 1.5px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer;">
           ← Back to Tools
         </button>
       </div>
@@ -1055,7 +1169,7 @@
   <!-- ========================================================
        TELL-ONCE INTAKE MODAL (TRAUMA-INFORMED SINGLE INTERVIEW)
        ======================================================== -->
-  <div class="modal-overlay" id="tell-once-modal" style="z-index: 99997;">
+  <div class="modal-overlay" id="tellOnceModal" style="display: none; z-index: 99997;">
     <div class="tell-once-modal-card">
       
       <!-- Modal Header -->
@@ -1082,7 +1196,7 @@
             <button type="button" class="tell-once-lang-btn active" id="tell-once-lang-en">English</button>
             <button type="button" class="tell-once-lang-btn" id="tell-once-lang-hi">हिंदी</button>
           </div>
-          <button type="button" id="btn-close-tell-once-modal" style="background:none; border:none; color:#c7d2fe; font-size:20px; cursor:pointer;" title="Close Modal">✕</button>
+          <button type="button" id="closeTellOnceBtn" class="close-tell-once-btn" data-close-workspace="tellOnceModal" style="background:none; border:none; color:#c7d2fe; font-size:20px; cursor:pointer;" title="Close Modal">✕</button>
         </div>
       </div>
 
@@ -1227,17 +1341,9 @@
        FLOATING EMERGENCY QUICK-DOCK (User-Friendly Safety Bar)
        ======================================================== -->
   <aside class="emergency-quick-dock" aria-label="Emergency quick dock">
-    <a href="tel:112" class="dock-pill-call" title="Direct Police Dispatch (112)">
-      <span>📞</span>
-      <span>112</span>
-    </a>
     <button type="button" class="dock-pill-tellonce" id="dock-btn-tell-once" title="Tell-Once Trauma-Informed Intake">
       <span>🌸</span>
       <span>Tell-Once</span>
-    </button>
-    <button type="button" class="dock-pill-panic" id="dock-btn-disguise" title="Hide page instantly (Recipe Disguise)">
-      <span>🛡️</span>
-      <span>Disguise</span>
     </button>
   </aside>
 
