@@ -47,7 +47,7 @@
       <!-- Prominent Emergency 112 Button -->
       <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
         <span class="pulse-indicator"></span>
-        <span>🚨 Emergency 112</span>
+        <span>Emergency 112</span>
       </a>
     </div>
   </header>
@@ -408,17 +408,10 @@
         <div class="footer-col">
           <div class="footer-brand-title">
             <span>SafeMate</span>
-            <span class="footer-brand-badge">SHIELD &bull; V1.0</span>
           </div>
           <p class="footer-desc">
             Tactical personal safety and statutory legal counsel engine. Built for immediate emergency dispatch, Zero FIR automated legal drafting, and client-side forensic evidence preservation.
           </p>
-          <div class="footer-compliance-card">
-            <span class="footer-compliance-badge">Zero Surveillance Guarantee</span>
-            <span class="footer-compliance-text">
-              Zero cloud logs. Volatile in-memory execution. All temporary caches purge cleanly upon session exit.
-            </span>
-          </div>
         </div>
 
         <!-- Column 2: Direct Workspaces Navigation -->
@@ -532,30 +525,31 @@
        DEDICATED FEATURE WORKSPACE MODALS (OPEN IN DETAIL)
        ======================================================== -->
 
-  <!-- Modal 1: Emergency SOS & Real Dialing Workspace (Clean, Sharp Architectural Interface) -->
+  <!-- Modal 1: Emergency SOS & Real Dialing Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="sosModal" style="display: none; z-index: 99996;">
-    <div class="workspace-modal-card" style="border: 1.5px solid #0f172a; border-radius: 6px; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4); max-width: 680px;">
+    <div class="workspace-modal-card">
       
-      <!-- Obsidian Architectural Header -->
-      <div class="workspace-modal-header" style="background: #0f172a; border-bottom: 2px solid #881337; padding: 20px 24px;">
+      <!-- Standardized Dark Navy & Crimson Header -->
+      <div class="workspace-modal-header">
         <div>
-          <div class="workspace-header-title" style="font-family: var(--font-serif), 'Karma', 'Alice', Georgia, serif; font-size: 1.35rem; color: #ffffff; letter-spacing: -0.01em;">
-            <svg style="width: 20px; height: 20px; color: #f43f5e; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <div class="workspace-header-title">
+            <svg style="width: 22px; height: 22px; color: #EF233C; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             <span>Emergency SOS &amp; Instant Real Calling</span>
+            <span class="workspace-header-badge">DISPATCH READY &bull; 112 DIRECT</span>
           </div>
-          <div class="workspace-header-sub" style="color: #94a3b8; font-size: 0.82rem; margin-top: 4px;">
+          <div class="workspace-header-sub">
             Direct connection to 112 emergency dispatchers or your trusted safety circle with verified GPS broadcasting.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" id="closeSosBtn" data-close-workspace="sosModal" aria-label="Close Modal" style="border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: #cbd5e1;">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeSosBtn" data-close-workspace="sosModal" aria-label="Close Modal">&times;</button>
       </div>
 
-      <div class="workspace-modal-body" style="padding: 24px; gap: 16px;">
+      <div class="workspace-modal-body">
         
         <!-- Live Protocol Micro-Badges -->
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          <span class="feature-micro-badge" style="background: #fff1f2; border-color: #fecdd3; color: #881337;">
-            <svg class="micro-icon" style="color: #881337;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="feature-micro-badge" style="background: rgba(217, 4, 41, 0.1); border-color: #D90429; color: #EF233C;">
+            <svg class="micro-icon" style="color: #EF233C;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
             Protocol Active: Encrypted
           </span>
           <span class="feature-micro-badge">
@@ -569,85 +563,86 @@
         </div>
 
         <!-- Active Contact Micro-Card -->
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 14px 18px; border-radius: 4px; border: 1.5px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 20px; border: 1.5px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
           <div>
             <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; display: flex; align-items: center; gap: 5px;">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+              <span style="width: 6px; height: 6px; background: #10b981; display: inline-block;"></span>
               Active Safety Contact
             </div>
-            <strong id="sos-active-contact-display" style="font-size: 1.05rem; color: #0f172a; letter-spacing: -0.01em; display: block; margin-top: 2px;">Mom (+91-9876543210)</strong>
+            <strong id="sos-active-contact-display" style="font-size: 1.08rem; color: #0B132B; letter-spacing: -0.01em; display: block; margin-top: 2px;">Mom (+91-9876543210)</strong>
           </div>
-          <button type="button" id="btn-toggle-contact-edit" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; padding: 7px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.16s ease;">
+          <button type="button" id="btn-toggle-contact-edit" style="background: #f8fafc; color: #0B132B; border: 1px solid #cbd5e1; padding: 8px 16px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.16s ease;">
             Edit Contact
           </button>
         </div>
 
         <!-- Expandable Contact Editor Card -->
-        <div id="sos-contact-editor" style="display: none; background: #f8fafc; padding: 18px; border-radius: 4px; border: 1.5px solid #cbd5e1;">
-          <div style="font-size: 0.84rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em;">Update Trusted Emergency Contact</div>
-          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Maya, Sister, Father)" style="width: 100%; padding: 10px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 8px; box-sizing: border-box; background: #ffffff;">
-          <input type="tel" id="input-emergency-phone" placeholder="Phone Number (e.g. +91-9876543210)" style="width: 100%; padding: 10px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 12px; box-sizing: border-box; background: #ffffff;">
-          <button type="button" id="btn-save-contact" style="width: 100%; padding: 10px; font-size: 13px; font-weight: 700; background: #0f172a; color: #ffffff; border: 1px solid #0f172a; border-radius: 4px; cursor: pointer;">
+        <div id="sos-contact-editor" style="display: none; background: #f8fafc; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <div style="font-size: 0.84rem; font-weight: 800; color: #0B132B; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em;">Update Trusted Emergency Contact</div>
+          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Maya, Sister, Father)" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 8px; box-sizing: border-box; background: #ffffff;">
+          <input type="tel" id="input-emergency-phone" placeholder="Phone Number (e.g. +91-9876543210)" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 12px; box-sizing: border-box; background: #ffffff;">
+          <button type="button" id="btn-save-contact" style="width: 100%; padding: 11px; font-size: 13px; font-weight: 700; background: #0B132B; color: #ffffff; border: 1px solid #0B132B; cursor: pointer;">
             Save Trusted Contact
           </button>
         </div>
 
-        <!-- Direct Connection Micro-Actions (Anti-Bubbly High-End Dual Grid) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <a id="btn-call-112" href="tel:112" style="background: #881337; color: #ffffff; border: 1.5px solid #881337; padding: 14px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 4px; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 2px 6px rgba(136, 19, 55, 0.2);">
+        <!-- Direct Connection Micro-Actions (Tactical High-Contrast Dual Grid) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <a id="btn-call-112" href="tel:112" style="background: #D90429; color: #ffffff; border: 1.5px solid #D90429; padding: 15px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 2px 6px rgba(217, 4, 41, 0.25);">
             <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Call 112 (Dispatch)
           </a>
-          <a id="btn-call-contact" href="tel:+919876543210" style="background: #ffffff; color: #0f172a; border: 1.5px solid #0f172a; padding: 14px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 4px; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-            <svg style="width: 16px; height: 16px; color: #0f172a;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <a id="btn-call-contact" href="tel:+919876543210" style="background: #ffffff; color: #0B132B; border: 1.5px solid #0B132B; padding: 15px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <svg style="width: 16px; height: 16px; color: #0B132B;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Call Saved Contact
           </a>
         </div>
 
         <!-- Primary Action Button: Obsidian High-Contrast SOS Trigger -->
-        <button type="button" id="btn-send-sos" style="width: 100%; padding: 16px; font-size: 0.94rem; background: #0f172a; color: #ffffff; border: 1.5px solid #0f172a; border-radius: 4px; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
-          <svg style="width: 18px; height: 18px; color: #f43f5e;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <button type="button" id="btn-send-sos" style="width: 100%; padding: 16px; font-size: 0.94rem; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(11, 19, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+          <svg style="width: 18px; height: 18px; color: #EF233C;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span>Trigger Full SOS (Broadcast Verified GPS + Dial Call)</span>
-          <span style="font-size: 1.1rem; margin-left: 4px;">→</span>
+          <span style="font-size: 1.1rem; margin-left: 4px;">&rarr;</span>
         </button>
 
-        <div id="sos-status-box" class="status-callout" style="display: none; border-radius: 4px; border: 1px solid #e2e8f0;"></div>
+        <div id="sos-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
-      <!-- Sharp Modal Footer -->
-      <div class="workspace-modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; border-radius: 0 0 4px 4px;">
-        <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">In immediate life danger? Always dial <strong>112</strong> directly.</span>
-        <button type="button" class="btn-outline close-sos-btn" id="closeSosFooterBtn" data-close-workspace="sosModal" style="font-size: 12px; padding: 6px 14px; border-radius: 4px; border-color: #cbd5e1; font-weight: 600;">
-          ← Back to Tools
+      <!-- Standardized Sharp Modal Footer -->
+      <div class="workspace-modal-footer">
+        <span class="modal-footer-disclaimer">In immediate life danger? Always dial <strong>112</strong> directly nationwide.</span>
+        <button type="button" class="btn-outline close-sos-btn" id="closeSosFooterBtn" data-close-workspace="sosModal">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 2: SafeWalk Escort Workspace -->
+  <!-- Modal 2: SafeWalk Escort Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-safewalk" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #075985 0%, #0369a1 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🚶</span>
+            <svg style="width: 22px; height: 22px; color: #EF233C; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span>SafeWalk Escort &amp; Live Tracking</span>
+            <span class="workspace-header-badge">LIVE TRIP TOKEN</span>
           </div>
-          <div class="workspace-header-sub" style="color: #bae6fd;">
-            Walking alone? Create a live Trip Token link for friends to monitor your journey.
+          <div class="workspace-header-sub">
+            Walking alone? Create a live Trip Token link for trusted contacts to monitor your journey in real time.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-safewalk">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-safewalk" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <div id="safewalk-setup-panel" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0;">
-          <label style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:6px;">Your Destination:</label>
-          <input type="text" id="safewalk-destination" placeholder="Destination (e.g. Home, Dorm Block 3, Metro Station)" value="Home" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
+        <div id="safewalk-setup-panel" style="background: #ffffff; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Your Destination:</label>
+          <input type="text" id="safewalk-destination" placeholder="Destination (e.g. Home, Dorm Block 3, Metro Station)" value="Home" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 14px; box-sizing: border-box; background: #ffffff;">
           
-          <div style="display:flex; gap:10px; align-items:center;">
-            <label style="font-size:0.8rem; font-weight:700; color:#334155;">Expected Walk Duration:</label>
-            <select id="safewalk-duration-select" style="padding:8px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;">
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; text-transform: uppercase; letter-spacing: 0.04em;">Expected Walk Duration:</label>
+            <select id="safewalk-duration-select" style="padding: 9px 14px; font-size: 13px; border: 1px solid #cbd5e1; background: #ffffff; color: #0B132B; font-weight: 600;">
               <option value="15">15 Minutes</option>
               <option value="20" selected>20 Minutes</option>
               <option value="30">30 Minutes</option>
@@ -656,91 +651,91 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f1f5f9; padding:16px 20px; border-radius:12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 18px 24px; border: 1.5px solid #cbd5e1; flex-wrap: wrap; gap: 14px;">
           <div>
-            <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase; font-weight:700; display:block;">Active Check-In Timer</span>
-            <span id="safewalk-timer-display" style="color:#e52543; font-family:monospace; font-weight:800; font-size:1.8rem;">20:00</span>
+            <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; display: block;">Active Check-In Countdown</span>
+            <span id="safewalk-timer-display" style="color: #D90429; font-family: monospace; font-weight: 800; font-size: 2rem;">20:00</span>
           </div>
-          <button class="btn-primary" id="btn-toggle-safewalk" style="padding:12px 22px; font-size:14px; font-weight:700; border-radius:10px;">
+          <button class="btn-primary" id="btn-toggle-safewalk" style="background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; padding: 14px 26px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
             Start SafeWalk Escort
           </button>
         </div>
 
-        <div id="safewalk-active-actions" style="display:none; gap:10px; flex-direction:column;">
-          <div style="display:flex; gap:10px;">
-            <button type="button" id="btn-share-safewalk" class="btn-outline" style="flex:1; padding:11px; font-size:13px; font-weight:700; border-radius:10px;">
-              🔗 Share Live Trip Link
+        <div id="safewalk-active-actions" style="display: none; gap: 12px; flex-direction: column;">
+          <div style="display: flex; gap: 12px;">
+            <button type="button" id="btn-share-safewalk" class="btn-outline" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; background: #1C2541; color: #F8F9FA; border: 1px solid rgba(141, 153, 174, 0.35); cursor: pointer;">
+              Share Live Trip Link
             </button>
-            <button type="button" id="btn-complete-safewalk" class="btn-primary" style="flex:1; padding:11px; font-size:13px; background:#059669; border-color:#059669; font-weight:700; border-radius:10px;">
-              ✓ I Have Arrived Safely
+            <button type="button" id="btn-complete-safewalk" class="btn-primary" style="flex: 1; padding: 12px; font-size: 13px; background: #059669; border: 1px solid #059669; color: #ffffff; font-weight: 700; cursor: pointer;">
+              Confirm Safe Arrival
             </button>
           </div>
         </div>
 
-        <div id="safewalk-status-box" class="status-callout" style="display:none;"></div>
+        <div id="safewalk-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Automatic emergency SMS sent to trusted circle if timer expires.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-safewalk" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Automatic emergency SMS dispatched to trusted safety circle if walk timer expires.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-safewalk">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 3: AI Deepfake & Manipulation Detector Workspace -->
-  <div class="modal-overlay" id="deepfakeModal" style="display: none; z-index: 99996; position: fixed; inset: 0; background-color: rgba(9, 13, 22, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 16px;">
-    <div class="workspace-modal-card" style="width: 100%; max-width: 780px; max-height: 94vh; background-color: #ffffff; border: 1.5px solid #090d16; border-radius: 12px; box-shadow: 0 25px 70px rgba(9, 13, 22, 0.45); overflow: hidden; display: flex; flex-direction: column;">
+  <!-- Modal 3: AI Deepfake & Manipulation Detector Workspace (Standardized Workspace Architecture) -->
+  <div class="modal-overlay" id="deepfakeModal" style="display: none; z-index: 99996;">
+    <div class="workspace-modal-card">
       
-      <!-- Architectural Obsidian Header with Emerald Accent Line -->
-      <div class="workspace-modal-header" style="background-color: #090d16; border-bottom: 2px solid #059669; color: #ffffff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;">
+      <!-- Standardized Dark Navy & Crimson Header -->
+      <div class="workspace-modal-header">
         <div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981;"></span>
-            <h2 id="deepfake-workspace-title" style="font-family: 'Karma', 'Alice', Georgia, serif; font-size: 1.28rem; font-weight: 700; letter-spacing: -0.01em; color: #ffffff; margin: 0;">
-              AI Deepfake &amp; Manipulation Detector
-            </h2>
+          <div class="workspace-header-title">
+            <svg style="width: 22px; height: 22px; color: #EF233C; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18"/><path d="m9 9 6 6"/><path d="m15 9-6 6"/></svg>
+            <span id="deepfake-workspace-title">AI Deepfake &amp; Manipulation Detector</span>
+            <span class="workspace-header-badge">NEURAL FORENSICS</span>
           </div>
-          <p style="font-size: 0.78rem; color: #94a3b8; margin: 4px 0 0 18px; font-family: 'Inter', sans-serif;">
+          <div class="workspace-header-sub">
             Dual neural models for forensic image morphing and video deepfake verification.
-          </p>
+          </div>
         </div>
-        <button type="button" class="workspace-close-btn" id="closeDeepfakeBtn" data-close-workspace="deepfakeModal" aria-label="Close Deepfake Scanner" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; color: #94a3b8; font-size: 14px; font-weight: 700; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer;">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeDeepfakeBtn" data-close-workspace="deepfakeModal" aria-label="Close Deepfake Scanner">&times;</button>
       </div>
 
-      <!-- Modal Body (Warm Alabaster Canvas) -->
-      <div class="workspace-modal-body" style="padding: 22px 26px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #fafaf9;">
+      <!-- Modal Body (Sharp Industrial Canvas) -->
+      <div class="workspace-modal-body">
         
         <!-- Dual-Mode Sharp Tab Switcher -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background-color: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0;" role="tablist">
-          <button type="button" id="tab-deepfake-image" role="tab" aria-selected="true" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; font-size: 0.82rem; font-weight: 700; color: #ffffff; background-color: #090d16; border: none; border-radius: 6px; cursor: pointer; transition: all 0.16s ease; box-shadow: 0 2px 8px rgba(9, 13, 22, 0.2);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #ffffff; padding: 6px; border: 1.5px solid #cbd5e1;" role="tablist">
+          <button type="button" id="tab-deepfake-image" role="tab" aria-selected="true" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; font-size: 0.82rem; font-weight: 700; color: #ffffff; background: #0B132B; border: 1.5px solid #0B132B; cursor: pointer; transition: all 0.16s ease;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <rect x="3" y="3" width="18" height="18"/>
               <circle cx="8.5" cy="8.5" r="1.5"/>
               <polyline points="21 15 16 10 5 21"/>
             </svg>
             <span>Image Privacy &amp; Morphed Screenshot Scan</span>
           </button>
 
-          <button type="button" id="tab-deepfake-video" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; font-size: 0.82rem; font-weight: 600; color: #475569; background-color: transparent; border: none; border-radius: 6px; cursor: pointer; transition: all 0.16s ease;">
+          <button type="button" id="tab-deepfake-video" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; font-size: 0.82rem; font-weight: 600; color: #475569; background: #f8fafc; border: 1.5px solid #cbd5e1; cursor: pointer; transition: all 0.16s ease;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="23 7 16 12 23 17 23 7"/>
-              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              <rect x="1" y="5" width="15" height="14"/>
             </svg>
             <span>Video Deepfake Detector</span>
           </button>
         </div>
 
         <!-- Model Specification Micro-Bar -->
-        <div style="display: flex; align-items: center; justify-content: space-between; background-color: #ffffff; border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: 0.74rem; color: #475569;">
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 12px 16px; font-size: 0.74rem; color: #475569; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-weight: 700; color: #090d16;">Active Neural Engine:</span>
-            <span id="deepfake-active-engine-label">Swin-Transformer (umm-maybe/AI-image-detector)</span>
+            <span style="font-weight: 800; color: #0B132B; text-transform: uppercase;">Active Neural Engine:</span>
+            <span id="deepfake-active-engine-label" style="font-weight: 600;">Swin-Transformer (umm-maybe/AI-image-detector)</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>
-            <span style="color: #047857; font-weight: 600;">100% In-Memory RAM Inspection</span>
+            <span style="width: 6px; height: 6px; background: #10b981; display: inline-block;"></span>
+            <span style="color: #047857; font-weight: 700; text-transform: uppercase;">100% In-Memory RAM Inspection</span>
           </div>
         </div>
 
@@ -748,39 +743,39 @@
         <input type="file" id="deepfake-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;">
 
         <!-- Drag & Drop Upload Zone -->
-        <div id="dropzone-deepfake" style="border: 1.5px dashed #cbd5e1; border-radius: 10px; padding: 24px 20px; text-align: center; background-color: #ffffff; cursor: pointer; transition: all 0.18s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px;">
+        <div id="dropzone-deepfake" style="border: 1.5px dashed #cbd5e1; padding: 30px 24px; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.18s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px;">
           
           <!-- Staged File Card (hidden until file chosen) -->
-          <div id="deepfake-staged-file-card" style="display: none; align-items: center; gap: 14px; width: 100%; max-width: 520px; text-align: left;">
-            <img id="deepfake-staged-thumb" src="" alt="Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; display: none;">
-            <div id="deepfake-staged-icon" style="width: 64px; height: 64px; border-radius: 6px; background-color: #090d16; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 24px;">🎬</div>
+          <div id="deepfake-staged-file-card" style="display: none; align-items: center; gap: 16px; width: 100%; max-width: 580px; text-align: left;">
+            <img id="deepfake-staged-thumb" src="" alt="Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border: 1px solid #cbd5e1; display: none;">
+            <div id="deepfake-staged-icon" style="width: 64px; height: 64px; background: #0B132B; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 0.06em;">MEDIA</div>
             <div style="flex: 1; min-width: 0;">
-              <div id="deepfake-staged-filename" style="font-size: 0.88rem; font-weight: 700; color: #090d16; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.jpg</div>
-              <div id="deepfake-staged-meta" style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">0.0 KB • Media File</div>
-              <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 0.72rem; color: #047857; font-weight: 600;">
+              <div id="deepfake-staged-filename" style="font-size: 0.88rem; font-weight: 700; color: #0B132B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.jpg</div>
+              <div id="deepfake-staged-meta" style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">0.0 KB &bull; Media File</div>
+              <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 0.72rem; color: #047857; font-weight: 700;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Staged for In-Memory Neural Scan</span>
               </div>
             </div>
-            <button type="button" id="btn-deepfake-change-file" style="padding: 6px 12px; font-size: 0.74rem; font-weight: 600; background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+            <button type="button" id="btn-deepfake-change-file" style="padding: 7px 14px; font-size: 0.74rem; font-weight: 700; background: #f8fafc; color: #0B132B; border: 1px solid #cbd5e1; cursor: pointer;">
               Change
             </button>
           </div>
 
           <!-- Empty Dropzone Prompt -->
           <div id="deepfake-dropzone-prompt">
-            <div id="deepfake-dropzone-icon" style="font-size: 1.8rem; margin-bottom: 6px;">🖼️</div>
-            <strong id="deepfake-dropzone-headline" style="font-size: 0.92rem; color: #090d16; display: block;">
+            <div id="deepfake-dropzone-icon" style="font-size: 0.82rem; font-weight: 800; color: #8D99AE; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">FILE SELECTION</div>
+            <strong id="deepfake-dropzone-headline" style="font-size: 0.95rem; color: #0B132B; display: block;">
               Drag &amp; Drop Image or Click to Select
             </strong>
-            <span id="deepfake-dropzone-sub" style="font-size: 0.75rem; color: #64748b; display: block; margin-top: 4px;">
+            <span id="deepfake-dropzone-sub" style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 4px;">
               Supports JPG, PNG, WEBP (Up to 10MB)
             </span>
-            <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-              <button type="button" id="btn-select-deepfake-file" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 700; background-color: #090d16; color: #ffffff; border: 1px solid #090d16; border-radius: 4px; cursor: pointer;">
+            <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" id="btn-select-deepfake-file" style="padding: 8px 18px; font-size: 0.76rem; font-weight: 700; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer;">
                 Browse Files
               </button>
-              <button type="button" id="btn-deepfake-demo-sample" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 600; background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">
+              <button type="button" id="btn-deepfake-demo-sample" style="padding: 8px 18px; font-size: 0.76rem; font-weight: 700; background: #ffffff; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
                 Use Forensic Sample Media
               </button>
             </div>
@@ -788,188 +783,197 @@
         </div>
 
         <!-- Cryptographic SHA-256 Fingerprint Bar (Hidden until computed) -->
-        <div id="deepfake-hash-bar" style="display: none; align-items: center; justify-content: space-between; background-color: #ffffff; border: 1px solid #e2e8f0; padding: 8px 14px; border-radius: 6px; font-size: 0.72rem;">
+        <div id="deepfake-hash-bar" style="display: none; align-items: center; justify-content: space-between; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 10px 16px; font-size: 0.72rem;">
           <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            <span style="font-weight: 700; color: #090d16;">SHA-256 Fingerprint:</span>
+            <span style="font-weight: 800; color: #0B132B;">SHA-256 Fingerprint:</span>
             <code id="deepfake-hash-code" style="color: #0284c7; font-family: monospace;">e3b0c44298fc1c149afbf4c8...</code>
           </div>
-          <button type="button" id="btn-copy-deepfake-hash" style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.7rem; font-weight: 600; color: #475569; cursor: pointer;">
+          <button type="button" id="btn-copy-deepfake-hash" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 0.7rem; font-weight: 700; color: #0B132B; cursor: pointer;">
             Copy Hash
           </button>
         </div>
 
         <!-- Multi-Stage Processing Indicator -->
-        <div id="deepfake-progress-card" style="display: none; background-color: #ffffff; border: 1.5px solid #090d16; border-radius: 8px; padding: 16px 20px; flex-direction: column; gap: 10px;">
+        <div id="deepfake-progress-card" style="display: none; background: #ffffff; border: 1.5px solid #0B132B; padding: 18px 22px; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <strong style="font-size: 0.84rem; color: #090d16;">Running Forensic Neural Verification...</strong>
-            <span id="deepfake-progress-step-text" style="font-size: 0.74rem; color: #059669; font-weight: 700;">Step 1 of 3</span>
+            <strong style="font-size: 0.86rem; color: #0B132B;">Running Forensic Neural Verification...</strong>
+            <span id="deepfake-progress-step-text" style="font-size: 0.74rem; color: #D90429; font-weight: 800;">Step 1 of 3</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem;">
-            <div id="df-step-1" style="display: flex; align-items: center; gap: 8px; color: #090d16;">
-              <span class="df-step-mark">●</span>
+            <div id="df-step-1" style="display: flex; align-items: center; gap: 8px; color: #0B132B;">
+              <span class="df-step-mark">[ACTIVE]</span>
               <span>Ingesting volatile stream &amp; generating SHA-256 custody fingerprint</span>
             </div>
             <div id="df-step-2" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
-              <span class="df-step-mark">○</span>
+              <span class="df-step-mark">[QUEUED]</span>
               <span id="df-step-2-text">Evaluating discrete cosine frequency &amp; diffusion patterns</span>
             </div>
             <div id="df-step-3" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
-              <span class="df-step-mark">○</span>
+              <span class="df-step-mark">[QUEUED]</span>
               <span>Executing transformer classification across spatial attention heads</span>
             </div>
           </div>
         </div>
 
         <!-- Structured Confidence Verdict Breakdown Container -->
-        <div id="deepfake-verdict-card" style="display: none; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
+        <div id="deepfake-verdict-card" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
           <!-- Dynamic Content Populated by JavaScript -->
         </div>
 
         <!-- Primary Action Button: Obsidian High-Contrast -->
-        <button type="button" id="btn-scan-deepfake" style="width: 100%; padding: 15px 20px; font-size: 0.92rem; background-color: #090d16; color: #ffffff; border: 1.5px solid #090d16; border-radius: 8px; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(9, 13, 22, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.18s ease;">
+        <button type="button" id="btn-scan-deepfake" style="width: 100%; padding: 16px 22px; font-size: 0.94rem; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(11, 19, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.18s ease;">
           <span id="btn-scan-deepfake-label">Execute Image Manipulation Scan</span>
-          <span style="font-size: 1.15rem;">→</span>
+          <span style="font-size: 1.15rem;">&rarr;</span>
         </button>
 
       </div>
 
-      <!-- Sharp Modal Footer -->
-      <div class="workspace-modal-footer" style="background-color: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; font-family: 'Inter', sans-serif;">
-        <span style="font-size: 0.74rem; color: #64748b; font-weight: 500;">
-          🔒 <strong>Zero Cloud Footprint:</strong> Files are screened strictly in volatile memory. No media is stored on cloud servers.
+      <!-- Standardized Sharp Modal Footer -->
+      <div class="workspace-modal-footer">
+        <span class="modal-footer-disclaimer">
+          <strong>Zero Cloud Footprint:</strong> Files are screened strictly in volatile client memory. No media is stored on remote servers.
         </span>
-        <button type="button" class="btn-outline close-deepfake-btn" id="closeDeepfakeFooterBtn" data-close-workspace="deepfakeModal" style="background-color: transparent; color: #475569; border: 1.5px solid #cbd5e1; border-radius: 4px; padding: 6px 14px; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer;">
-          ← Back to Tools
+        <button type="button" class="btn-outline close-deepfake-btn" id="closeDeepfakeFooterBtn" data-close-workspace="deepfakeModal">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 4: Leak Tracer Workspace -->
+  <!-- Modal 4: Leak Tracer Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-leak" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #92400e 0%, #b45309 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🕵️</span>
+            <svg style="width: 22px; height: 22px; color: #EF233C; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
             <span>Leak Tracer (Forensic Watermarking)</span>
+            <span class="workspace-header-badge">STEGANOGRAPHY</span>
           </div>
-          <div class="workspace-header-sub" style="color: #fde68a;">
-            Embed invisible recipient signatures into photos or trace a leaked copy to its source.
+          <div class="workspace-header-sub">
+            Embed invisible recipient signatures into photos or trace a leaked copy back to the exact recipient.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-leak">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-leak" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <!-- Mode Tabs -->
-        <div style="display:flex; gap:10px;">
-          <button type="button" id="leak-tab-embed" class="btn-primary" style="flex:1; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">1. Protect &amp; Share</button>
-          <button type="button" id="leak-tab-extract" class="btn-outline" style="flex:1; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">2. Trace Leaked Image</button>
+        <!-- Mode Tabs (Sharp Segmented Tabs) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" id="leak-tab-embed" class="btn-primary" style="padding: 12px; font-size: 13px; font-weight: 800; background: #0B132B; border: 1.5px solid #0B132B; color: #ffffff; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;">
+            1. Protect &amp; Watermark Media
+          </button>
+          <button type="button" id="leak-tab-extract" class="btn-outline" style="padding: 12px; font-size: 13px; font-weight: 800; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #0B132B; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;">
+            2. Trace Leaked Image
+          </button>
         </div>
 
         <!-- Embed Panel -->
-        <div id="leak-panel-embed">
-          <input type="file" id="leak-file-input" accept="image/*" style="display:none;">
-          <button type="button" class="btn-outline" id="btn-select-leak-img" style="width:100%; padding:10px 14px; font-size:13px; margin-bottom:10px; cursor:pointer;">
-            📁 Select Photo to Protect
+        <div id="leak-panel-embed" style="background: #ffffff; padding: 22px; border: 1.5px solid #cbd5e1;">
+          <input type="file" id="leak-file-input" accept="image/*" style="display: none;">
+          <button type="button" class="btn-outline" id="btn-select-leak-img" style="width: 100%; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 14px; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+            Select Photo to Protect
           </button>
-          <div id="leak-selected-filename" style="font-size:0.85rem; color:#0284c7; margin-bottom:10px; display:none; font-weight:700;"></div>
+          <div id="leak-selected-filename" style="font-size: 0.85rem; color: #0284c7; margin-bottom: 12px; display: none; font-weight: 700;"></div>
           
-          <label style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">Recipients (comma separated):</label>
-          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width:100%; padding:10px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:14px; box-sizing:border-box;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Recipients (comma separated):</label>
+          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
 
-          <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width:100%; padding:12px; font-size:13px; cursor:pointer; font-weight:700; border-radius:10px;">
-            🔒 Generate Watermarked Copies (ZIP Archive)
+          <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width: 100%; padding: 15px; font-size: 13px; cursor: pointer; font-weight: 800; background: #D90429; color: #ffffff; border: 1.5px solid #D90429; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 4px 14px rgba(217, 4, 41, 0.25);">
+            Generate Watermarked Copies (ZIP Archive)
           </button>
         </div>
 
         <!-- Extract Panel -->
-        <div id="leak-panel-extract" style="display:none;">
-          <input type="file" id="leak-extract-file-input" accept="image/*" style="display:none;">
-          <button type="button" class="btn-outline" id="btn-select-extract-img" style="width:100%; padding:10px 14px; font-size:13px; margin-bottom:10px; cursor:pointer;">
-            🔍 Select Suspected Leaked Photo
+        <div id="leak-panel-extract" style="display: none; background: #ffffff; padding: 22px; border: 1.5px solid #cbd5e1;">
+          <input type="file" id="leak-extract-file-input" accept="image/*" style="display: none;">
+          <button type="button" class="btn-outline" id="btn-select-extract-img" style="width: 100%; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 14px; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+            Select Suspected Leaked Photo
           </button>
-          <div id="leak-extract-filename" style="font-size:0.85rem; color:#0284c7; margin-bottom:10px; display:none; font-weight:700;"></div>
+          <div id="leak-extract-filename" style="font-size: 0.85rem; color: #0284c7; margin-bottom: 12px; display: none; font-weight: 700;"></div>
           
-          <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width:100%; padding:12px; font-size:13px; background:#dc2626; border-color:#dc2626; cursor:pointer; font-weight:700; border-radius:10px;">
-            🕵️ Trace Leaker &amp; Verify Attribution
+          <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width: 100%; padding: 15px; font-size: 13px; background: #0B132B; border: 1.5px solid #0B132B; color: #ffffff; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;">
+            Trace Leaker &amp; Verify Attribution
           </button>
         </div>
 
-        <div id="leak-tracer-status-box" class="status-callout" style="display:none;"></div>
+        <div id="leak-tracer-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Signatures survive compression, screenshots, and social re-encoding.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-leak" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Forensic signatures survive compression, screenshots, cropping, and social platform re-encoding.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-leak">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 5: Disguised Evidence Vault Workspace -->
+  <!-- Modal 5: Disguised Evidence Vault Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-vault" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🔒</span>
+            <svg style="width: 22px; height: 22px; color: #EF233C; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Disguised Evidence Vault</span>
+            <span class="workspace-header-badge">SHA-256 SEALED</span>
           </div>
-          <div class="workspace-header-sub" style="color: #cbd5e1;">
-            Covert audio recorder and sealed file vault hidden behind a calculator camouflage.
+          <div class="workspace-header-sub">
+            Covert audio recorder and sealed file vault hidden behind an instant calculator camouflage.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-vault">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-vault" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px;">
-          <div class="vault-visualizer-row" style="margin-bottom:14px;">
+        <div style="background: #ffffff; border: 1.5px solid #cbd5e1; padding: 22px;">
+          <div class="vault-visualizer-row" style="margin-bottom: 16px;">
             <div class="vault-visualizer" id="vault-audio-bars">
               <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
               <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </div>
-            <div class="vault-timer-display" id="vault-timer" style="font-size:1.4rem;">00:00</div>
+            <div class="vault-timer-display" id="vault-timer" style="font-size: 1.6rem; color: #D90429; font-weight: 800;">00:00</div>
           </div>
 
-          <input type="text" id="vault-note-input" placeholder="Incident note (e.g. Someone following near parking lot)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Incident Note:</label>
+          <input type="text" id="vault-note-input" placeholder="Incident note (e.g. Someone following near parking lot)" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-primary btn-record-act" id="btn-record-vault" style="flex:1; padding:11px 16px; font-size:13px; font-weight:700; border-radius:8px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-primary btn-record-act" id="btn-record-vault" style="flex: 1; padding: 14px 20px; font-size: 13px; font-weight: 800; background: #D90429; color: #ffffff; border: 1.5px solid #D90429; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
               <span class="record-dot"></span>
               <span id="btn-record-vault-text">Record Incident Audio</span>
             </button>
-            <button class="btn-outline btn-calc-toggle" id="btn-calc-disguise" style="padding:11px 16px; font-size:13px; border-radius:8px; cursor:pointer;" title="Switch disguise mode to calculator">
-              🧮 Calculator Mode
+            <button class="btn-outline btn-calc-toggle" id="btn-calc-disguise" style="padding: 14px 20px; font-size: 13px; font-weight: 700; background: #1C2541; color: #F8F9FA; border: 1px solid rgba(141, 153, 174, 0.35); cursor: pointer;" title="Switch disguise mode to calculator">
+              Calculator Camouflage (ESC)
             </button>
           </div>
         </div>
 
-        <div style="background:#f1f5f9; border-radius:12px; padding:14px; border:1px solid #cbd5e1;">
-          <span style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:8px;">Seal Digital Evidence (SHA-256 Stamp):</span>
-          <div style="display:flex; gap:8px;">
-            <button type="button" class="btn-outline" id="btn-select-vault-file" style="flex:1; padding:9px 12px; font-size:12px; cursor:pointer;">
-              📁 Choose File to Seal
+        <div style="background: #ffffff; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <span style="font-size: 0.82rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em;">Seal Digital Evidence (SHA-256 Stamp):</span>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-outline" id="btn-select-vault-file" style="flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 700; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+              Choose File to Seal
             </button>
-            <button type="button" class="btn-primary" id="btn-upload-vault-file" style="flex:1; padding:9px 12px; font-size:12px; cursor:pointer;">
-              🔒 Seal &amp; Encrypt File
+            <button type="button" class="btn-primary" id="btn-upload-vault-file" style="flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 800; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
+              Seal &amp; Encrypt File
             </button>
           </div>
-          <input type="file" id="vault-file-input" style="display:none;">
-          <div id="vault-selected-filename" style="font-size:0.82rem; color:#0284c7; margin-top:6px; display:none; font-weight:700;"></div>
+          <input type="file" id="vault-file-input" style="display: none;">
+          <div id="vault-selected-filename" style="font-size: 0.82rem; color: #0284c7; margin-top: 8px; display: none; font-weight: 700;"></div>
         </div>
 
-        <div id="vault-status-box" class="status-callout" style="display:none;"></div>
+        <div id="vault-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
         <div id="vault-items-list"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Press ESC anytime to camouflage instantly into a calculator or recipe blog.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-vault" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Zero server logs. Press ESC anytime to camouflage instantly into a calculator or recipe blog.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-vault">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
@@ -1078,8 +1082,8 @@
             <span class="module-badge-leak">LEAK TRACER</span>
             <span class="module-subtag-warn">FORENSIC WATERMARK &bull; TRACE</span>
           </div>
-          <h4 class="module-title" style="color:#FFFFFF;">Forensic Leak Tracer</h4>
-          <p class="module-desc" style="color:#FFA6B3;">Embed forensic invisible steganographic signatures or trace leaked photos directly back to the original recipient.</p>
+          <h4 class="module-title">Forensic Leak Tracer</h4>
+          <p class="module-desc">Embed forensic invisible steganographic signatures or trace leaked photos directly back to the original recipient.</p>
           <button type="button" class="btn-module-leak" data-open-workspace="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
             <span>Launch Tracer</span>
             <span class="module-btn-arrow">&rarr;</span>
@@ -1207,14 +1211,16 @@
         <button type="button" id="btn-close-call-modal" style="background:none; border:none; color:#9ca3af; font-size:16px; cursor:pointer;">✕</button>
       </div>
 
-      <div class="call-avatar" style="margin:4px auto 10px auto;">📞</div>
+      <div class="call-avatar" style="margin:4px auto 10px auto; display: flex; align-items: center; justify-content: center;">
+        <svg style="width: 28px; height: 28px; color: #ffffff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
       <div class="call-title" id="escape-caller-title">Mom</div>
-      <div class="call-sub" id="call-status">Mobile • Incoming Alert...</div>
+      <div class="call-sub" id="call-status">Mobile &bull; Incoming Alert...</div>
 
       <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
         <!-- Real Outgoing Call Option -->
-        <a id="btn-real-escape-call" href="tel:+919876543210" class="btn-primary" style="background:#dc2626; border-color:#dc2626; text-decoration:none; text-align:center; padding:10px; font-size:13px; font-weight:700; border-radius:8px;">
-          📞 Make REAL Emergency Call Now
+        <a id="btn-real-escape-call" href="tel:+919876543210" class="btn-primary" style="background:#D90429; border-color:#D90429; text-decoration:none; text-align:center; padding:12px; font-size:13px; font-weight:700; border-radius:0px !important;">
+          Make REAL Emergency Call Now
         </a>
 
         <!-- Simulated In-App Rescue Controls -->
@@ -1431,8 +1437,8 @@
             <span class="module-badge-leak">LEAK TRACER</span>
             <span class="module-subtag-warn">FORENSIC WATERMARK &bull; TRACE</span>
           </div>
-          <h4 class="module-title" style="color:#FFFFFF;">Forensic Leak Tracer</h4>
-          <p class="module-desc" style="color:#FFA6B3;">Embed forensic invisible signatures into media or trace circulating leaked photos to the recipient.</p>
+          <h4 class="module-title">Forensic Leak Tracer</h4>
+          <p class="module-desc">Embed forensic invisible signatures into media or trace circulating leaked photos to the recipient.</p>
           <button type="button" class="btn-module-leak" data-open-workspace="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
             <span>Launch Tracer</span>
             <span class="module-btn-arrow">&rarr;</span>
@@ -1501,8 +1507,8 @@
       <div class="tell-once-body" id="tell-once-dossier-view" style="display:none;">
         <div class="tell-once-dossier-banner">
           <div>
-            <strong style="color:#FFFFFF; font-size:0.95rem; display:block;">Multi-Agency Tell-Once Dossier Compiled</strong>
-            <span style="font-size:0.8rem; color:#8D99AE;" id="tell-once-dossier-note">
+            <strong style="color:#0F172A; font-size:0.95rem; display:block;">Multi-Agency Tell-Once Dossier Compiled</strong>
+            <span style="font-size:0.8rem; color:#475569;" id="tell-once-dossier-note">
               You never have to repeat your story again. Present this unified dossier directly to police, helplines, or legal counsel.
             </span>
           </div>
@@ -1550,6 +1556,15 @@
         </div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
+      <div class="workspace-modal-footer tell-once-modal-footer">
+        <span class="modal-footer-disclaimer">
+          <strong>Confidential Intake Protocol:</strong> Disclose once with zero cloud retention. Multi-agency dossier generated in volatile memory.
+        </span>
+        <button type="button" class="btn-outline close-tell-once-btn" data-close-workspace="tellOnceModal">
+          &larr; Back to Tools
+        </button>
+      </div>
     </div>
   </div>
   <script src="app.js"></script>

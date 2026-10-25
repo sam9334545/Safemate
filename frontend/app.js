@@ -144,11 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnCallContact) {
       btnCallContact.href = `tel:${clean}`;
-      btnCallContact.innerHTML = `📞 Call ${contactName}`;
+      btnCallContact.innerHTML = `Call ${contactName}`;
     }
     if (btnRealEscapeCall) {
       btnRealEscapeCall.href = `tel:${clean}`;
-      btnRealEscapeCall.innerHTML = `📞 Call ${contactName} Now`;
+      btnRealEscapeCall.innerHTML = `Call ${contactName} Now`;
     }
     if (escapeCallerTitle) {
       escapeCallerTitle.textContent = contactName;
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSendSos) {
     btnSendSos.addEventListener('click', () => {
       sosStatusBox.style.display = 'block';
-      sosStatusBox.innerHTML = `<div>🛰️ Acquiring live satellite GPS coordinates...</div>`;
+      sosStatusBox.innerHTML = `<div>Acquiring verified GPS coordinates...</div>`;
 
       const executeSosDispatch = async (lat, lng, accuracy) => {
         const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
@@ -259,10 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         sosStatusBox.innerHTML = `
-          <div style="color:#b91c1c; font-weight:700; font-size:0.95rem; margin-bottom:6px;">
-            🚨 SOS BEACON BROADCASTED!
+          <div style="color:#D90429; font-weight:800; font-size:0.95rem; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
+            SOS BEACON BROADCASTED
           </div>
-          <div style="font-size:0.83rem; line-height:1.6; color:#1e293b; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px; margin-bottom:10px;">
+          <div style="font-size:0.83rem; line-height:1.6; color:#0B132B; background:#fff1f2; border:1px solid #fecdd3; padding:12px; margin-bottom:10px;">
             <strong>GPS Coordinates:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)} (±${accuracy}m accuracy)<br>
             <strong>Time:</strong> ${timeNow}<br>
             <strong>Dispatched Alerts:</strong><br>${contactsSummary}<br>
@@ -270,8 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <a href="tel:${cleanPhone}" class="btn-primary" style="background:#dc2626; border-color:#dc2626; text-decoration:none; text-align:center; padding:10px; font-size:13px; font-weight:700;">
-              📞 Call ${contactName} (${cleanPhone}) Now
+            <a href="tel:${cleanPhone}" class="btn-primary" style="background:#D90429; border-color:#D90429; text-decoration:none; text-align:center; padding:12px; font-size:13px; font-weight:800; text-transform:uppercase;">
+              Call ${contactName} (${cleanPhone}) Now
             </a>
             <div style="display:flex; gap:8px;">
               <a href="https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(distressText)}" target="_blank" class="btn-primary" style="flex:1; padding:8px 12px; font-size:12px; background:#22c55e; border-color:#22c55e; text-decoration:none; text-align:center;">
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
       remainingSeconds = duration * 60;
 
       safewalkStatusBox.style.display = 'block';
-      safewalkStatusBox.innerHTML = `<div style="color:#0284c7; font-size:0.85rem;">🛡️ Initializing live SafeWalk session on server...</div>`;
+      safewalkStatusBox.innerHTML = `<div style="color:#0284c7; font-size:0.85rem;">Initializing live SafeWalk session on server...</div>`;
 
       try {
         const token = await getAuthToken();
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           safewalkStatusBox.innerHTML = `
             <div style="color:#059669; font-weight:700; margin-bottom:4px;">
-              ✓ SafeWalk Active • Token: <code>${activeTripToken}</code>
+              SafeWalk Active &bull; Token: <code>${activeTripToken}</code>
             </div>
             <div style="font-size:0.8rem; line-height:1.5; color:#334155;">
               Escorting to <strong>${destination}</strong>. Guardians can follow your journey in real time.
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
               clearInterval(walkCountdownTimer);
               walkCountdownTimer = null;
               safewalkStatusBox.innerHTML = `
-                <div style="color:#dc2626; font-weight:700;">⚠ ESCORT TIMER EXPIRED! Triggering emergency alert...</div>
+                <div style="color:#dc2626; font-weight:700;">ALERT: ESCORT TIMER EXPIRED! Triggering emergency alert...</div>
               `;
               if (btnSendSos) btnSendSos.click();
             }
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (safewalkActiveActions) safewalkActiveActions.style.display = 'flex';
 
         safewalkStatusBox.innerHTML = `
-          <div style="color:#059669; font-weight:700;">🛡️ SafeWalk Escort Running (Local Mode)</div>
+          <div style="color:#059669; font-weight:700;">SafeWalk Escort Running (Local Mode)</div>
           <div style="font-size:0.8rem; color:#475569;">Timer active for ${destination}. Auto-SOS arms upon expiry.</div>
         `;
 
@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       safewalkStatusBox.style.display = 'block';
       safewalkStatusBox.innerHTML = `
-        <div style="color:#059669; font-weight:700;">✓ Safe Arrival Confirmed!</div>
+        <div style="color:#059669; font-weight:700;">Safe Arrival Confirmed!</div>
         <div style="font-size:0.8rem; color:#334155;">Escort session safely completed. Guardians and emergency circle notified.</div>
       `;
     });
@@ -549,17 +549,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (deepfakeActiveEngineLabel) {
           deepfakeActiveEngineLabel.textContent = 'Swin-Transformer (umm-maybe/AI-image-detector)';
         }
-        if (deepfakeDropzoneIcon) deepfakeDropzoneIcon.textContent = '🖼️';
+        if (deepfakeDropzoneIcon) deepfakeDropzoneIcon.textContent = 'IMAGE FILE';
         if (deepfakeDropzoneHeadline) deepfakeDropzoneHeadline.textContent = 'Drag & Drop Image or Click to Select';
         if (deepfakeDropzoneSub) deepfakeDropzoneSub.textContent = 'Supports JPG, PNG, WEBP (Up to 10MB)';
         if (btnScanDeepfakeLabel) btnScanDeepfakeLabel.textContent = 'Execute Image Manipulation Scan';
         if (deepfakeFileInput) deepfakeFileInput.accept = 'image/jpeg,image/png,image/webp';
         if (dfStep2Text) dfStep2Text.textContent = 'Evaluating discrete cosine frequency & diffusion patterns';
       } else {
-        tabDeepfakeVideo.style.backgroundColor = '#090d16';
+        tabDeepfakeVideo.style.backgroundColor = '#0B132B';
         tabDeepfakeVideo.style.color = '#ffffff';
         tabDeepfakeVideo.style.fontWeight = '700';
-        tabDeepfakeVideo.style.boxShadow = '0 2px 8px rgba(9, 13, 22, 0.2)';
+        tabDeepfakeVideo.style.boxShadow = '0 2px 8px rgba(11, 19, 43, 0.2)';
         tabDeepfakeVideo.setAttribute('aria-selected', 'true');
 
         tabDeepfakeImage.style.backgroundColor = 'transparent';
@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (deepfakeActiveEngineLabel) {
           deepfakeActiveEngineLabel.textContent = 'MS-EffGCViT-B0 + YOLOv8n-Face (KoreaPeter/ms-eff-gcvit)';
         }
-        if (deepfakeDropzoneIcon) deepfakeDropzoneIcon.textContent = '🎥';
+        if (deepfakeDropzoneIcon) deepfakeDropzoneIcon.textContent = 'VIDEO FILE';
         if (deepfakeDropzoneHeadline) deepfakeDropzoneHeadline.textContent = 'Drag & Drop Video or Click to Select';
         if (deepfakeDropzoneSub) deepfakeDropzoneSub.textContent = 'Supports MP4, MOV, AVI, WEBM (Up to 50MB, samples 20 frames)';
         if (btnScanDeepfakeLabel) btnScanDeepfakeLabel.textContent = 'Execute Video Deepfake Scan';
@@ -704,7 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       if (!activeFileHash) return;
       navigator.clipboard?.writeText(activeFileHash);
-      btnCopyDeepfakeHash.textContent = '✓ Copied';
+      btnCopyDeepfakeHash.textContent = 'Copied';
       setTimeout(() => {
         btnCopyDeepfakeHash.textContent = 'Copy Hash';
       }, 2000);
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isManipulated = result.isManipulated;
     const accentColor = isManipulated ? '#be123c' : '#059669';
-    const ribbonIcon = isManipulated ? '🚨' : '🛡️';
+    const ribbonTag = isManipulated ? '[ALERT]' : '[AUTHENTIC]';
 
     deepfakeVerdictCard.style.display = 'block';
     deepfakeVerdictCard.style.border = `1.5px solid ${accentColor}`;
@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Verdict Header Ribbon -->
       <div style="background-color: ${accentColor}; color: #ffffff; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.1rem;">${ribbonIcon}</span>
+          <span style="font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em;">${ribbonTag}</span>
           <span style="font-weight: 800; font-size: 0.86rem; letter-spacing: 0.04em;">${result.verdictTitle}</span>
         </div>
         <span style="background-color: rgba(255, 255, 255, 0.22); padding: 3px 10px; border-radius: 4px; font-size: 0.76rem; font-weight: 700;">
@@ -840,19 +840,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Step 2: Facial Localization / Artifacts
       if (deepfakeProgressStepText) deepfakeProgressStepText.textContent = 'Step 2 of 3';
-      if (dfStep1) dfStep1.querySelector('.df-step-mark').textContent = '✓';
+      if (dfStep1) dfStep1.querySelector('.df-step-mark').textContent = '[DONE]';
       if (dfStep2) {
-        dfStep2.style.color = '#090d16';
-        dfStep2.querySelector('.df-step-mark').textContent = '●';
+        dfStep2.style.color = '#0B132B';
+        dfStep2.querySelector('.df-step-mark').textContent = '[ACTIVE]';
       }
       await new Promise(r => setTimeout(r, 500));
 
       // Step 3: Neural Transformer Classification
       if (deepfakeProgressStepText) deepfakeProgressStepText.textContent = 'Step 3 of 3';
-      if (dfStep2) dfStep2.querySelector('.df-step-mark').textContent = '✓';
+      if (dfStep2) dfStep2.querySelector('.df-step-mark').textContent = '[DONE]';
       if (dfStep3) {
-        dfStep3.style.color = '#090d16';
-        dfStep3.querySelector('.df-step-mark').textContent = '●';
+        dfStep3.style.color = '#0B132B';
+        dfStep3.querySelector('.df-step-mark').textContent = '[ACTIVE]';
       }
 
       try {
@@ -1071,14 +1071,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           leakTracerStatusBox.innerHTML = `
             <div style="color:#059669; font-weight:700; margin-bottom:6px;">
-              ✓ Forensic Watermark Batch Generated!
+              Forensic Watermark Batch Generated!
             </div>
             <div style="font-size:0.82rem; line-height:1.5; color:#334155; margin-bottom:10px;">
               Created ${recipientCount} individually signed copies with HMAC-SHA256 signatures for: <em>${recipients}</em>.<br>
               Every copy looks identical to the naked eye, but uniquely identifies the leaker if distributed without consent.
             </div>
-            <a href="${downloadUrl}" download="safemate_protected_bundle.zip" class="btn-primary" style="display:inline-block; text-align:center; padding:9px 18px; font-size:12px; text-decoration:none;">
-              📥 Download Watermarked ZIP Bundle
+            <a href="${downloadUrl}" download="safemate_protected_bundle.zip" class="btn-primary" style="display:inline-block; text-align:center; padding:10px 18px; font-size:12px; text-decoration:none; background:#0B132B; border:1.5px solid #0B132B; color:#ffffff; font-weight:800; text-transform:uppercase;">
+              Download Watermarked ZIP Bundle
             </a>
           `;
         } else {
@@ -1087,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         leakTracerStatusBox.innerHTML = `
           <div style="color:#059669; font-weight:700; margin-bottom:4px;">
-            ✓ 3 Unique Invisible Watermarked Copies Created
+            3 Unique Invisible Watermarked Copies Created
           </div>
           <div style="font-size:0.82rem; line-height:1.5; color:#334155;">
             • Copy 1 (Liam): Tag <code>TRC-891-LIAM</code> (Embedded)<br>
@@ -1123,11 +1123,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
           if (data.detected) {
             leakTracerStatusBox.innerHTML = `
-              <div style="color:#dc2626; font-weight:700; font-size:0.95rem; margin-bottom:6px;">
-                🚨 LEAK ATTRIBUTED: Source Identified!
+              <div style="color:#D90429; font-weight:800; font-size:0.95rem; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.04em;">
+                LEAK ATTRIBUTED: Source Identified!
               </div>
-              <div style="font-size:0.85rem; line-height:1.6; color:#1e293b; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px; margin-bottom:8px;">
-                <strong>Identified Recipient:</strong> <span style="color:#b91c1c; font-size:0.95rem; font-weight:700;">${data.recipient_name}</span><br>
+              <div style="font-size:0.85rem; line-height:1.6; color:#0B132B; background:#fff1f2; border:1px solid #fecdd3; padding:12px; margin-bottom:8px;">
+                <strong>Identified Recipient:</strong> <span style="color:#D90429; font-size:0.95rem; font-weight:700;">${data.recipient_name}</span><br>
                 <strong>Recipient ID:</strong> <code>${data.recipient_id}</code><br>
                 <strong>Timestamp:</strong> ${data.timestamp}<br>
                 <strong>Cryptographic Integrity:</strong> <span style="color:#059669; font-weight:700;">${data.audit_report?.cryptographic_integrity || 'VALID_AUTHENTICATED'}</span>
@@ -1175,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function uploadEvidenceBlob(fileBlob, filename, noteText) {
     vaultStatusBox.style.display = 'block';
-    vaultStatusBox.innerHTML = `<div style="color:#0284c7; font-size:0.85rem;">🔒 Cryptographically hashing (SHA-256) and sealing in private vault...</div>`;
+    vaultStatusBox.innerHTML = `<div style="color:#0284c7; font-size:0.85rem;">Cryptographically hashing (SHA-256) and sealing in private vault...</div>`;
 
     let lat = 28.6139;
     let lng = 77.2090;
@@ -1210,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         vaultStatusBox.innerHTML = `
           <div style="color:#059669; font-weight:700; margin-bottom:4px;">
-            ✓ Evidence Sealed &amp; Persisted!
+            Evidence Sealed &amp; Persisted!
           </div>
           <div style="font-size:0.8rem; line-height:1.5; color:#334155;">
             <strong>Evidence ID:</strong> <code>${data.evidence_id}</code><br>
@@ -1221,14 +1221,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (vaultItemsList) {
           const item = document.createElement('div');
-          item.style.cssText = 'background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-top:8px; font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;';
+          item.style.cssText = 'background:#ffffff; border:1.5px solid #cbd5e1; padding:12px 14px; margin-top:8px; font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;';
           item.innerHTML = `
             <div>
-              <strong style="color:#0f172a;">${filename}</strong><br>
+              <strong style="color:#0B132B;">${filename}</strong><br>
               <span style="color:#64748b; font-size:0.74rem;">Hash: ${data.sha256_checksum.substring(0, 18)}... • ${new Date().toLocaleTimeString()}</span>
             </div>
-            <a href="${API_BASE_URL}/api/v1/evidence/download/${data.evidence_id}" target="_blank" class="btn-outline" style="padding:4px 8px; font-size:11px; text-decoration:none;">
-              📥 Export
+            <a href="${API_BASE_URL}/api/v1/evidence/download/${data.evidence_id}" target="_blank" class="btn-outline" style="padding:5px 10px; font-size:11px; text-decoration:none; background:#1C2541; color:#ffffff; font-weight:700;">
+              Export
             </a>
           `;
           vaultItemsList.prepend(item);
@@ -1239,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       // Local fallback representation
       vaultStatusBox.innerHTML = `
-        <div style="color:#059669; font-weight:700;">✓ Encrypted Local Evidence Stored</div>
+        <div style="color:#059669; font-weight:700;">Encrypted Local Evidence Stored</div>
         <div style="font-size:0.8rem; color:#475569;">Incident recording locked with client-side cryptographic seal.</div>
       `;
     }
@@ -1778,7 +1778,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCopyFir && firOutputLetter) {
     btnCopyFir.addEventListener('click', () => {
       navigator.clipboard?.writeText(firOutputLetter.textContent);
-      btnCopyFir.textContent = '✓ Copied!';
+      btnCopyFir.textContent = 'Copied!';
       setTimeout(() => { btnCopyFir.textContent = 'Copy Letter'; }, 2000);
     });
   }
@@ -2611,7 +2611,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!tellOnceDossierText) return;
       navigator.clipboard.writeText(tellOnceDossierText.textContent).then(() => {
         const oldText = btnCopyDossier.textContent;
-        btnCopyDossier.textContent = '✓ Copied to Clipboard!';
+        btnCopyDossier.textContent = 'Copied to Clipboard!';
         setTimeout(() => { btnCopyDossier.textContent = oldText; }, 2000);
       });
     });
