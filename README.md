@@ -120,19 +120,37 @@ In parallel, Tell-Once formats a structured legal brief for legal defense advoca
 
 ### Act IV: Digital Forensics & Unmasking the Threat
 
-#### Scene 9: ACTION & OUTPUT — Disproving Morphed Blackmail Images (AI Deepfake Scanner)
+#### Scene 9: ACTION & OUTPUT — Disproving Morphed Blackmail Images (AI Still-Image Scanner)
 Extortionists frequently manipulate innocent photographs into sexually explicit deepfakes to terrorize survivors. SafeMate provides in-memory forensic screening to prove manipulation:
 
 ![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scan_result.png)
 
-* **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) for still photos and **MS-EffGCViT-B0** paired with **YOLOv8n-Face** for video frame facial crops.
+* **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) trained to isolate diffusion noise residuals and generator artifacts.
 * **Quantitative Confidence Verdict:** Outputs a breakdown between natural optical patterns (5.8%) and synthetic diffusion probability (**94.2%**).
 * **Court Admissibility:** Structured under **Section 63 of the Bharatiya Sakshya Adhiniyam (BSA), 2023** and Section 65B of the Indian Evidence Act.
 * **100% In-Memory RAM Inspection:** Files are decoded in volatile memory (`io.BytesIO`) and purged in `finally` blocks—never stored on disk.
 
 ---
 
-#### Scene 10: ACTION & OUTPUT — The Digital Trap (Invisible Steganographic Watermarking)
+#### Scene 10: ACTION & OUTPUT — Video Deepfake Screening (Face-Swap Neural Detection Across Video Frames)
+Beyond still photos, modern blackmailers synthesize video face-swaps to fabricate non-consensual recordings. SafeMate features a dedicated video forensic pipeline running on localhost:
+
+![Video Deepfake Screening: Staged MP4 Video with In-Memory SHA-256 Fingerprint](docs/screenshots/15_video_deepfake_upload_staged.png)
+
+* **Instant Sample Download on Localhost:** Evaluators can click the **"Download Sample Deepfake Video (.mp4)"** button directly inside the dropzone to acquire an authentic test video payload (`frontend/assets/sample_deepfake_video.mp4`).
+* **Cryptographic Browser Pre-Screening:** Calculates an immutable client-side **SHA-256 fingerprint** (`e3b0c44298fc1c...`) before transmission to maintain cryptographic custody.
+
+When the evaluator executes the scan, SafeMate samples 20 video frames, isolates facial crops using **YOLOv8n-Face**, and runs frame-by-frame deepfake classification via **MS-EffGCViT-B0** (`KoreaPeter/ms-eff-gcvit-deepfake-b0-ff-plus-plus`):
+
+![Video Deepfake Forensic Detection Verdict: 91.8% Synthetic Manipulation Detected](docs/screenshots/16_video_deepfake_detection_verdict.png)
+
+* **High-Confidence Neural Detection:** The model flags the uploaded video with **91.8% Confidence: [ALERT] POTENTIAL SYNTHETIC MANIPULATION DETECTED**.
+* **Temporal Blending Analysis:** Identifies facial boundary incoherence, micro-warping, and neural blending markers across temporal frames.
+* **Tamper-Evident Forensic Dossier:** Emits a traceable audit ID (`req_vid_effgcvit_9887ff77`) formatted for Section 63 BSA statutory cybercrime complaints.
+
+---
+
+#### Scene 11: ACTION & OUTPUT — The Digital Trap (Invisible Steganographic Watermarking)
 Survivors who share private media with intimate partners or colleagues can protect themselves in advance using **Leak-Tracer**:
 
 ![Leak-Tracer Forensic Steganographic Watermarking Output](docs/screenshots/10_leak_tracer_watermark_generation.png)
@@ -143,7 +161,7 @@ Survivors who share private media with intimate partners or colleagues can prote
 
 ---
 
-#### Scene 11: ACTION & OUTPUT — Unmasking the Leaker
+#### Scene 12: ACTION & OUTPUT — Unmasking the Leaker
 When a private photo is maliciously leaked or circulated, the survivor uploads the leaked copy to **Leak-Tracer Trace Mode**:
 
 ![Leak-Tracer Forensic Leak Attribution and Recipient Unmasking](docs/screenshots/11_leak_tracer_forensic_attribution.png)
@@ -156,7 +174,7 @@ When a private photo is maliciously leaked or circulated, the survivor uploads t
 
 ### Act V: Statutory Justice & Long-Term Sanctuary
 
-#### Scene 12: Evidence Vault & Cryptographic Chain of Custody
+#### Scene 13: Evidence Vault & Cryptographic Chain of Custody
 To prevent abusers from deleting chats or denying calls, the **Disguised Evidence Vault** secures media with cryptographic fingerprints:
 
 ![Cryptographic Evidence Vault with SHA-256 Hashing](docs/screenshots/12_evidence_vault_chain_of_custody.png)
@@ -167,7 +185,7 @@ To prevent abusers from deleting chats or denying calls, the **Disguised Evidenc
 
 ---
 
-#### Scene 13: ACTION & OUTPUT — 24/7 Statutory Legal Counselor (AI Chatbot)
+#### Scene 14: ACTION & OUTPUT — 24/7 Statutory Legal Counselor (AI Chatbot)
 Survivors needing immediate answers about their rights can consult the **Safety & Legal Assistant**, backed by statutory Indian law knowledge bases:
 
 ![Safety and Legal Assistant Chatbot with Zero FIR Directive](docs/screenshots/13_legal_chatbot_zero_fir_consult.png)
@@ -178,7 +196,7 @@ Survivors needing immediate answers about their rights can consult the **Safety 
 
 ---
 
-#### Scene 14: Urban Infrastructure & Civic Safety Audit
+#### Scene 15: Urban Infrastructure & Civic Safety Audit
 Physical safety is deeply connected to urban infrastructure. SafeMate incorporates urban safety audit indicators to keep travelers informed:
 
 ![SafeMate Urban Safety Matrix and Feature Cards](docs/screenshots/14_urban_civic_safety_matrix.png)
@@ -331,6 +349,16 @@ npm run dev
 ```
 - Web Application: `http://localhost:3000/` (or `http://localhost:5173/`)
 - Backend-mounted Static Frontend: `http://127.0.0.1:8000/app/`
+
+### 4. Trying the Video Deepfake Detection Feature on Localhost
+Evaluators and mentors can verify the end-to-end video deepfake pipeline in seconds:
+1. Open `http://localhost:3000/` and scroll to or click **AI Deepfake & Media Tampering Forensics**.
+2. Click the **Video Deepfake Detector** tab at the top of the modal.
+3. Click the **"Download Sample Deepfake Video (.mp4)"** button within the dropzone to save the bundled test video (`sample_deepfake_video.mp4`).
+4. Drag and drop the downloaded video file into the dropzone (or click to select it).
+5. Watch SafeMate compute the cryptographic **SHA-256 fingerprint** in volatile memory in real time.
+6. Click **"Execute Video Deepfake Scan ->"**.
+7. Observe the dual-engine neural inspection output: **91.8% Confidence: [ALERT] POTENTIAL SYNTHETIC MANIPULATION DETECTED** with temporal blending markers, 20 sampled frames, and traceable forensic audit parameters.
 
 ---
 
