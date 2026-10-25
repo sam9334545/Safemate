@@ -33,29 +33,7 @@
       </div>
     </a>
 
-    <ul class="nav-links">
-      <li><a href="#hero" class="nav-link">Home</a></li>
-      <li><a href="#sos-section" class="nav-link">Get Help</a></li>
-      <li><a href="#features" class="nav-link">Services</a></li>
-      <li><a href="#tell-once-section" class="nav-link nav-link-extra" style="color:#7c3aed; font-weight:700;">✨ Tell-Once</a></li>
-      <li><a href="#safewalk-section" class="nav-link nav-link-extra">SafeWalk</a></li>
-      <li><a href="#deepfake-section" class="nav-link">Deepfake</a></li>
-      <li><a href="#chatbot-section" class="nav-link">Safety Bot</a></li>
-      <li><a href="#movement" class="nav-link">About</a></li>
-    </ul>
-
     <div class="nav-actions">
-      <!-- Prominent Emergency 112 Pill Button (Inspired by Maitri's crimson pill button) -->
-      <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
-        <span class="pulse-indicator"></span>
-        <span>🚨 Emergency 112</span>
-      </a>
-
-      <!-- Tell-Once Quick Launch Button -->
-      <button class="btn-tell-once-nav btn-open-workspace" id="btn-nav-tell-once" data-target-modal="tell-once-modal" title="Tell-Once Trauma-Informed Intake (Speak or Type Once)">
-        🌸 Tell-Once
-      </button>
-
       <!-- Stealth Panic Switch (Recipe Disguise) -->
       <button class="btn-panic" id="panic-disguise-btn" title="Instantly hide this page with a recipe blog (ESC)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -66,12 +44,11 @@
         <span class="kbd-hint">ESC</span>
       </button>
 
-      <button class="btn-outline btn-escape-call-nav" id="btn-escape-call" title="Simulate an incoming rescue call">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-        </svg>
-        <span class="btn-call-text">Escape Call</span>
-      </button>
+      <!-- Prominent Emergency 112 Button -->
+      <a href="tel:112" class="btn-emergency-pill" id="nav-btn-emergency" title="Instant emergency telephone connection">
+        <span class="pulse-indicator"></span>
+        <span>Emergency 112</span>
+      </a>
     </div>
   </header>
 
@@ -156,50 +133,39 @@
 
       <!-- Center Floating Motto & Mission Card -->
       <div class="maitri-motto-card">
-        <div class="motto-tag">Free, Confidential &amp; Trauma-Informed Platform</div>
+        <div class="motto-tag">FREE, CONFIDENTIAL &amp; TRAUMA-INFORMED PLATFORM</div>
         <p class="motto-text">
           SafeMate is a free, confidential, trauma-informed digital safety platform that primarily helps women, youth, and families facing domestic violence, intimate image abuse, deepfakes, cyberstalking, or immediate physical distress.
         </p>
-
-        <div class="motto-actions">
-          <button type="button" class="btn-motto-tell-once btn-open-workspace" data-target-modal="tell-once-modal" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); color:#fff; border:none; padding:12px 22px; border-radius:9999px; font-weight:700; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35); display:inline-flex; align-items:center; gap:8px;">
-            <span>🌸 Tell-Once Intake</span>
-          </button>
-          <a href="tel:112" class="btn-motto-emergency" id="hero-motto-call">
-            <span class="motto-pulse"></span>
-            <span>🚨 Emergency Help (112)</span>
-          </a>
-          <button type="button" class="btn-motto-primary btn-open-workspace" data-target-modal="modal-feature-chatbot">
-            <span>🛡️ Safety Bot</span>
-          </button>
-          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-deepfake">
-            <span>🔍 Deepfake Scan</span>
-          </button>
-          <button type="button" class="btn-motto-outline btn-open-workspace" data-target-modal="modal-feature-safewalk">
-            <span>🚶 SafeWalk</span>
-          </button>
-        </div>
-
-        <div class="motto-trust-badges">
-          <span>🔒 100% Client-Side Privacy</span>
-          <span class="sep">•</span>
-          <span>🛡️ Zero Cloud Tracking</span>
-          <span class="sep">•</span>
-          <span>⚡ Instant Disguise (ESC)</span>
-          <span class="sep">•</span>
-          <span>📞 Real 112 Dispatch</span>
-        </div>
       </div>
     </div>
   </main>
 
-  <!-- Minimalist Trust Indicator Bar (Replaces text-heavy stats grid) -->
-  <section class="trust-pills-bar">
-    <div class="trust-pill"><span>🔒</span> 100% Client-Side Privacy</div>
-    <div class="trust-pill"><span>⚡</span> Instant 112 &amp; 1930 Hotlines</div>
-    <div class="trust-pill"><span>🌸</span> Trauma-Informed (Hindi &amp; English)</div>
-    <div class="trust-pill"><span>🛡️</span> Zero Cloud Footprint</div>
-  </section>
+  <!-- Functional Feature Sub-Bar (Directly Below Banner Section) -->
+  <nav class="feature-subnav-bar" id="feature-subnav" aria-label="Feature navigation sub-bar">
+    <div class="subnav-container">
+      <a href="#vault-section" class="subnav-pill" data-scroll-to="vault-section" title="Jump to Client-Side Privacy & Evidence Vault">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">100% Client-Side Privacy</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#sos-section" class="subnav-pill" data-scroll-to="sos-section" title="Jump to Instant 112 & 1930 Hotlines">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Instant 112 &amp; 1930 Hotlines</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#tell-once-section" class="subnav-pill" data-scroll-to="tell-once-section" title="Jump to Trauma-Informed Intake">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Trauma-Informed (Hindi &amp; English)</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+      <a href="#features" class="subnav-pill" data-scroll-to="features" title="Jump to Zero Cloud Footprint Tools Hub">
+        <span class="subnav-icon"></span>
+        <span class="subnav-label">Zero Cloud Footprint</span>
+        <span class="subnav-arrow">↓</span>
+      </a>
+    </div>
+  </nav>
 
   <!-- Section Header & Filter Tabs -->
   <div class="section-header" id="features" style="margin-bottom:12px;">
@@ -210,16 +176,16 @@
     </p>
   </div>
 
-  <!-- Category Filter Bar -->
-  <div class="tools-filter-bar" id="tools-filter-bar">
-    <button type="button" class="filter-tab active" data-filter="all">🌟 All Tools (7)</button>
-    <button type="button" class="filter-tab" data-filter="tell-once">🌸 Tell-Once</button>
-    <button type="button" class="filter-tab" data-filter="emergency">🚨 Emergency SOS</button>
-    <button type="button" class="filter-tab" data-filter="safewalk">🚶 SafeWalk</button>
-    <button type="button" class="filter-tab" data-filter="deepfake">🔍 Deepfake Scan</button>
-    <button type="button" class="filter-tab" data-filter="vault">🔒 Evidence Vault</button>
-    <button type="button" class="filter-tab" data-filter="leak">🕵️ Leak Tracer</button>
-    <button type="button" class="filter-tab" data-filter="chatbot">⚖️ Legal Chatbot</button>
+  <!-- Category Filter Bar (No emojis, sleek minimal styling) -->
+  <div class="tools-filter-bar" id="tools-filter-bar" role="tablist" aria-label="Feature filter selector">
+    <button type="button" class="filter-tab active" data-filter="all" data-target="features" role="tab" aria-selected="true" onclick="selectFeatureFilter(this)">All Tools</button>
+    <button type="button" class="filter-tab" data-filter="tell-once" data-target="tell-once-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Tell-Once</button>
+    <button type="button" class="filter-tab" data-filter="emergency" data-target="sos-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Emergency SOS</button>
+    <button type="button" class="filter-tab" data-filter="safewalk" data-target="safewalk-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">SafeWalk</button>
+    <button type="button" class="filter-tab" data-filter="deepfake" data-target="deepfake-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Deepfake Scan</button>
+    <button type="button" class="filter-tab" data-filter="vault" data-target="vault-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Evidence Vault</button>
+    <button type="button" class="filter-tab" data-filter="leak" data-target="leak-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Leak Tracer</button>
+    <button type="button" class="filter-tab" data-filter="chatbot" data-target="chatbot-section" role="tab" aria-selected="false" onclick="selectFeatureFilter(this)">Legal Chatbot</button>
   </div>
 
   <!-- Clean, Uncluttered Features Grid (Click Card to Open Feature in Detail) -->
@@ -227,10 +193,10 @@
     <div class="features-grid" id="tools-grid">
 
       <!-- Feature 0: Tell-Once Intake -->
-      <div class="feature-card-tile" id="tell-once-section" data-feature-cat="tell-once" data-target-modal="tell-once-modal" style="border: 2px solid #ddd6fe;">
+      <div class="feature-card-tile" id="tell-once-section" data-feature-cat="tell-once" data-target-modal="tellOnceModal">
         <div class="feature-tile-img-box">
           <img src="assets/tell_once_counsel.jpg" alt="Tell-Once trauma-informed counseling">
-          <span class="feature-tile-badge" style="background:#7c3aed;">🌸 Tell-Once • Trauma-Informed</span>
+          <span class="feature-tile-badge" style="background:#881337;">Tell-Once • Trauma-Informed</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -239,73 +205,23 @@
               Speak or type once. Our trauma-informed assistant asks one gentle question at a time and automatically generates your Police Zero FIR, 1930 Cyber Brief, and Lawyer Summary.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🌸 Trauma-Informed</span>
+              <span class="feature-tag-chip"> Trauma-Informed</span>
               <span class="feature-tag-chip">🇮🇳 Hindi &amp; English</span>
-              <span class="feature-tag-chip">📁 3-in-1 Unified Dossier</span>
+              <span class="feature-tag-chip"> 3-in-1 Unified Dossier</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace" style="background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);">
+          <button type="button" class="btn-open-workspace" id="openTellOnceBtn" data-target-modal="tellOnceModal">
             <span>Open Tell-Once Intake</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
 
-      <!-- Feature 1: Emergency SOS & Instant Real Calling -->
-      <div class="feature-card-tile" id="sos-section" data-feature-cat="emergency" data-target-modal="modal-feature-sos">
-        <div class="feature-tile-img-box">
-          <img src="assets/real_sos.jpg" alt="Woman holding phone for emergency SOS">
-          <span class="feature-tile-badge" style="background:#dc2626;">🚨 Emergency Response</span>
-        </div>
-        <div class="feature-tile-body">
-          <div>
-            <h3 class="feature-tile-title">Emergency SOS &amp; Instant Real Calling</h3>
-            <p class="feature-tile-desc">
-              Direct connection to 112 emergency dispatchers or your trusted safety circle, with verified real-time GPS coordinate broadcasting.
-            </p>
-            <div class="feature-tile-tags">
-              <span class="feature-tag-chip">📞 Call 112</span>
-              <span class="feature-tag-chip">📍 Live GPS Broadcast</span>
-              <span class="feature-tag-chip">👥 Safe Circle</span>
-            </div>
-          </div>
-          <button type="button" class="btn-open-workspace">
-            <span>Open Emergency SOS</span>
-            <span>➜</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Feature 2: SafeWalk Escort & Live Tracking -->
-      <div class="feature-card-tile" id="safewalk-section" data-feature-cat="safewalk" data-target-modal="modal-feature-safewalk">
-        <div class="feature-tile-img-box">
-          <img src="assets/real_safewalk.jpg" alt="Woman walking safely along city street">
-          <span class="feature-tile-badge" style="background:#0284c7;">🚶 Personal Escort</span>
-        </div>
-        <div class="feature-tile-body">
-          <div>
-            <h3 class="feature-tile-title">SafeWalk Escort &amp; Live Tracking</h3>
-            <p class="feature-tile-desc">
-              Walking home alone? Generate a live route monitoring link for friends with an automatic countdown alert if you don't check in on arrival.
-            </p>
-            <div class="feature-tile-tags">
-              <span class="feature-tag-chip">⏱️ Auto Countdown</span>
-              <span class="feature-tag-chip">🔗 Shareable Trip Token</span>
-              <span class="feature-tag-chip">✓ Arrival Check-In</span>
-            </div>
-          </div>
-          <button type="button" class="btn-open-workspace">
-            <span>Open SafeWalk Escort</span>
-            <span>➜</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Feature 3: AI Deepfake & Manipulation Detector -->
-      <div class="feature-card-tile" id="deepfake-section" data-feature-cat="deepfake" data-target-modal="modal-feature-deepfake">
+      <!-- Feature 1: AI Deepfake & Manipulation Detector -->
+      <div class="feature-card-tile" id="deepfake-section" data-feature-cat="deepfake" data-target-modal="deepfakeModal">
         <div class="feature-tile-img-box">
           <img src="assets/real_evidence_phone.jpg" alt="Forensic media examination on laptop">
-          <span class="feature-tile-badge" style="background:#059669;">🔍 Neural AI Forensics</span>
+          <span class="feature-tile-badge" style="background:#059669;">Neural AI Forensics</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -314,23 +230,23 @@
               Verify whether received photos, morphed screenshots, or videos have been synthetically altered or face-swapped using neural classification.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🧠 Dual AI Models</span>
-              <span class="feature-tag-chip">📸 Image &amp; Video Scan</span>
-              <span class="feature-tag-chip">📊 Confidence Verdict</span>
+              <span class="feature-tag-chip">Dual AI Models</span>
+              <span class="feature-tag-chip">Image &amp; Video Scan</span>
+              <span class="feature-tag-chip">Confidence Verdict</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
-            <span>Open Deepfake Scanner</span>
-            <span>➜</span>
+          <button type="button" class="btn-open-workspace" id="openDeepfakeBtn" data-target-modal="deepfakeModal">
+            <span>OPEN DEEPFAKE SCANNER</span>
+            <span class="btn-arrow">&rarr;</span>
           </button>
         </div>
       </div>
 
-      <!-- Feature 4: Leak Tracer (Forensic Watermarking) -->
+      <!-- Feature 2: Leak Tracer (Forensic Watermarking) -->
       <div class="feature-card-tile" id="leak-section" data-feature-cat="leak" data-target-modal="modal-feature-leak">
         <div class="feature-tile-img-box">
           <img src="assets/real_phone_message.jpg" alt="Sending protected private photos">
-          <span class="feature-tile-badge" style="background:#d97706;">🕵️ Leak Tracer</span>
+          <span class="feature-tile-badge" style="background:#d97706;">Leak Tracer</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -339,14 +255,73 @@
               Embed imperceptible cryptographic recipient signatures before sharing photos. If a photo leaks, extract the watermark to pinpoint who shared it.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🔒 Invisible Signatures</span>
-              <span class="feature-tag-chip">📦 Batch ZIP Export</span>
-              <span class="feature-tag-chip">🔍 Leaker Attribution</span>
+              <span class="feature-tag-chip">Invisible Signatures</span>
+              <span class="feature-tag-chip">Batch ZIP Export</span>
+              <span class="feature-tag-chip">Leaker Attribution</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-leak">
             <span>Open Leak Tracer</span>
-            <span>➜</span>
+            <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature 3: Emergency SOS & Instant Real Calling -->
+      <div class="feature-card-tile" id="sos-section" data-feature-cat="emergency" data-target-modal="sosModal">
+        <div class="feature-tile-img-box">
+          <img src="assets/real_sos.jpg" alt="Woman holding phone for emergency SOS">
+          <span class="feature-tile-badge" style="background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.2);">Emergency Response</span>
+        </div>
+        <div class="feature-tile-body">
+          <div>
+            <h3 class="feature-tile-title" style="font-family: var(--font-serif), 'Karma', 'Alice', Georgia, serif; font-size: 1.28rem; font-weight: 700; letter-spacing: -0.01em;">Emergency SOS &amp; Instant Real Calling</h3>
+            <p class="feature-tile-desc">
+              Direct connection to 112 emergency dispatchers or your trusted safety circle, with verified real-time GPS coordinate broadcasting.
+            </p>
+            <div class="feature-tile-tags">
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Call 112
+              </span>
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 12 8"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+                Live GPS Broadcast
+              </span>
+              <span class="feature-micro-badge">
+                <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Safe Circle
+              </span>
+            </div>
+          </div>
+          <button type="button" class="btn-open-workspace" id="openSosBtn" data-target-modal="sosModal">
+            <span>Open Emergency SOS</span>
+            <span class="btn-arrow">&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature 4: SafeWalk Escort & Live Tracking -->
+      <div class="feature-card-tile" id="safewalk-section" data-feature-cat="safewalk" data-target-modal="modal-feature-safewalk">
+        <div class="feature-tile-img-box">
+          <img src="assets/real_safewalk.jpg" alt="Woman walking safely along city street">
+          <span class="feature-tile-badge" style="background:#0284c7;">Personal Escort</span>
+        </div>
+        <div class="feature-tile-body">
+          <div>
+            <h3 class="feature-tile-title">SafeWalk Escort &amp; Live Tracking</h3>
+            <p class="feature-tile-desc">
+              Walking home alone? Generate a live route monitoring link for friends with an automatic countdown alert if you don't check in on arrival.
+            </p>
+            <div class="feature-tile-tags">
+              <span class="feature-tag-chip">Auto Countdown</span>
+              <span class="feature-tag-chip">Shareable Trip Token</span>
+              <span class="feature-tag-chip">Arrival Check-In</span>
+            </div>
+          </div>
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-safewalk">
+            <span>Open SafeWalk Escort</span>
+            <span class="btn-arrow">&rarr;</span>
           </button>
         </div>
       </div>
@@ -354,8 +329,8 @@
       <!-- Feature 5: Disguised Evidence Vault -->
       <div class="feature-card-tile" id="vault-section" data-feature-cat="vault" data-target-modal="modal-feature-vault">
         <div class="feature-tile-img-box">
-          <img src="assets/real_phone_message.jpg" alt="Covert evidence documentation">
-          <span class="feature-tile-badge" style="background:#475569;">🔒 Evidence Locker</span>
+          <img src="assets/diguish_evidence.png" alt="Covert evidence documentation">
+          <span class="feature-tile-badge" style="background:#475569;"> Evidence Locker</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -364,14 +339,14 @@
               Discreetly record incident audio or upload files stamped with cryptographic SHA-256 signatures, hidden behind an innocent calculator disguise.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">🎙️ Covert Audio</span>
-              <span class="feature-tag-chip">📍 GPS &amp; Timestamp Stamp</span>
-              <span class="feature-tag-chip">🧮 Calculator Disguise</span>
+              <span class="feature-tag-chip"> Covert Audio</span>
+              <span class="feature-tag-chip"> GPS &amp; Timestamp Stamp</span>
+              <span class="feature-tag-chip"> Calculator Disguise</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-vault">
             <span>Open Evidence Vault</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -380,7 +355,7 @@
       <div class="feature-card-tile" id="chatbot-section" data-feature-cat="chatbot" data-target-modal="modal-feature-chatbot">
         <div class="feature-tile-img-box">
           <img src="assets/image_3.jpg" alt="Confidential legal and safety companion">
-          <span class="feature-tile-badge" style="background:#2563eb;">⚖️ Legal Companion</span>
+          <span class="feature-tile-badge" style="background:#0B132B; border: 1px solid #D90429; color: #F8F9FA;">Legal Companion</span>
         </div>
         <div class="feature-tile-body">
           <div>
@@ -389,14 +364,14 @@
               Confidential guidance on cyber harassment, emergency restraining orders, drafting formal Zero FIR complaints, and direct helpline directories.
             </p>
             <div class="feature-tile-tags">
-              <span class="feature-tag-chip">⚖️ Zero FIR Generator</span>
-              <span class="feature-tag-chip">🌐 Multi-Country (IN/US/GB)</span>
-              <span class="feature-tag-chip">🗣️ Speech-to-Text &amp; TTS</span>
+              <span class="feature-tag-chip"> Zero FIR Generator</span>
+              <span class="feature-tag-chip"> Multi-Country (IN/US/GB)</span>
+              <span class="feature-tag-chip"> Speech-to-Text &amp; TTS</span>
             </div>
           </div>
-          <button type="button" class="btn-open-workspace">
+          <button type="button" class="btn-open-workspace" data-target-modal="modal-feature-chatbot">
             <span>Open Legal Chatbot</span>
-            <span>➜</span>
+            <span class="btn-arrow">➜</span>
           </button>
         </div>
       </div>
@@ -406,34 +381,142 @@
 
   <!-- Sleek Minimal Movement Callout (No walls of text) -->
   <section class="cta-wrapper" id="movement" style="padding: 30px 6%;">
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; border-radius: 20px; padding: 32px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);">
+    <div style="background: #0f172a; border: 1.5px solid #1e293b; color: #ffffff; border-radius: 6px; padding: 32px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);">
       <div>
         <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 6px;">You are never alone.</h2>
         <p style="font-size: 0.9rem; color: #94a3b8; max-width: 500px;">
           SafeMate is built with zero surveillance, instant distress beacons, and stealth disguise modes to protect your peace of mind.
         </p>
       </div>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <button type="button" class="btn-primary" id="cta-recipe-test" style="background: #334155; border-color: #475569; padding: 11px 18px; font-size: 13px;">
-          🛡️ Test Recipe Disguise (ESC)
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button type="button" class="btn-primary" id="cta-recipe-test" style="background: transparent; border: 1.5px solid #475569; color: #f1f5f9; padding: 11px 20px; font-size: 0.82rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase;">
+           Test Recipe Disguise (ESC)
         </button>
-        <button type="button" class="btn-primary" id="cta-tell-once-btn" style="background: #7c3aed; border-color: #7c3aed; padding: 11px 20px; font-size: 13px; font-weight: 700;">
-          🌸 Open Tell-Once Intake
+        <button type="button" class="btn-primary" id="cta-tell-once-btn" style="background: #881337; border: 1.5px solid #881337; color: #ffffff; padding: 11px 22px; font-size: 0.82rem; font-weight: 700; border-radius: 4px; letter-spacing: 0.03em; text-transform: uppercase;">
+           Open Tell-Once Intake
         </button>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Full-Width Expanded Footer (Dark Navy & Crimson Sharp Theme) -->
   <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-copy">
-        SafeMate &copy; 2026. A Silent Shield, A Strong Voice. Privacy & Safety First.
+    <div class="footer-expanded-container">
+      <div class="footer-main-grid">
+        
+        <!-- Column 1: Brand & Compliance Mission -->
+        <div class="footer-col">
+          <div class="footer-brand-title">
+            <span>SafeMate</span>
+          </div>
+          <p class="footer-desc">
+            Tactical personal safety and statutory legal counsel engine. Built for immediate emergency dispatch, Zero FIR automated legal drafting, and client-side forensic evidence preservation.
+          </p>
+        </div>
+
+        <!-- Column 2: Direct Workspaces Navigation -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Direct Workspaces</h4>
+          <ul class="footer-nav-list">
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="tellOnceModal" onclick="if(window.openTellOnceModal)window.openTellOnceModal('en');">
+                <span class="footer-link-dot"></span>
+                <span>Tell-Once Intake Protocol</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="sosModal" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-sos');">
+                <span class="footer-link-dot"></span>
+                <span>Emergency SOS &amp; 112 Call</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="modal-feature-safewalk" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-safewalk');">
+                <span class="footer-link-dot"></span>
+                <span>SafeWalk Escort &amp; Live Tracking</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="deepfakeModal" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-deepfake');">
+                <span class="footer-link-dot"></span>
+                <span>AI Deepfake Scanner</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="modal-feature-vault" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-vault');">
+                <span class="footer-link-dot"></span>
+                <span>Disguised Evidence Vault</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
+                <span class="footer-link-dot"></span>
+                <span>Forensic Leak Tracer</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="footer-nav-link" data-target-modal="modal-feature-chatbot" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-chatbot');">
+                <span class="footer-link-dot"></span>
+                <span>Safety &amp; Legal Companion</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Statutory Rights & Emergency Hotlines -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Statutory Directives</h4>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="footer-statutory-item">
+              <span class="footer-statutory-label">National Police Emergency:</span>
+              <span><a href="tel:112" class="footer-tel-link">Dial 112 (Nationwide 24/7)</a></span>
+              <span class="footer-statutory-sub">Immediate police, fire, &amp; ambulance response</span>
+            </div>
+            <div class="footer-statutory-item">
+              <span class="footer-statutory-label">National Cyber Crime Helpline:</span>
+              <span><a href="tel:1930" class="footer-tel-link">Dial 1930</a> &bull; cybercrime.gov.in</span>
+              <span class="footer-statutory-sub">Financial fraud freeze &amp; NCII takedown</span>
+            </div>
+            <div class="footer-statutory-item">
+              <span class="footer-statutory-label">Women Safety Hotline:</span>
+              <span><a href="tel:1091" class="footer-tel-link">1091</a> / <a href="tel:181" class="footer-tel-link">181</a></span>
+              <span class="footer-statutory-sub">24/7 emergency survivor crisis intervention</span>
+            </div>
+            <div class="footer-statutory-item">
+              <span class="footer-statutory-label">Mandatory Zero FIR Right:</span>
+              <span class="footer-statutory-sub">Sec 173 BNSS (CrPC 154) mandates FIR filing at any police station across India.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 4: Tactical Privacy Utilities -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Tactical Utilities</h4>
+          <div class="footer-util-group">
+            <button type="button" class="footer-action-btn footer-btn-crimson" id="footer-clear-traces">
+              Clear Browser Traces
+            </button>
+            <button type="button" class="footer-action-btn" id="footer-recipe-trigger">
+              Recipe Disguise (ESC)
+            </button>
+            <a href="#hero" class="footer-action-btn footer-btn-link">
+              Back to Top &uarr;
+            </a>
+            <div class="footer-volatile-notice">
+              Volatile Client Storage: SafeMate keeps zero server database traces. Purge temporary memory instantly via Clear Browser Traces above.
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="footer-links">
-        <a href="#hero">Top</a>
-        <a href="#" id="footer-clear-traces">Clear Browser Traces</a>
-        <a href="#" id="footer-recipe-trigger">Recipe Disguise (ESC)</a>
+    </div>
+
+    <!-- Full-Width Bottom Bar -->
+    <div class="footer-bottom-bar">
+      <div class="footer-bottom-inner">
+        <div class="footer-copy">
+          SafeMate &copy; 2026. A Silent Shield, A Strong Voice. Built for survivor dignity, safety, and statutory justice.
+        </div>
       </div>
     </div>
   </footer>
@@ -442,95 +525,120 @@
        DEDICATED FEATURE WORKSPACE MODALS (OPEN IN DETAIL)
        ======================================================== -->
 
-  <!-- Modal 1: Emergency SOS & Real Dialing Workspace -->
-  <div class="modal-overlay" id="modal-feature-sos" style="z-index: 99996;">
+  <!-- Modal 1: Emergency SOS & Real Dialing Workspace (Standardized Workspace Architecture) -->
+  <div class="modal-overlay" id="sosModal" style="display: none; z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);">
+      
+      <!-- Standardized Dark Navy & Crimson Header -->
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🚨</span>
             <span>Emergency SOS &amp; Instant Real Calling</span>
           </div>
-          <div class="workspace-header-sub" style="color: #fecaca;">
-            Direct connection to 112 emergency dispatchers or your trusted safety circle.
+          <div class="workspace-header-sub">
+            Direct connection to 112 emergency dispatchers or your trusted safety circle with verified GPS broadcasting.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-sos">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeSosBtn" data-close-workspace="sosModal" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <!-- Active Contact Bar & Editor Toggle -->
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px 16px; border-radius:12px; border:1px solid #e2e8f0;">
+        
+        <!-- Live Protocol Micro-Badges -->
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <span class="feature-micro-badge" style="background: rgba(217, 4, 41, 0.1); border-color: #D90429; color: #EF233C;">
+            <svg class="micro-icon" style="color: #EF233C;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            Protocol Active: Encrypted
+          </span>
+          <span class="feature-micro-badge">
+            <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Zero-Footprint Client Broadcast
+          </span>
+          <span class="feature-micro-badge">
+            <svg class="micro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Instant Dispatcher Gateway
+          </span>
+        </div>
+
+        <!-- Active Contact Micro-Card -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 16px 20px; border: 1.5px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
           <div>
-            <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; display:block; font-weight:700;">Active Emergency Contact</span>
-            <strong id="sos-active-contact-display" style="font-size:1.02rem; color:#0f172a;">Mom (+91-9876543210)</strong>
+            <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+              <span style="width: 6px; height: 6px; background: #10b981; display: inline-block;"></span>
+              Active Safety Contact
+            </div>
+            <strong id="sos-active-contact-display" style="font-size: 1.08rem; color: #0B132B; letter-spacing: -0.01em; display: block; margin-top: 2px;">Mom (+91-9876543210)</strong>
           </div>
-          <button type="button" id="btn-toggle-contact-edit" class="btn-outline" style="padding:6px 12px; font-size:12px; cursor:pointer;">
-            ⚙️ Edit Contact
+          <button type="button" id="btn-toggle-contact-edit" style="background: #f8fafc; color: #0B132B; border: 1px solid #cbd5e1; padding: 8px 16px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.16s ease;">
+            Edit Contact
           </button>
         </div>
 
-        <!-- Expandable Contact Editor -->
-        <div id="sos-contact-editor" style="display:none; background:#f1f5f9; padding:16px; border-radius:12px; border:1px solid #cbd5e1;">
-          <div style="font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">Set Real Emergency Contact</div>
-          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Mom, Maya, Sister)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
-          <input type="tel" id="input-emergency-phone" placeholder="Contact Phone Number (e.g. +91-9876543210)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
-          <button type="button" id="btn-save-contact" class="btn-primary" style="width:100%; padding:10px; font-size:13px; cursor:pointer;">
-            💾 Save Emergency Contact
+        <!-- Expandable Contact Editor Card -->
+        <div id="sos-contact-editor" style="display: none; background: #f8fafc; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <div style="font-size: 0.84rem; font-weight: 800; color: #0B132B; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em;">Update Trusted Emergency Contact</div>
+          <input type="text" id="input-emergency-name" placeholder="Contact Name (e.g. Maya, Sister, Father)" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 8px; box-sizing: border-box; background: #ffffff;">
+          <input type="tel" id="input-emergency-phone" placeholder="Phone Number (e.g. +91-9876543210)" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 12px; box-sizing: border-box; background: #ffffff;">
+          <button type="button" id="btn-save-contact" style="width: 100%; padding: 11px; font-size: 13px; font-weight: 700; background: #0B132B; color: #ffffff; border: 1px solid #0B132B; cursor: pointer;">
+            Save Trusted Contact
           </button>
         </div>
 
-        <!-- Direct Real Call Buttons -->
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <a id="btn-call-112" href="tel:112" class="btn-primary" style="background:#dc2626; border-color:#dc2626; padding:14px; font-size:14px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-radius:12px;">
-            📞 Call 112 (Police)
+        <!-- Direct Connection Micro-Actions (Tactical High-Contrast Dual Grid) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <a id="btn-call-112" href="tel:112" style="background: #D90429; color: #ffffff; border: 1.5px solid #D90429; padding: 15px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 2px 6px rgba(217, 4, 41, 0.25);">
+            <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call 112 (Dispatch)
           </a>
-          <a id="btn-call-contact" href="tel:+919876543210" class="btn-outline" style="padding:14px; font-size:14px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-color:#0284c7; color:#0284c7; border-radius:12px;">
-            📞 Call Saved Contact
+          <a id="btn-call-contact" href="tel:+919876543210" style="background: #ffffff; color: #0B132B; border: 1.5px solid #0B132B; padding: 15px; font-size: 0.88rem; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; letter-spacing: 0.02em; transition: all 0.18s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <svg style="width: 16px; height: 16px; color: #0B132B;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Call Saved Contact
           </a>
         </div>
 
-        <!-- Full Emergency SOS Panic Trigger -->
-        <button type="button" class="btn-primary" id="btn-send-sos" style="width:100%; padding:15px; font-size:15px; background:linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); border-color:#991b1b; cursor:pointer; font-weight:800; border-radius:12px; box-shadow:0 4px 18px rgba(185, 28, 28, 0.35);">
-          🚨 Trigger Full SOS (Broadcast Verified GPS + Dial Call)
+        <!-- Primary Action Button: Obsidian High-Contrast SOS Trigger -->
+        <button type="button" id="btn-send-sos" style="width: 100%; padding: 16px; font-size: 0.94rem; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(11, 19, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+          <svg style="width: 18px; height: 18px; color: #EF233C;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Trigger Full SOS (Broadcast Verified GPS + Dial Call)</span>
+          <span style="font-size: 1.1rem; margin-left: 4px;">&rarr;</span>
         </button>
 
-        <div id="sos-status-box" class="status-callout" style="display:none;"></div>
+        <div id="sos-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">⚠️ In immediate danger? Always dial 112 directly.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-sos" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">In immediate life danger? Always dial <strong>112</strong> directly nationwide.</span>
+        <button type="button" class="btn-outline close-sos-btn" id="closeSosFooterBtn" data-close-workspace="sosModal">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 2: SafeWalk Escort Workspace -->
+  <!-- Modal 2: SafeWalk Escort Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-safewalk" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #075985 0%, #0369a1 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🚶</span>
             <span>SafeWalk Escort &amp; Live Tracking</span>
           </div>
-          <div class="workspace-header-sub" style="color: #bae6fd;">
-            Walking alone? Create a live Trip Token link for friends to monitor your journey.
+          <div class="workspace-header-sub">
+            Walking alone? Create a live Trip Token link for trusted contacts to monitor your journey in real time.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-safewalk">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-safewalk" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <div id="safewalk-setup-panel" style="background:#f8fafc; padding:16px; border-radius:12px; border:1px solid #e2e8f0;">
-          <label style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:6px;">Your Destination:</label>
-          <input type="text" id="safewalk-destination" placeholder="Destination (e.g. Home, Dorm Block 3, Metro Station)" value="Home" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
+        <div id="safewalk-setup-panel" style="background: #ffffff; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Your Destination:</label>
+          <input type="text" id="safewalk-destination" placeholder="Destination (e.g. Home, Dorm Block 3, Metro Station)" value="Home" style="width: 100%; padding: 10px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 14px; box-sizing: border-box; background: #ffffff;">
           
-          <div style="display:flex; gap:10px; align-items:center;">
-            <label style="font-size:0.8rem; font-weight:700; color:#334155;">Expected Walk Duration:</label>
-            <select id="safewalk-duration-select" style="padding:8px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;">
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; text-transform: uppercase; letter-spacing: 0.04em;">Expected Walk Duration:</label>
+            <select id="safewalk-duration-select" style="padding: 9px 14px; font-size: 13px; border: 1px solid #cbd5e1; background: #ffffff; color: #0B132B; font-weight: 600;">
               <option value="15">15 Minutes</option>
               <option value="20" selected>20 Minutes</option>
               <option value="30">30 Minutes</option>
@@ -539,298 +647,472 @@
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#f1f5f9; padding:16px 20px; border-radius:12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 18px 24px; border: 1.5px solid #cbd5e1; flex-wrap: wrap; gap: 14px;">
           <div>
-            <span style="font-size:0.75rem; color:#64748b; text-transform:uppercase; font-weight:700; display:block;">Active Check-In Timer</span>
-            <span id="safewalk-timer-display" style="color:#e52543; font-family:monospace; font-weight:800; font-size:1.8rem;">20:00</span>
+            <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; display: block;">Active Check-In Countdown</span>
+            <span id="safewalk-timer-display" style="color: #D90429; font-family: monospace; font-weight: 800; font-size: 2rem;">20:00</span>
           </div>
-          <button class="btn-primary" id="btn-toggle-safewalk" style="padding:12px 22px; font-size:14px; font-weight:700; border-radius:10px;">
+          <button class="btn-primary" id="btn-toggle-safewalk" style="background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; padding: 14px 26px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
             Start SafeWalk Escort
           </button>
         </div>
 
-        <div id="safewalk-active-actions" style="display:none; gap:10px; flex-direction:column;">
-          <div style="display:flex; gap:10px;">
-            <button type="button" id="btn-share-safewalk" class="btn-outline" style="flex:1; padding:11px; font-size:13px; font-weight:700; border-radius:10px;">
-              🔗 Share Live Trip Link
+        <div id="safewalk-active-actions" style="display: none; gap: 12px; flex-direction: column;">
+          <div style="display: flex; gap: 12px;">
+            <button type="button" id="btn-share-safewalk" class="btn-outline" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; background: #1C2541; color: #F8F9FA; border: 1px solid rgba(141, 153, 174, 0.35); cursor: pointer;">
+              Share Live Trip Link
             </button>
-            <button type="button" id="btn-complete-safewalk" class="btn-primary" style="flex:1; padding:11px; font-size:13px; background:#059669; border-color:#059669; font-weight:700; border-radius:10px;">
-              ✓ I Have Arrived Safely
+            <button type="button" id="btn-complete-safewalk" class="btn-primary" style="flex: 1; padding: 12px; font-size: 13px; background: #059669; border: 1px solid #059669; color: #ffffff; font-weight: 700; cursor: pointer;">
+              Confirm Safe Arrival
             </button>
           </div>
         </div>
 
-        <div id="safewalk-status-box" class="status-callout" style="display:none;"></div>
+        <div id="safewalk-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Automatic emergency SMS sent to trusted circle if timer expires.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-safewalk" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Automatic emergency SMS dispatched to trusted safety circle if walk timer expires.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-safewalk">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 3: AI Deepfake Scanner Workspace -->
-  <div class="modal-overlay" id="modal-feature-deepfake" style="z-index: 99996;">
+  <!-- Modal 3: AI Deepfake & Manipulation Detector Workspace (Standardized Workspace Architecture) -->
+  <div class="modal-overlay" id="deepfakeModal" style="display: none; z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%);">
+      
+      <!-- Standardized Dark Navy & Crimson Header -->
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🔍</span>
-            <span>AI Deepfake &amp; Manipulation Detector</span>
+            <span id="deepfake-workspace-title">AI Deepfake &amp; Manipulation Detector</span>
           </div>
-          <div class="workspace-header-sub" style="color: #a7f3d0;">
-            Dual-engine neural classification for image and video face-swaps.
+          <div class="workspace-header-sub">
+            Dual neural models for forensic image morphing and video deepfake verification.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-deepfake">✕</button>
+        <button type="button" class="workspace-close-btn" id="closeDeepfakeBtn" data-close-workspace="deepfakeModal" aria-label="Close Deepfake Scanner">&times;</button>
       </div>
 
+      <!-- Modal Body (Sharp Industrial Canvas) -->
       <div class="workspace-modal-body">
-        <input type="file" id="deepfake-file-input" accept="image/*,video/*" style="display:none;">
-        <div style="border: 2px dashed #cbd5e1; border-radius:14px; padding:28px 20px; text-align:center; background:#f8fafc; cursor:pointer;" id="dropzone-deepfake">
-          <div style="font-size:2rem; margin-bottom:8px;">📁</div>
-          <strong style="font-size:0.95rem; color:#0f172a; display:block; margin-bottom:4px;">Select Photo or Video to Screen</strong>
-          <span style="font-size:0.78rem; color:#64748b; display:block; margin-bottom:12px;">Supports JPG, PNG, WEBP, MP4, MOV (up to 50MB)</span>
-          <button type="button" class="btn-outline" id="btn-select-deepfake-file" style="padding:8px 16px; font-size:12px; cursor:pointer;">
-            Browse Files
+        
+        <!-- Dual-Mode Sharp Tab Switcher -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #ffffff; padding: 6px; border: 1.5px solid #cbd5e1;" role="tablist">
+          <button type="button" id="tab-deepfake-image" role="tab" aria-selected="true" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; font-size: 0.82rem; font-weight: 700; color: #ffffff; background: #0B132B; border: 1.5px solid #0B132B; cursor: pointer; transition: all 0.16s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Image Privacy &amp; Morphed Screenshot Scan</span>
           </button>
-          <div id="deepfake-selected-filename" style="font-size:0.85rem; color:#0284c7; margin-top:10px; display:none; font-weight:700;"></div>
+
+          <button type="button" id="tab-deepfake-video" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; font-size: 0.82rem; font-weight: 600; color: #475569; background: #f8fafc; border: 1.5px solid #cbd5e1; cursor: pointer; transition: all 0.16s ease;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14"/>
+            </svg>
+            <span>Video Deepfake Detector</span>
+          </button>
         </div>
 
-        <button type="button" class="btn-primary" id="btn-scan-deepfake" style="width:100%; padding:13px; font-size:14px; cursor:pointer; font-weight:700; border-radius:10px;">
-          🔍 Screen Media for Synthetic Manipulation
+        <!-- Model Specification Micro-Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 12px 16px; font-size: 0.74rem; color: #475569; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 800; color: #0B132B; text-transform: uppercase;">Active Neural Engine:</span>
+            <span id="deepfake-active-engine-label" style="font-weight: 600;">Swin-Transformer (umm-maybe/AI-image-detector)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; background: #10b981; display: inline-block;"></span>
+            <span style="color: #047857; font-weight: 700; text-transform: uppercase;">100% In-Memory RAM Inspection</span>
+          </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="deepfake-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;">
+
+        <!-- Drag & Drop Upload Zone -->
+        <div id="dropzone-deepfake" style="border: 1.5px dashed #cbd5e1; padding: 30px 24px; text-align: center; background: #ffffff; cursor: pointer; transition: all 0.18s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px;">
+          
+          <!-- Staged File Card (hidden until file chosen) -->
+          <div id="deepfake-staged-file-card" style="display: none; align-items: center; gap: 16px; width: 100%; max-width: 580px; text-align: left;">
+            <img id="deepfake-staged-thumb" src="" alt="Thumbnail" style="width: 64px; height: 64px; object-fit: cover; border: 1px solid #cbd5e1; display: none;">
+            <div id="deepfake-staged-icon" style="width: 64px; height: 64px; background: #0B132B; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 0.06em;">MEDIA</div>
+            <div style="flex: 1; min-width: 0;">
+              <div id="deepfake-staged-filename" style="font-size: 0.88rem; font-weight: 700; color: #0B132B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">filename.jpg</div>
+              <div id="deepfake-staged-meta" style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">0.0 KB &bull; Media File</div>
+              <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 0.72rem; color: #047857; font-weight: 700;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Staged for In-Memory Neural Scan</span>
+              </div>
+            </div>
+            <button type="button" id="btn-deepfake-change-file" style="padding: 7px 14px; font-size: 0.74rem; font-weight: 700; background: #f8fafc; color: #0B132B; border: 1px solid #cbd5e1; cursor: pointer;">
+              Change
+            </button>
+          </div>
+
+          <!-- Empty Dropzone Prompt -->
+          <div id="deepfake-dropzone-prompt">
+            <div id="deepfake-dropzone-icon" style="font-size: 0.82rem; font-weight: 800; color: #8D99AE; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">FILE SELECTION</div>
+            <strong id="deepfake-dropzone-headline" style="font-size: 0.95rem; color: #0B132B; display: block;">
+              Drag &amp; Drop Image or Click to Select
+            </strong>
+            <span id="deepfake-dropzone-sub" style="font-size: 0.76rem; color: #64748b; display: block; margin-top: 4px;">
+              Supports JPG, PNG, WEBP (Up to 10MB)
+            </span>
+            <div style="margin-top: 14px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" id="btn-select-deepfake-file" style="padding: 8px 18px; font-size: 0.76rem; font-weight: 700; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer;">
+                Browse Files
+              </button>
+              <button type="button" id="btn-deepfake-demo-sample" style="padding: 8px 18px; font-size: 0.76rem; font-weight: 700; background: #ffffff; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+                Use Forensic Sample Media
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cryptographic SHA-256 Fingerprint Bar (Hidden until computed) -->
+        <div id="deepfake-hash-bar" style="display: none; align-items: center; justify-content: space-between; background: #ffffff; border: 1.5px solid #cbd5e1; padding: 10px 16px; font-size: 0.72rem;">
+          <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <span style="font-weight: 800; color: #0B132B;">SHA-256 Fingerprint:</span>
+            <code id="deepfake-hash-code" style="color: #0284c7; font-family: monospace;">e3b0c44298fc1c149afbf4c8...</code>
+          </div>
+          <button type="button" id="btn-copy-deepfake-hash" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 4px 10px; font-size: 0.7rem; font-weight: 700; color: #0B132B; cursor: pointer;">
+            Copy Hash
+          </button>
+        </div>
+
+        <!-- Multi-Stage Processing Indicator -->
+        <div id="deepfake-progress-card" style="display: none; background: #ffffff; border: 1.5px solid #0B132B; padding: 18px 22px; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong style="font-size: 0.86rem; color: #0B132B;">Running Forensic Neural Verification...</strong>
+            <span id="deepfake-progress-step-text" style="font-size: 0.74rem; color: #D90429; font-weight: 800;">Step 1 of 3</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem;">
+            <div id="df-step-1" style="display: flex; align-items: center; gap: 8px; color: #0B132B;">
+              <span class="df-step-mark">[ACTIVE]</span>
+              <span>Ingesting volatile stream &amp; generating SHA-256 custody fingerprint</span>
+            </div>
+            <div id="df-step-2" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
+              <span class="df-step-mark">[QUEUED]</span>
+              <span id="df-step-2-text">Evaluating discrete cosine frequency &amp; diffusion patterns</span>
+            </div>
+            <div id="df-step-3" style="display: flex; align-items: center; gap: 8px; color: #94a3b8;">
+              <span class="df-step-mark">[QUEUED]</span>
+              <span>Executing transformer classification across spatial attention heads</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Structured Confidence Verdict Breakdown Container -->
+        <div id="deepfake-verdict-card" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);">
+          <!-- Dynamic Content Populated by JavaScript -->
+        </div>
+
+        <!-- Primary Action Button: Obsidian High-Contrast -->
+        <button type="button" id="btn-scan-deepfake" style="width: 100%; padding: 16px 22px; font-size: 0.94rem; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; cursor: pointer; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(11, 19, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.18s ease;">
+          <span id="btn-scan-deepfake-label">Execute Image Manipulation Scan</span>
+          <span style="font-size: 1.15rem;">&rarr;</span>
         </button>
 
-        <div id="deepfake-status-box" class="status-callout" style="display:none;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">🔒 100% in-memory processing. Zero files are saved on cloud.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-deepfake" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">
+          <strong>Zero Cloud Footprint:</strong> Files are screened strictly in volatile client memory. No media is stored on remote servers.
+        </span>
+        <button type="button" class="btn-outline close-deepfake-btn" id="closeDeepfakeFooterBtn" data-close-workspace="deepfakeModal">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 4: Leak Tracer Workspace -->
+  <!-- Modal 4: Leak Tracer Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-leak" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #92400e 0%, #b45309 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🕵️</span>
             <span>Leak Tracer (Forensic Watermarking)</span>
           </div>
-          <div class="workspace-header-sub" style="color: #fde68a;">
-            Embed invisible recipient signatures into photos or trace a leaked copy to its source.
+          <div class="workspace-header-sub">
+            Embed invisible recipient signatures into photos or trace a leaked copy back to the exact recipient.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-leak">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-leak" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <!-- Mode Tabs -->
-        <div style="display:flex; gap:10px;">
-          <button type="button" id="leak-tab-embed" class="btn-primary" style="flex:1; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">1. Protect &amp; Share</button>
-          <button type="button" id="leak-tab-extract" class="btn-outline" style="flex:1; padding:10px; font-size:13px; font-weight:700; cursor:pointer;">2. Trace Leaked Image</button>
+        <!-- Mode Tabs (Sharp Segmented Tabs) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" id="leak-tab-embed" class="btn-primary" style="padding: 12px; font-size: 13px; font-weight: 800; background: #0B132B; border: 1.5px solid #0B132B; color: #ffffff; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;">
+            1. Protect &amp; Watermark Media
+          </button>
+          <button type="button" id="leak-tab-extract" class="btn-outline" style="padding: 12px; font-size: 13px; font-weight: 800; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #0B132B; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;">
+            2. Trace Leaked Image
+          </button>
         </div>
 
         <!-- Embed Panel -->
-        <div id="leak-panel-embed">
-          <input type="file" id="leak-file-input" accept="image/*" style="display:none;">
-          <button type="button" class="btn-outline" id="btn-select-leak-img" style="width:100%; padding:10px 14px; font-size:13px; margin-bottom:10px; cursor:pointer;">
-            📁 Select Photo to Protect
+        <div id="leak-panel-embed" style="background: #ffffff; padding: 22px; border: 1.5px solid #cbd5e1;">
+          <input type="file" id="leak-file-input" accept="image/*" style="display: none;">
+          <button type="button" class="btn-outline" id="btn-select-leak-img" style="width: 100%; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 14px; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+            Select Photo to Protect
           </button>
-          <div id="leak-selected-filename" style="font-size:0.85rem; color:#0284c7; margin-bottom:10px; display:none; font-weight:700;"></div>
+          <div id="leak-selected-filename" style="font-size: 0.85rem; color: #0284c7; margin-bottom: 12px; display: none; font-weight: 700;"></div>
           
-          <label style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">Recipients (comma separated):</label>
-          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width:100%; padding:10px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:14px; box-sizing:border-box;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Recipients (comma separated):</label>
+          <input type="text" id="leak-recipients-input" placeholder="e.g. Liam, Jake, Sarah" value="Liam, Jake, Sarah" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
 
-          <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width:100%; padding:12px; font-size:13px; cursor:pointer; font-weight:700; border-radius:10px;">
-            🔒 Generate Watermarked Copies (ZIP Archive)
+          <button type="button" class="btn-primary" id="btn-generate-leak-trace" style="width: 100%; padding: 15px; font-size: 13px; cursor: pointer; font-weight: 800; background: #D90429; color: #ffffff; border: 1.5px solid #D90429; text-transform: uppercase; letter-spacing: 0.04em; box-shadow: 0 4px 14px rgba(217, 4, 41, 0.25);">
+            Generate Watermarked Copies (ZIP Archive)
           </button>
         </div>
 
         <!-- Extract Panel -->
-        <div id="leak-panel-extract" style="display:none;">
-          <input type="file" id="leak-extract-file-input" accept="image/*" style="display:none;">
-          <button type="button" class="btn-outline" id="btn-select-extract-img" style="width:100%; padding:10px 14px; font-size:13px; margin-bottom:10px; cursor:pointer;">
-            🔍 Select Suspected Leaked Photo
+        <div id="leak-panel-extract" style="display: none; background: #ffffff; padding: 22px; border: 1.5px solid #cbd5e1;">
+          <input type="file" id="leak-extract-file-input" accept="image/*" style="display: none;">
+          <button type="button" class="btn-outline" id="btn-select-extract-img" style="width: 100%; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 14px; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+            Select Suspected Leaked Photo
           </button>
-          <div id="leak-extract-filename" style="font-size:0.85rem; color:#0284c7; margin-bottom:10px; display:none; font-weight:700;"></div>
+          <div id="leak-extract-filename" style="font-size: 0.85rem; color: #0284c7; margin-bottom: 12px; display: none; font-weight: 700;"></div>
           
-          <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width:100%; padding:12px; font-size:13px; background:#dc2626; border-color:#dc2626; cursor:pointer; font-weight:700; border-radius:10px;">
-            🕵️ Trace Leaker &amp; Verify Attribution
+          <button type="button" class="btn-primary" id="btn-run-extract-trace" style="width: 100%; padding: 15px; font-size: 13px; background: #0B132B; border: 1.5px solid #0B132B; color: #ffffff; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;">
+            Trace Leaker &amp; Verify Attribution
           </button>
         </div>
 
-        <div id="leak-tracer-status-box" class="status-callout" style="display:none;"></div>
+        <div id="leak-tracer-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Signatures survive compression, screenshots, and social re-encoding.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-leak" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Forensic signatures survive compression, screenshots, cropping, and social platform re-encoding.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-leak">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 5: Disguised Evidence Vault Workspace -->
+  <!-- Modal 5: Disguised Evidence Vault Workspace (Standardized Workspace Architecture) -->
   <div class="modal-overlay" id="modal-feature-vault" style="z-index: 99996;">
     <div class="workspace-modal-card">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+      <div class="workspace-modal-header">
         <div>
           <div class="workspace-header-title">
-            <span>🔒</span>
             <span>Disguised Evidence Vault</span>
           </div>
-          <div class="workspace-header-sub" style="color: #cbd5e1;">
-            Covert audio recorder and sealed file vault hidden behind a calculator camouflage.
+          <div class="workspace-header-sub">
+            Covert audio recorder and sealed file vault hidden behind an instant calculator camouflage.
           </div>
         </div>
-        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-vault">✕</button>
+        <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-vault" aria-label="Close Modal">&times;</button>
       </div>
 
       <div class="workspace-modal-body">
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px;">
-          <div class="vault-visualizer-row" style="margin-bottom:14px;">
+        <div style="background: #ffffff; border: 1.5px solid #cbd5e1; padding: 22px;">
+          <div class="vault-visualizer-row" style="margin-bottom: 16px;">
             <div class="vault-visualizer" id="vault-audio-bars">
               <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
               <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </div>
-            <div class="vault-timer-display" id="vault-timer" style="font-size:1.4rem;">00:00</div>
+            <div class="vault-timer-display" id="vault-timer" style="font-size: 1.6rem; color: #D90429; font-weight: 800;">00:00</div>
           </div>
 
-          <input type="text" id="vault-note-input" placeholder="Incident note (e.g. Someone following near parking lot)" style="width:100%; padding:9px 12px; font-size:13px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:12px; box-sizing:border-box;">
+          <label style="font-size: 0.8rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em;">Incident Note:</label>
+          <input type="text" id="vault-note-input" placeholder="Incident note (e.g. Someone following near parking lot)" style="width: 100%; padding: 11px 14px; font-size: 13px; border: 1px solid #cbd5e1; margin-bottom: 16px; box-sizing: border-box; background: #ffffff;">
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-primary btn-record-act" id="btn-record-vault" style="flex:1; padding:11px 16px; font-size:13px; font-weight:700; border-radius:8px;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-primary btn-record-act" id="btn-record-vault" style="flex: 1; padding: 14px 20px; font-size: 13px; font-weight: 800; background: #D90429; color: #ffffff; border: 1.5px solid #D90429; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
               <span class="record-dot"></span>
               <span id="btn-record-vault-text">Record Incident Audio</span>
             </button>
-            <button class="btn-outline btn-calc-toggle" id="btn-calc-disguise" style="padding:11px 16px; font-size:13px; border-radius:8px; cursor:pointer;" title="Switch disguise mode to calculator">
-              🧮 Calculator Mode
+            <button class="btn-outline btn-calc-toggle" id="btn-calc-disguise" style="padding: 14px 20px; font-size: 13px; font-weight: 700; background: #1C2541; color: #F8F9FA; border: 1px solid rgba(141, 153, 174, 0.35); cursor: pointer;" title="Switch disguise mode to calculator">
+              Calculator Camouflage (ESC)
             </button>
           </div>
         </div>
 
-        <div style="background:#f1f5f9; border-radius:12px; padding:14px; border:1px solid #cbd5e1;">
-          <span style="font-size:0.8rem; font-weight:700; color:#334155; display:block; margin-bottom:8px;">Seal Digital Evidence (SHA-256 Stamp):</span>
-          <div style="display:flex; gap:8px;">
-            <button type="button" class="btn-outline" id="btn-select-vault-file" style="flex:1; padding:9px 12px; font-size:12px; cursor:pointer;">
-              📁 Choose File to Seal
+        <div style="background: #ffffff; padding: 20px; border: 1.5px solid #cbd5e1;">
+          <span style="font-size: 0.82rem; font-weight: 800; color: #0B132B; display: block; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em;">Seal Digital Evidence (SHA-256 Stamp):</span>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-outline" id="btn-select-vault-file" style="flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 700; background: #f8fafc; color: #0B132B; border: 1.5px solid #cbd5e1; cursor: pointer;">
+              Choose File to Seal
             </button>
-            <button type="button" class="btn-primary" id="btn-upload-vault-file" style="flex:1; padding:9px 12px; font-size:12px; cursor:pointer;">
-              🔒 Seal &amp; Encrypt File
+            <button type="button" class="btn-primary" id="btn-upload-vault-file" style="flex: 1; padding: 12px 16px; font-size: 13px; font-weight: 800; background: #0B132B; color: #ffffff; border: 1.5px solid #0B132B; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;">
+              Seal &amp; Encrypt File
             </button>
           </div>
-          <input type="file" id="vault-file-input" style="display:none;">
-          <div id="vault-selected-filename" style="font-size:0.82rem; color:#0284c7; margin-top:6px; display:none; font-weight:700;"></div>
+          <input type="file" id="vault-file-input" style="display: none;">
+          <div id="vault-selected-filename" style="font-size: 0.82rem; color: #0284c7; margin-top: 8px; display: none; font-weight: 700;"></div>
         </div>
 
-        <div id="vault-status-box" class="status-callout" style="display:none;"></div>
+        <div id="vault-status-box" class="status-callout" style="display: none; border: 1px solid #cbd5e1;"></div>
         <div id="vault-items-list"></div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
       <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">Press ESC anytime to camouflage instantly into a calculator or recipe blog.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-vault" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+        <span class="modal-footer-disclaimer">Zero server logs. Press ESC anytime to camouflage instantly into a calculator or recipe blog.</span>
+        <button type="button" class="btn-outline" data-close-workspace="modal-feature-vault">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 6: Safety & Legal Chatbot Workspace -->
-  <div class="modal-overlay" id="modal-feature-chatbot" style="z-index: 99996;">
-    <div class="workspace-modal-card" style="max-width: 840px;">
-      <div class="workspace-modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);">
-        <div>
-          <div class="workspace-header-title">
-            <span>⚖️</span>
-            <span>Safety &amp; Legal Companion</span>
-          </div>
-          <div class="workspace-header-sub" style="color: #bfdbfe;">
-            Confidential step-by-step legal guidance, Zero FIR drafts, and national hotlines.
+  <!-- Modal 6: Safety & Legal Companion Workspace (Sharp Midnight & Crimson Luxury Interface) -->
+  <div class="modal-overlay legal-modal-overlay" id="modal-feature-chatbot" style="display: none; z-index: 99996;">
+    <div class="workspace-modal-card legal-companion-modal-card">
+      
+      <!-- Architectural Midnight Header -->
+      <div class="legal-modal-header">
+        <div class="legal-header-brand">
+          <div class="legal-header-info">
+            <div class="legal-title-row">
+              <h2 class="legal-modal-title">Safety &amp; Legal Companion</h2>
+            </div>
+            <p class="legal-modal-sub">
+              Institutional-grade statutory counsel, Zero FIR drafting protocols, and verified 24/7 emergency hotlines.
+            </p>
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px;">
-          <select id="chat-country-select" style="background:#1e293b; color:#fff; border:1px solid #3b82f6; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer;">
-            <option value="IN" selected>🇮🇳 India (112 / 1930)</option>
-            <option value="US">🇺🇸 United States (911)</option>
-            <option value="GB">🇬🇧 United Kingdom (999)</option>
-            <option value="CA">🇨🇦 Canada (911)</option>
-            <option value="AU">🇦🇺 Australia (000)</option>
-            <option value="GLOBAL">🌐 International</option>
+        <div class="legal-header-controls">
+          <select id="chat-country-select" class="legal-select-pill" aria-label="Select Country Jurisdiction">
+            <option value="IN" selected>India (112 / 1930)</option>
+            <option value="US">United States (911)</option>
+            <option value="GB">United Kingdom (999)</option>
+            <option value="CA">Canada (911)</option>
+            <option value="AU">Australia (000)</option>
+            <option value="GLOBAL">International Protocols</option>
           </select>
-          <select id="chat-language-select" style="background:#1e293b; color:#fff; border:1px solid #3b82f6; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer;">
+          <select id="chat-language-select" class="legal-select-pill" aria-label="Select Language">
             <option value="en" selected>English</option>
             <option value="hi">हिंदी (Hindi)</option>
           </select>
-          <button type="button" class="workspace-close-btn" data-close-workspace="modal-feature-chatbot">✕</button>
+          <button type="button" class="legal-close-btn" data-close-workspace="modal-feature-chatbot" aria-label="Close Legal Companion">✕</button>
         </div>
       </div>
 
-      <!-- Chatbot Toolbar -->
-      <div style="background:#0f172a; padding:8px 16px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; gap:6px;">
-          <button type="button" id="btn-open-fir-modal" style="background:#0284c7; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:0.75rem; cursor:pointer; font-weight:700;">
-            ⚖️ Draft Zero FIR
+      <!-- Action Command Strip -->
+      <div class="legal-command-strip">
+        <div class="legal-strip-left">
+          <button type="button" id="btn-open-fir-modal" class="btn-legal-crimson">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Draft Zero FIR</span>
           </button>
-          <button type="button" id="btn-export-chat-report" style="background:#334155; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:0.75rem; cursor:pointer;" title="Export Safety Consultation Report">
-            📄 Export Summary
+          <button type="button" id="btn-export-chat-report" class="btn-legal-secondary" title="Export Safety Consultation Report">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Export Consultation</span>
           </button>
         </div>
-        <button type="button" id="btn-clear-chat-log" style="background:#dc2626; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:0.75rem; cursor:pointer;" title="Panic Clear Chat (Wipe Memory)">
-          🧹 Wipe History
+        <button type="button" id="btn-clear-chat-log" class="btn-legal-wipe" title="Panic Clear Chat (Wipe Memory)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Wipe History</span>
         </button>
       </div>
 
-      <!-- Quick Suggestion Action Chips -->
-      <div class="chat-chips-scroll">
-        <button class="chat-chip" data-topic="hotlines">📞 Hotlines (112)</button>
-        <button class="chat-chip" data-topic="zerofir">⚖️ Zero FIR Rights</button>
-        <button class="chat-chip" data-topic="cyber">🛡️ Cyber Blackmail (1930)</button>
-        <button class="chat-chip" data-topic="ncii">📸 Morphed Photo Leak</button>
-        <button class="chat-chip" data-topic="evidence">🔒 Preserving Evidence</button>
-        <button class="chat-chip" data-topic="hindi">🇮🇳 हिंदी में मदद</button>
+      <!-- Quick Suggestion Action Chips (Zero Emojis, Sharp Minimal Pills) -->
+      <div class="chat-chips-scroll legal-chips-row" role="toolbar" aria-label="Suggested Legal Inquiries">
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="hotlines">Hotlines (112 / 1091)</button>
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="zerofir">Zero FIR BNSS 173</button>
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="cyber">Cyber Blackmail (1930)</button>
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="ncii">Non-Consensual Photo Leaks</button>
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="evidence">Evidence Preservation Protocol</button>
+        <button type="button" class="chat-chip legal-topic-chip" data-topic="hindi">हिंदी कानूनी परामर्श</button>
       </div>
 
-      <!-- Live Chat Stream -->
-      <div class="simple-chat-log" id="simple-chat-log" style="height:320px; overflow-y:auto; padding:16px;">
-        <div class="chat-bubble-ai">
-          Hi, I'm your SafeMate confidential legal and safety companion. Tap any topic above or ask any question about your safety, protection orders, emergency helplines, or drafting a police Zero FIR complaint.
+      <!-- Distinct Module Separation Blocks: Evidence Vault vs. Leak Tracer -->
+      <div class="legal-modules-split">
+        <!-- Evidence Vault Feature Block (Deep Secure Navy & Crisp Framing) -->
+        <div class="module-block-vault">
+          <div class="module-header-row">
+            <span class="module-badge-vault">EVIDENCE VAULT</span>
+            <span class="module-subtag">SECURE DEPOSIT &bull; SHA-256</span>
+          </div>
+          <h4 class="module-title">Disguised Evidence Vault</h4>
+          <p class="module-desc">Cryptographically preserve photos, audio logs, and extortion chats behind instant calculator camouflage.</p>
+          <button type="button" class="btn-module-vault" data-open-workspace="modal-feature-vault" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-vault');">
+            <span>Access Vault</span>
+            <span class="module-btn-arrow">&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Leak Tracer Feature Block (Crimson-Tinted Trace Highlights & Warning Borders) -->
+        <div class="module-block-leak">
+          <div class="module-header-row">
+            <span class="module-badge-leak">LEAK TRACER</span>
+            <span class="module-subtag-warn">FORENSIC WATERMARK &bull; TRACE</span>
+          </div>
+          <h4 class="module-title">Forensic Leak Tracer</h4>
+          <p class="module-desc">Embed forensic invisible steganographic signatures or trace leaked photos directly back to the original recipient.</p>
+          <button type="button" class="btn-module-leak" data-open-workspace="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
+            <span>Launch Tracer</span>
+            <span class="module-btn-arrow">&rarr;</span>
+          </button>
         </div>
       </div>
 
-      <!-- Chat Input Bar -->
-      <div class="simple-chat-bar" style="padding:10px 16px; border-top:1px solid #e2e8f0;">
-        <input type="text" id="simple-chat-input" placeholder="Ask a confidential question or type in Hindi...">
-        <button id="btn-chat-mic" type="button" title="Voice Input (Speak to Chatbot)" style="background:#475569;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <!-- Live Chat Stream -->
+      <div class="simple-chat-log legal-chat-stream" id="simple-chat-log" role="log" aria-live="polite">
+        <div class="chat-bubble-ai">
+          SafeMate Safety &amp; Legal Companion initialized under attorney-client style confidentiality. Select any verified topic above or query your statutory legal rights, cybercrime remedies under BNSS Section 173 and IT Act 66E/67A, or national emergency protocols.
+        </div>
+      </div>
+
+      <!-- Enterprise-Grade Chat Input Bar -->
+      <div class="simple-chat-bar legal-input-bar">
+        <div class="legal-input-box-wrap">
+          <input type="text" id="simple-chat-input" class="legal-input-field" placeholder="Type your confidential legal question or query in Hindi..." autocomplete="off">
+        </div>
+        <button id="btn-chat-mic" class="btn-legal-mic" type="button" title="Voice Input (Dictate Legal Query)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
             <line x1="12" y1="19" x2="12" y2="23"></line>
             <line x1="8" y1="23" x2="16" y2="23"></line>
           </svg>
         </button>
-        <button id="simple-chat-send" title="Send question">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        <button id="simple-chat-send" class="btn-legal-send" type="button" title="Send Legal Question">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
         </button>
       </div>
 
-      <div class="workspace-modal-footer">
-        <span style="font-size:0.78rem; color:#64748b;">🔒 Confidential. Responses cite BNSS 2023, IT Act, and BNS 2023.</span>
-        <button type="button" class="btn-outline" data-close-workspace="modal-feature-chatbot" style="font-size:12px; padding:6px 12px;">
-          ← Back to Tools
+      <!-- Minimalist Architectural Footer -->
+      <div class="workspace-modal-footer legal-modal-footer">
+        <div class="legal-footer-disclaimer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#EF233C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Zero Cloud Retention &bull; Statutory citations adhere to Bharatiya Nagarik Suraksha Sanhita (BNSS 2023) and Information Technology Act</span>
+        </div>
+        <button type="button" class="legal-back-btn" data-close-workspace="modal-feature-chatbot">
+          &larr; Back to Tools
         </button>
       </div>
     </div>
@@ -912,14 +1194,16 @@
         <button type="button" id="btn-close-call-modal" style="background:none; border:none; color:#9ca3af; font-size:16px; cursor:pointer;">✕</button>
       </div>
 
-      <div class="call-avatar" style="margin:4px auto 10px auto;">📞</div>
+      <div class="call-avatar" style="margin:4px auto 10px auto; display: flex; align-items: center; justify-content: center;">
+        <svg style="width: 28px; height: 28px; color: #ffffff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
       <div class="call-title" id="escape-caller-title">Mom</div>
-      <div class="call-sub" id="call-status">Mobile • Incoming Alert...</div>
+      <div class="call-sub" id="call-status">Mobile &bull; Incoming Alert...</div>
 
       <div style="margin-top:16px; display:flex; flex-direction:column; gap:10px;">
         <!-- Real Outgoing Call Option -->
-        <a id="btn-real-escape-call" href="tel:+919876543210" class="btn-primary" style="background:#dc2626; border-color:#dc2626; text-decoration:none; text-align:center; padding:10px; font-size:13px; font-weight:700; border-radius:8px;">
-          📞 Make REAL Emergency Call Now
+        <a id="btn-real-escape-call" href="tel:+919876543210" class="btn-primary" style="background:#D90429; border-color:#D90429; text-decoration:none; text-align:center; padding:12px; font-size:13px; font-weight:700; border-radius:0px !important;">
+          Make REAL Emergency Call Now
         </a>
 
         <!-- Simulated In-App Rescue Controls -->
@@ -983,7 +1267,7 @@
     <div class="complaint-modal-card">
       <div class="complaint-modal-header">
         <div style="font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
-          ⚖️ Zero FIR &amp; Cyber Crime Complaint Generator
+          <span>Zero FIR &amp; Cyber Crime Complaint Generator</span>
         </div>
         <button type="button" id="btn-close-complaint-modal" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;" title="Close Modal">✕</button>
       </div>
@@ -1033,19 +1317,19 @@
           <textarea id="fir-summary" rows="3" placeholder="Describe chronologically what occurred (e.g. received threatening messages demanding monetary extortion to stop circulating morphed photos)..."></textarea>
         </div>
 
-        <button type="button" class="btn-primary" id="btn-generate-fir" style="padding:10px; font-size:13px; font-weight:700;">
-          📜 Generate Formal Zero FIR Letter
+        <button type="button" class="btn-primary" id="btn-generate-fir" style="padding:10px; font-size:13px; font-weight:700; border-radius:0px !important;">
+          Generate Formal Zero FIR Letter
         </button>
 
         <div id="fir-output-container" style="display:none; margin-top:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <strong style="color:#0f172a; font-size:0.85rem;" id="fir-output-title">Formal Statutory Complaint Draft:</strong>
             <div style="display:flex; gap:6px;">
-              <button type="button" class="btn-outline" id="btn-copy-fir" style="padding:4px 10px; font-size:11px; cursor:pointer;">📋 Copy</button>
-              <button type="button" class="btn-outline" id="btn-print-fir" style="padding:4px 10px; font-size:11px; cursor:pointer;">🖨️ Print</button>
+              <button type="button" class="btn-outline" id="btn-copy-fir" style="padding:4px 10px; font-size:11px; cursor:pointer; border-radius:0px !important;">Copy</button>
+              <button type="button" class="btn-outline" id="btn-print-fir" style="padding:4px 10px; font-size:11px; cursor:pointer; border-radius:0px !important;">Print</button>
             </div>
           </div>
-          <div class="complaint-draft-output" id="fir-output-letter"></div>
+          <div class="complaint-draft-output" id="fir-output-letter" style="border-radius:0px !important;"></div>
           <div id="fir-instructions-list" style="margin-top:10px; font-size:0.78rem; color:#475569;"></div>
         </div>
       </div>
@@ -1053,27 +1337,26 @@
   </div>
 
   <!-- ========================================================
-       TELL-ONCE INTAKE MODAL (TRAUMA-INFORMED SINGLE INTERVIEW)
+       TELL-ONCE INTAKE MODAL (SHARP INDUSTRIAL TRAUMA-INFORMED PROTOCOL)
        ======================================================== -->
-  <div class="modal-overlay" id="tell-once-modal" style="z-index: 99997;">
+  <div class="modal-overlay" id="tellOnceModal" style="display: none; z-index: 99997;">
     <div class="tell-once-modal-card">
       
-      <!-- Modal Header -->
+      <!-- Architectural Midnight Header with Crimson Accent -->
       <div class="tell-once-modal-header">
-        <div>
+        <div class="tell-once-brand-wrap">
           <div class="tell-once-header-title">
-            <span>🌸</span>
-            <span>Tell-Once Intake</span>
+            <span>Tell-Once Intake Protocol</span>
           </div>
           <div class="tell-once-header-sub" id="tell-once-header-sub">
-            A trauma-informed assistant • Tell your story once, never repeat it.
+            Unified statutory statement builder &bull; Disclose once with zero cloud retention.
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <!-- Interactive Voice Ask & Answer Mode Toggle -->
+        <div class="tell-once-header-actions">
+          <!-- Voice Conversation Mode Toggle Button -->
           <button type="button" class="tell-once-voice-toggle-btn active" id="btn-toggle-voice-mode" title="Toggle automatic voice asking and answering">
-            <span>🎙️</span>
+            <span class="voice-indicator-dot"></span>
             <span id="voice-toggle-label">Voice Mode: ON</span>
           </button>
 
@@ -1082,32 +1365,62 @@
             <button type="button" class="tell-once-lang-btn active" id="tell-once-lang-en">English</button>
             <button type="button" class="tell-once-lang-btn" id="tell-once-lang-hi">हिंदी</button>
           </div>
-          <button type="button" id="btn-close-tell-once-modal" style="background:none; border:none; color:#c7d2fe; font-size:20px; cursor:pointer;" title="Close Modal">✕</button>
+          <button type="button" id="closeTellOnceBtn" class="close-tell-once-btn" data-close-workspace="tellOnceModal" title="Close Modal">✕</button>
         </div>
       </div>
 
-      <!-- Stepper Progress Bar -->
+      <!-- Stepper Progress Bar (Zero Rounded Corners) -->
       <div class="tell-once-stepper-wrap">
         <div class="tell-once-progress-track">
           <div class="tell-once-progress-fill" id="tell-once-progress-fill"></div>
         </div>
-        <div class="tell-once-step-label" id="tell-once-step-label">Step 1 of 6: Safety Check</div>
+        <div class="tell-once-step-label" id="tell-once-step-label">Step 1 of 6: Physical Safety Check</div>
       </div>
 
       <!-- Calming Breather Bar -->
       <div class="tell-once-breather-bar">
-        <span style="font-size:0.75rem; color:#6b21a8; font-weight:600;">Feeling overwhelmed? Take all the time you need.</span>
+        <span class="tell-once-breather-hint">Feeling overwhelmed? Take all the time you need.</span>
         <button type="button" class="btn-tell-once-breather" id="btn-tell-once-breather">
-          <span>🌿</span>
           <span id="btn-breather-text">Take a Breather (गहरी सांस लें)</span>
         </button>
       </div>
 
-      <!-- Animated Box Breathing Visualizer (Collapsible) -->
+      <!-- Box Breathing Visualizer (Sharp Geometric Focus) -->
       <div class="breathing-box-overlay" id="tell-once-breathing-box" style="display:none;">
-        <div class="breathing-circle"></div>
+        <div class="breathing-square"></div>
         <div class="breathing-guidance-text" id="breathing-guidance-text">
-          <strong>Calm Box Breathing:</strong> Inhale gently for 4 seconds as the circle expands... hold for 4 seconds... and release slowly. You are completely safe and in total control.
+          <strong>Tactical Box Breathing:</strong> Inhale gently for 4 seconds as the indicator expands... hold for 4 seconds... and release slowly. You are completely safe and in total control.
+        </div>
+      </div>
+
+      <!-- Distinct Module Separation Blocks: Evidence Vault vs. Leak Tracer -->
+      <div class="tell-once-modules-split">
+        <!-- Evidence Vault Feature Block -->
+        <div class="module-block-vault">
+          <div class="module-header-row">
+            <span class="module-badge-vault">EVIDENCE VAULT</span>
+            <span class="module-subtag">SECURE DEPOSIT &bull; SHA-256</span>
+          </div>
+          <h4 class="module-title">Disguised Evidence Vault</h4>
+          <p class="module-desc">Cryptographically preserve extortion chats, photos, and voice notes behind instant calculator camouflage.</p>
+          <button type="button" class="btn-module-vault" data-open-workspace="modal-feature-vault" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-vault');">
+            <span>Access Vault</span>
+            <span class="module-btn-arrow">&rarr;</span>
+          </button>
+        </div>
+
+        <!-- Leak Tracer Feature Block -->
+        <div class="module-block-leak">
+          <div class="module-header-row">
+            <span class="module-badge-leak">LEAK TRACER</span>
+            <span class="module-subtag-warn">FORENSIC WATERMARK &bull; TRACE</span>
+          </div>
+          <h4 class="module-title">Forensic Leak Tracer</h4>
+          <p class="module-desc">Embed forensic invisible signatures into media or trace circulating leaked photos to the recipient.</p>
+          <button type="button" class="btn-module-leak" data-open-workspace="modal-feature-leak" onclick="if(window.openWorkspaceModal)window.openWorkspaceModal('modal-feature-leak');">
+            <span>Launch Tracer</span>
+            <span class="module-btn-arrow">&rarr;</span>
+          </button>
         </div>
       </div>
 
@@ -1117,7 +1430,7 @@
         <div class="voice-live-status-bar" id="voice-live-status-bar" style="display:none;">
           <div class="voice-status-indicator">
             <div class="voice-pulse-ring speaking" id="voice-pulse-ring">
-              <span id="voice-status-emoji">🔊</span>
+              <span id="voice-status-emoji" class="voice-status-text-pill">VOICE</span>
             </div>
             <div class="voice-status-copy">
               <div class="voice-status-headline" id="voice-status-headline">SafeMate is asking the question...</div>
@@ -1127,32 +1440,33 @@
           <button type="button" class="btn-voice-pause" id="btn-voice-pause">Pause Voice</button>
         </div>
 
+        <!-- Question Bubble (Sharp Minimal Framing) -->
         <div class="tell-once-question-bubble" id="tell-once-question-box">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-            <span style="font-size:0.72rem; color:#6d28d9; text-transform:uppercase; letter-spacing:0.06em; font-weight:700;" id="tell-once-stage-title">GENTLE INTAKE QUESTION</span>
+            <span id="tell-once-stage-title" style="font-size:0.72rem; color:#EF233C; text-transform:uppercase; letter-spacing:0.06em; font-weight:800;">GENTLE INTAKE QUESTION</span>
             <button type="button" id="btn-tell-once-audio-read" class="bubble-action-btn" title="Listen to question aloud">
-              🔊 Listen
+              Read Question Aloud
             </button>
           </div>
           <div class="tell-once-prompt-text" id="tell-once-prompt-text">
             Welcome to Tell-Once Intake. You are in a safe, judgment-free space. First: Are you in a physically safe space right now?
           </div>
           <div class="tell-once-affirmation-text" id="tell-once-affirmation-text">
-            ✨ Take a breath. You are in full control of this conversation.
+            Take a breath. You are in full control of this conversation.
           </div>
         </div>
 
-        <!-- Suggested Answer Chips -->
+        <!-- Suggested Answer Chips (0px Sharp Edges) -->
         <div class="tell-once-chips-row" id="tell-once-chips-container">
           <button type="button" class="tell-once-chip">Yes, I am in a safe place</button>
           <button type="button" class="tell-once-chip">I am somewhat safe, but worried</button>
           <button type="button" class="tell-once-chip">No, I am in immediate danger (Call 112)</button>
         </div>
 
-        <!-- Survivor Spoken / Typed Input Bar -->
+        <!-- Survivor Spoken / Typed Input Bar (0px Sharp Edges) -->
         <div class="tell-once-input-bar">
           <button type="button" class="tell-once-mic-btn" id="btn-tell-once-mic" title="Speak your reply in English or Hindi">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
               <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -1162,38 +1476,38 @@
           <input type="text" class="tell-once-input-field" id="tell-once-user-input" placeholder="Speak or type gently here (English or हिंदी)...">
           <button type="button" class="tell-once-next-btn" id="btn-tell-once-next">
             <span>Next</span>
-            <span>➜</span>
+            <span>&rarr;</span>
           </button>
         </div>
       </div>
 
       <!-- Dossier View (Shown When Complete or Requested) -->
       <div class="tell-once-body" id="tell-once-dossier-view" style="display:none;">
-        <div style="background:#ecfdf5; border-left:4px solid #10b981; padding:12px 16px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="tell-once-dossier-banner">
           <div>
-            <strong style="color:#065f46; font-size:0.95rem; display:block;">🎉 Multi-Agency Tell-Once Dossier Compiled!</strong>
-            <span style="font-size:0.8rem; color:#047857;" id="tell-once-dossier-note">
+            <strong style="color:#0F172A; font-size:0.95rem; display:block;">Multi-Agency Tell-Once Dossier Compiled</strong>
+            <span style="font-size:0.8rem; color:#475569;" id="tell-once-dossier-note">
               You never have to repeat your story again. Present this unified dossier directly to police, helplines, or legal counsel.
             </span>
           </div>
-          <button type="button" id="btn-tell-once-back-to-chat" class="btn-outline" style="font-size:11px; padding:6px 12px; cursor:pointer; font-weight:700;">
-            💬 Back to Interview
+          <button type="button" id="btn-tell-once-back-to-chat" class="btn-outline" style="font-size:11px; padding:6px 14px; cursor:pointer; font-weight:700; border-radius:0px !important;">
+            &larr; Back to Interview
           </button>
         </div>
 
         <div class="tell-once-dossier-card">
-          <!-- Dossier Sub-Tabs (Clean Segmented Pills) -->
+          <!-- Dossier Sub-Tabs (Clean Segmented Sharp Pills) -->
           <div class="tell-once-dossier-nav">
-            <button type="button" class="tell-once-dossier-tab-btn active" id="tab-dossier-fir">👮 1. Police Zero FIR</button>
-            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-cyber">💻 2. Cyber Helpline 1930</button>
-            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-lawyer">⚖️ 3. Legal Counsel Brief</button>
-            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-evidence">📁 4. Evidence Checklist &amp; Contacts</button>
+            <button type="button" class="tell-once-dossier-tab-btn active" id="tab-dossier-fir">1. Police Zero FIR</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-cyber">2. Cyber Helpline 1930</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-lawyer">3. Legal Counsel Brief</button>
+            <button type="button" class="tell-once-dossier-tab-btn" id="tab-dossier-evidence">4. Evidence Checklist &amp; Contacts</button>
           </div>
 
-          <!-- Document Header Badge -->
+          <!-- Document Header Badge (Zero Emojis) -->
           <div class="tell-once-dossier-doc-header" id="tell-once-doc-badge">
-            <span id="tell-once-doc-badge-title">⚖️ FORMAL ZERO FIR COMPLAINT • SECTION 173 BNSS / SEC 154 CrPC</span>
-            <span style="font-size:0.7rem; color:#9d174d;">🔒 VERIFIED SHA-256 DIGITAL EVIDENCE</span>
+            <span id="tell-once-doc-badge-title">FORMAL ZERO FIR COMPLAINT &bull; SECTION 173 BNSS / SEC 154 CrPC</span>
+            <span class="tell-once-doc-badge-sha">VERIFIED SHA-256 DIGITAL EVIDENCE</span>
           </div>
 
           <!-- Active Text Content Pane -->
@@ -1202,45 +1516,35 @@
 
         <!-- Dossier Actions Row -->
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div style="display:flex; gap:6px;">
-            <button type="button" class="btn-primary" id="btn-copy-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
-              📋 Copy Current File
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-primary" id="btn-copy-dossier" style="padding:9px 16px; font-size:12px; font-weight:700; border-radius:0px !important;">
+              Copy Current File
             </button>
-            <button type="button" class="btn-outline" id="btn-print-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
-              🖨️ Print Dossier
+            <button type="button" class="btn-outline" id="btn-print-dossier" style="padding:9px 16px; font-size:12px; font-weight:700; border-radius:0px !important;">
+              Print Dossier
             </button>
-            <button type="button" class="btn-outline" id="btn-download-dossier" style="padding:8px 14px; font-size:12px; font-weight:700;">
-              💾 Download (.txt)
+            <button type="button" class="btn-outline" id="btn-download-dossier" style="padding:9px 16px; font-size:12px; font-weight:700; border-radius:0px !important;">
+              Download (.txt)
             </button>
           </div>
 
-          <button type="button" class="btn-outline" id="btn-restart-tell-once" style="color:#64748b; font-size:11px; padding:6px 10px; cursor:pointer;">
-            🔄 Start New Intake Session
+          <button type="button" class="btn-outline" id="btn-restart-tell-once" style="color:#8D99AE; font-size:11px; padding:7px 12px; cursor:pointer; border-radius:0px !important;">
+            Start New Intake Session
           </button>
         </div>
       </div>
 
+      <!-- Standardized Sharp Modal Footer -->
+      <div class="workspace-modal-footer tell-once-modal-footer">
+        <span class="modal-footer-disclaimer">
+          <strong>Confidential Intake Protocol:</strong> Disclose once with zero cloud retention. Multi-agency dossier generated in volatile memory.
+        </span>
+        <button type="button" class="btn-outline close-tell-once-btn" data-close-workspace="tellOnceModal">
+          &larr; Back to Tools
+        </button>
+      </div>
     </div>
   </div>
-
-  <!-- ========================================================
-       FLOATING EMERGENCY QUICK-DOCK (User-Friendly Safety Bar)
-       ======================================================== -->
-  <aside class="emergency-quick-dock" aria-label="Emergency quick dock">
-    <a href="tel:112" class="dock-pill-call" title="Direct Police Dispatch (112)">
-      <span>📞</span>
-      <span>112</span>
-    </a>
-    <button type="button" class="dock-pill-tellonce" id="dock-btn-tell-once" title="Tell-Once Trauma-Informed Intake">
-      <span>🌸</span>
-      <span>Tell-Once</span>
-    </button>
-    <button type="button" class="dock-pill-panic" id="dock-btn-disguise" title="Hide page instantly (Recipe Disguise)">
-      <span>🛡️</span>
-      <span>Disguise</span>
-    </button>
-  </aside>
-
   <script src="app.js"></script>
 </body>
 </html>
