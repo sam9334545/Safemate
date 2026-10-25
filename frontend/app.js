@@ -833,6 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const deepfakeVerdictCard = document.getElementById('deepfake-verdict-card');
   const btnScanDeepfake = document.getElementById('btn-scan-deepfake');
   const btnScanDeepfakeLabel = document.getElementById('btn-scan-deepfake-label');
+  const btnDownloadSampleVideo = document.getElementById('btn-download-sample-video');
 
   let activeDeepfakeTab = 'image'; // 'image' | 'video'
   let chosenDeepfakeFile = null;
@@ -852,6 +853,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setDeepfakeTab(tab) {
     activeDeepfakeTab = tab;
+    chosenDeepfakeFile = null;
+    if (deepfakeStagedFileCard) deepfakeStagedFileCard.style.display = 'none';
+    if (deepfakeDropzonePrompt) deepfakeDropzonePrompt.style.display = 'block';
+    if (deepfakeHashBar) deepfakeHashBar.style.display = 'none';
+
+    if (btnDownloadSampleVideo) {
+      btnDownloadSampleVideo.style.display = tab === 'video' ? 'inline-flex' : 'none';
+    }
+
     if (tabDeepfakeImage && tabDeepfakeVideo) {
       if (tab === 'image') {
         tabDeepfakeImage.style.backgroundColor = '#090d16';
@@ -1006,8 +1016,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       try {
         const isVid = activeDeepfakeTab === 'video';
-        const sampleUrl = isVid ? 'assets/real_evidence_phone.jpg' : 'assets/real_phone_message.jpg';
-        const sampleName = isVid ? 'forensic_cctv_clip.mp4' : 'morphed_screenshot_sample.png';
+        const sampleUrl = isVid ? 'assets/sample_deepfake_video.mp4' : 'assets/real_phone_message.jpg';
+        const sampleName = isVid ? 'sample_deepfake_video.mp4' : 'morphed_screenshot_sample.png';
         const mime = isVid ? 'video/mp4' : 'image/png';
         const res = await fetch(sampleUrl);
         const blob = await res.blob();
