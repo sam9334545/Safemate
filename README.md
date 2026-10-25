@@ -7,23 +7,49 @@ SafeMate empowers survivors with automated screening, stealth disguises, forensi
 
 ---
 
-## Visual Walkthrough & System Capabilities
+## The Survivor's Journey: A Story-Driven Walkthrough
 
-### 1. Homepage & Trauma-Informed Survivor Hub
-The landing interface greets users with an authentic, calming aesthetic, quick-action emergency tiles, a stealth panic switch, and three flexible access pathways (**Try Demo Mode**, **Guest Mode**, **Sign In**).
-
-![SafeMate Homepage Hero Interface](docs/screenshots/01_hero_homepage.png)
+```
+[ Crisis & Threat ] ──► [ Stealth Sanctuary ] ──► [ Tell-Once Intake ] ──► [ Forensic Proof ] ──► [ Statutory Justice ]
+  • Physical Danger       • Recipe Panic ESC        • Disclose Once          • Deepfake Scanner      • Mandatory Zero FIR
+  • Cyber Blackmail       • 3-Mode Shield           • Voice / Hindi          • Leak Attribution      • Cyber Helpline 1930
+  • Transit Risk          • Volatile Memory         • Multi-Agency Dossier   • Evidence Vault SHA    • Legal Counsel Brief
+```
 
 ---
 
-### 2. The 3-Mode Shield: Authentication & Authorization Matrix
-SafeMate accommodates evaluators, anonymous visitors, and personal users with strict authorization boundaries and zero setup barriers:
+### Act I: Seeking Refuge Without Leaving a Trace
 
-![3-Mode Authentication & Access Selection Modal](docs/screenshots/02_auth_3mode_modal.png)
+#### Scene 1: The Survivor Sanctuary Hub
+When an individual in distress reaches SafeMate, they are not confronted with jarring alerts, tracking cookies, or aggressive sign-up demands. The interface is designed around the calming, trauma-informed Maitri design tokens—featuring a serene slate palette, clear emergency hotlines, and instant pathways for evaluation and protection.
 
-| Capability / Resource | Judge Demo Mode (`demo`) | Ephemeral Guest Mode (`guest`) | Personal Account (`authenticated`) |
+![SafeMate Survivor Sanctuary Hub](docs/screenshots/01_survivor_sanctuary_hub.png)
+
+* **Trauma-Informed Minimalism:** Generous typography, high contrast, and muted palettes designed to prevent anxiety spikes during crisis.
+* **Instant Hotlines:** Direct dial triggers for **112 (National Emergency)**, **181 (Women's Helpline)**, and **1930 (National Cybercrime)**.
+* **Zero Forced Onboarding:** Full access through **Try Demo Mode** and **Guest Mode** without requesting emails, phone numbers, or passwords.
+
+---
+
+#### Scene 2: The Footstep in the Hallway (Instant Stealth Panic Disguise)
+A survivor browsing for help in an abusive domestic setting faces severe danger if an abuser enters the room. SafeMate's **Stealth Panic Switch** allows them to tap `ESC` or click the disguise toggle at any millisecond:
+
+![Stealth Recipe Disguise Panic Screen](docs/screenshots/02_instant_stealth_disguise.png)
+
+* **Authentic Culinary Disguise:** The entire application instantly transforms into **"The Hearth & Spoon: 15-Minute Tuscan Garlic Basil Penne"**, complete with appetizing food imagery, ingredients, and prep times.
+* **Browser Tab & History Cloak:** Document title, favicon, and interface are instantly sanitized.
+* **Stealth Session Recovery:** Clicking the brand icon discreetly restores the survivor workspace without losing work in progress.
+
+---
+
+#### Scene 3: The Frictionless Shield (3-Mode Authentication)
+Evaluators, mentors, anonymous visitors, and registered users require tailored access boundaries with zero onboarding friction:
+
+![3-Mode Authentication and Access Selection Shield](docs/screenshots/03_evaluator_demo_mode.png)
+
+| Capability / Dimension | Judge Demo Mode (`demo`) | Ephemeral Guest Mode (`guest`) | Personal Account (`authenticated`) |
 | :--- | :--- | :--- | :--- |
-| **Authentication Requirement** | Zero credentials / Instant click | Anonymous ephemeral JWT | Email + Argon2/Bcrypt password |
+| **Credential Gate** | **Zero Friction** (Instant click) | Anonymous ephemeral JWT | Email + Argon2/Bcrypt password |
 | **Backend Data Source** | Fictional verified sample fixtures | Ephemeral in-memory session | Authenticated database partition |
 | **Evidence Vault Storage** | Preloaded mock evidence items | Volatile session-only records | Encrypted permanent storage |
 | **Emergency SOS Action** | **Simulated** (Non-negotiable) | Active dialer / client trigger | Active dialer + saved Safety Circle |
@@ -33,133 +59,147 @@ SafeMate accommodates evaluators, anonymous visitors, and personal users with st
 
 ---
 
-### 3. Zero-Friction Judge Demo Experience
-Judges, evaluators, and mentors can explore every single module offline with realistic sample data without encountering login gates, registration forms, or network failures.
+### Act II: The Physical Shield in the Real World
 
-![Judge Demo Mode Active Banner and Sample Environment](docs/screenshots/03_demo_mode_active.png)
+#### Scene 4: Immediate Crisis — Emergency SOS Dispatch
+When physical danger strikes at home or in public, every second counts. Clicking **Emergency 112** triggers immediate location broadcasting and live emergency calling:
 
-> **Safety Notice:** In Judge Demo Mode, Emergency SOS triggers a **simulated dispatch**. No phone calls, SMS messages, or emergency transmissions are ever dispatched to real authorities (112) or contacts.
+![Emergency SOS Modal with Live Location and Dispatch Diagnostics](docs/screenshots/04_emergency_sos_dispatch.png)
 
----
-
-### 4. Emergency SOS & Simulated Safety Dispatch
-One-tap access to national emergency services (112), primary guardians, and instant GPS coordinate broadcasts with high-visibility dispatch logging.
-
-![Emergency SOS Modal with Live Location and Dispatch Diagnostics](docs/screenshots/04_emergency_sos.png)
-
-- **One-Tap Emergency Calling:** Direct protocol integration for national emergency dispatch (`tel:112`) and trusted safety circle contacts.
-- **High-Accuracy Geolocation:** Automatic GPS coordinates fix with accuracy radius and Google Maps live location routing.
-- **Evaluator Safety Isolation:** In Demo Mode, an explicit simulation banner displays simulated GPS coordinates and standby contacts without external telephony.
+* **High-Accuracy Geolocation:** Automatic GPS coordinates fix with accuracy radius (`22.79321, 86.21647 ±68m fix`) and direct Google Maps routing.
+* **Dual Dispatch Architecture:** Instant calling to **112 (ERSS)** alongside simulated alert broadcasting to designated safety contacts.
+* **Evaluator Safety Isolation:** In Demo Mode, an explicit simulation banner displays simulated GPS coordinates and standby contacts without external telephony.
 
 ---
 
-### 5. SafeWalk: Live Journey Escort & Dead Man's Timer
-A real-time safety escort companion that monitors nighttime transit or risky commutes with automated countdown check-ins and dead-man escalation.
+#### Scene 5: Walking Home Alone — SafeWalk Live Transit Escort
+When walking home at night through poorly lit alleys or unsafe transit corridors, SafeWalk acts as an active digital companion with an automated **Dead Man's Timer**:
 
-![SafeWalk Live Transit Escort with Dead Man's Timer](docs/screenshots/05_safewalk_journey.png)
+![SafeWalk Live Transit Escort with Dead Man's Timer](docs/screenshots/05_safewalk_active_escort.png)
 
-- **Dead Man's Timer:** Users set a transit window (5 to 60 minutes). If the timer expires without check-in, automated escalation triggers.
-- **Route Breadcrumb Logging:** Tracks location checkpoints along the transit route.
-- **Instant Escalation:** Allows the traveler to immediately notify their safety circle if they feel followed or unsafe.
-
----
-
-### 6. Tell-Once: Trauma-Informed Incident Sanctuary
-Survivors often have to recount agonizing details multiple times to police, lawyers, counselors, and family. **Tell-Once** guides survivors through a calm, multi-step intake once, and automatically formats specialized briefs for each agency.
-
-![Tell-Once Multi-Agency Incident Intake Sanctuary](docs/screenshots/06_tell_once_intake.png)
-
-- **Bilingual Guided Voice / Text:** Step-by-step physical safety check, timeline capture, perpetrator details, and evidence cataloging in English and Hindi.
-- **Statutory Multi-Agency Outputs:**
-  1. **Police Complaint & Zero FIR:** Formatted in strict compliance with **BNSS Section 173** and **IT Act 66E / 67A**.
-  2. **Legal Counsel Case Brief:** Chronological evidentiary timeline for attorneys and legal aid cells.
-  3. **Medical & Counseling Intake:** Clinical context and emotional trauma assessment.
-  4. **Support Circle Summary:** Plain-language safety summary for trusted friends and family.
+* **Dead Man's Timer:** Traveler initiates a countdown window (e.g. 15 minutes). SafeWalk tracks breadcrumbs and prompts periodic check-in pings.
+* **Automatic Escalation:** If the timer expires without a survivor check-in ping, an emergency distress broadcast is sent to their safety circle.
+* **Live Route Tracking:** Logs transit waypoints with timestamps for forensic transit validation.
 
 ---
 
-### 7. Evidence Vault & Cryptographic Chain of Custody
-Tamper-evident digital evidence repository that computes cryptographic SHA-256 hashes upon upload, preserving forensic chain-of-custody for legal admissibility under Indian and international evidence acts.
+### Act III: Tell-Once — Breaking the Trauma of Repetition
 
-![Cryptographic Evidence Vault with SHA-256 Hashing](docs/screenshots/07_evidence_vault.png)
+#### Scene 6: The Safe Space Intake Sanctuary
+Survivors commonly describe reporting an incident as re-living the assault—having to repeat intimate, humiliating details to police officers, then lawyers, then counselors, then helplines. SafeMate's **Tell-Once Sanctuary** guides the survivor through an empathetic, multi-step intake once:
 
-- **Cryptographic Fingerprinting:** SHA-256 HMAC hash generated immediately upon file staging.
-- **Chain of Custody Metadata:** Records exact ISO timestamps, file size, MIME type, device metadata, and cryptographic digests.
-- **Calculator Camouflage:** One-click camouflage transforms the vault into a functional calculator.
+![Tell-Once Multi-Agency Incident Intake Sanctuary](docs/screenshots/06_tell_once_intake_flow.png)
 
----
-
-### 8. Leak-Tracer: Forensic Steganographic Watermarking
-Enables users to protect sensitive photos before sharing them with intimate partners, agents, or colleagues by embedding invisible cryptographic recipient tags into image pixels.
-
-![Leak-Tracer Forensic Steganographic Watermarking](docs/screenshots/08_leak_tracer.png)
-
-- **Invisible LSB Steganography:** Embeds encrypted recipient IDs (e.g., `"Liam"`, `"Jake"`, `"Sarah"`) into the least significant bits of image pixels with zero visual distortion.
-- **Batch Export in 1 Go:** Automatically creates individually fingerprinted copies in a ZIP archive for each designated recipient.
-- **Forensic Leak Identification:** If a photo is leaked online or shared maliciously, uploading the leaked copy extracts the hidden signature, unmasking the exact leaker.
+* **Bilingual Voice & Text Guidance:** Full voice synthesis and microphone recognition in both **Hindi** and **English**.
+* **Trauma-Informed Pacing:** Step 1 checks immediate physical safety; "Take a Breather" pause buttons allow the survivor to take all the time they need.
+* **Volatile Memory Compilation:** Responses are held strictly in memory without persistent cloud database retention.
 
 ---
 
-### 9. Dual-Engine AI Deepfake & Media Screening
-Forensic detection pipelines designed to screen manipulated media, non-consensual deepfakes, and synthetic images in memory.
+#### Scene 7: ACTION & OUTPUT — The Mandatory Zero FIR (Section 173 BNSS)
+Once the survivor completes their statement, SafeMate automatically compiles a formal, statutory **Police Complaint & Zero FIR** ready for legal submission:
 
-![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scanner.png)
+![Tell-Once Output: Mandatory Zero FIR Complaint](docs/screenshots/07_tell_once_zero_fir_dossier.png)
 
-- **Still Image Diffusion Screening:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`), screening for diffusion artifacts from Midjourney, DALL-E, and Stable Diffusion.
-- **Video Face Manipulation Screening:** Powered by **MS-EffGCViT-B0** (Efficient Global Context Vision Transformer) and **YOLOv8n-Face** face detection, sampling video frames to detect face-swaps.
-- **100% In-Memory Processing:** Uploaded images and video frames are decoded in volatile RAM (`io.BytesIO`) and purged immediately in a `finally` block.
-
----
-
-### 10. Interactive Safety & Legal Assistant (Chatbot)
-Statutory legal counselor and crisis assistant offering 9 structured triage workflows, emergency interrupt capabilities, and legal guidance under Indian law.
-
-![Safety and Legal Assistant Chatbot with Zero FIR Drafting](docs/screenshots/10_legal_chatbot.png)
-
-- **9 Guided Safety Flows:**
-  1. `immediate_danger`: Emergency physical crisis triage & 112 hotline.
-  2. `online_harassment`: Cyberstalking, trolling, abusive messages, or threats.
-  3. `blackmail_threats`: Extortion, sextortion, or monetary coercion.
-  4. `intimate_image_abuse`: Non-consensual media sharing & StopNCII.org intake.
-  5. `impersonation_fake_profile`: Identity theft take-down workflows.
-  6. `physical_harassment`: Street stalking & workplace POSH compliance.
-  7. `report_cybercrime_india`: `cybercrime.gov.in` and 1930 helpline guidance.
-  8. `preserve_evidence`: Digital forensics and chain-of-custody best practices.
-  9. `understand_options`: Statutory rights under Zero FIR (BNSS 173) and IT Act.
-- **Emergency Hotline Override:** Instant fallback to national helplines (**112**, **181**, **1091**, **1930**).
+* **Statutory Compliance:** Formatted in strict accordance with **Section 173 of the Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023** (mandating registration of an FIR at any police station regardless of jurisdiction).
+* **Penal Code Invocation:** Auto-populates applicable sections: **BNS Section 351(2)** (Criminal Intimidation), **BNS Section 308(2)** (Extortion), and **IT Act Sections 66E & 67A** (Bodily Privacy & Sexually Explicit Media).
+* **One-Click Export:** Download as a text file, copy to clipboard, or print directly for the Station House Officer (SHO).
 
 ---
 
-### 11. Stealth Panic Switch: Instant Recipe Disguise
-A life-saving safety feature for individuals browsing in dangerous domestic environments. Hitting `ESC` or clicking the disguise button instantly masks the entire application with an authentic food blog.
+#### Scene 8: ACTION & OUTPUT — Confidential Counsel Brief for Advocates
+In parallel, Tell-Once formats a structured legal brief for legal defense advocates and High Court legal aid cells:
 
-![Stealth Recipe Disguise Panic Screen](docs/screenshots/11_stealth_recipe_disguise.png)
+![Tell-Once Output: Confidential Legal Defense Counsel Brief](docs/screenshots/08_tell_once_lawyer_brief.png)
 
-- **Instant Disguise:** Replaces active screen with **"The Hearth & Spoon: 15-Minute Tuscan Garlic Basil Penne"**.
-- **Stealth Restore:** Clicking the recipe brand icon restores the survivor interface without losing in-progress work.
-- **Quick-Leave:** Unconditionally redirects browser history to Google if an abuser enters the room.
-
----
-
-### 12. Modular Feature Matrix & Urban Safety Hub
-Interactive workspace linking physical transit safety, civic audit indexes, and digital forensics in one unified suite.
-
-![SafeMate Feature Matrix and Workspace Cards](docs/screenshots/12_feature_matrix_cards.png)
+* **Evidentiary Summary:** Chronological incident breakdown paired with SHA-256 evidence digests.
+* **Statutory Directions:** Instructions for serving **Rule 3(2)(b) IT Rules Intermediary Takedown Notices** to social media platforms for 24-hour content suppression.
+* **Magistrate Safeguards:** Outlines Section 175(3) BNSS applications if local police hesitate to register the Zero FIR.
 
 ---
 
-## System Architecture
+### Act IV: Digital Forensics & Unmasking the Threat
+
+#### Scene 9: ACTION & OUTPUT — Disproving Morphed Blackmail Images (AI Deepfake Scanner)
+Extortionists frequently manipulate innocent photographs into sexually explicit deepfakes to terrorize survivors. SafeMate provides in-memory forensic screening to prove manipulation:
+
+![AI Deepfake and Media Manipulation Screening Engine](docs/screenshots/09_deepfake_scan_result.png)
+
+* **Neural Transformer Architecture:** Powered by a pre-trained **Swin Transformer** (`umm-maybe/AI-image-detector`) for still photos and **MS-EffGCViT-B0** paired with **YOLOv8n-Face** for video frame facial crops.
+* **Quantitative Confidence Verdict:** Outputs a breakdown between natural optical patterns (5.8%) and synthetic diffusion probability (**94.2%**).
+* **Court Admissibility:** Structured under **Section 63 of the Bharatiya Sakshya Adhiniyam (BSA), 2023** and Section 65B of the Indian Evidence Act.
+* **100% In-Memory RAM Inspection:** Files are decoded in volatile memory (`io.BytesIO`) and purged in `finally` blocks—never stored on disk.
+
+---
+
+#### Scene 10: ACTION & OUTPUT — The Digital Trap (Invisible Steganographic Watermarking)
+Survivors who share private media with intimate partners or colleagues can protect themselves in advance using **Leak-Tracer**:
+
+![Leak-Tracer Forensic Steganographic Watermarking Output](docs/screenshots/10_leak_tracer_watermark_generation.png)
+
+* **High-Speed Bounded LSB Steganography:** Embeds invisible cryptographic recipient tags into the least significant bits of blue channel pixels.
+* **Zero Visual Distortion:** The resulting images look identical to the original image under human inspection.
+* **1-Go Batch Generation:** Generates individual copies for "Liam", "Jake", and "Sarah" with individual download, WhatsApp, and AirDrop share triggers.
+
+---
+
+#### Scene 11: ACTION & OUTPUT — Unmasking the Leaker
+When a private photo is maliciously leaked or circulated, the survivor uploads the leaked copy to **Leak-Tracer Trace Mode**:
+
+![Leak-Tracer Forensic Leak Attribution and Recipient Unmasking](docs/screenshots/11_leak_tracer_forensic_attribution.png)
+
+* **Forensic Source Identification:** Extracts the embedded cryptographic bitstream and matches it to the exact recipient: **"LEAK ATTRIBUTED: Source Identified! Recipient: Liam (Tracking ID: rec_liam_8829471)"**.
+* **Cryptographic Integrity:** Validates HMAC-SHA256 non-repudiation, establishing that the image came from the specific copy delivered to that recipient.
+* **Statutory Affidavit:** Generates a ready-to-cite forensic statement for cybercrime complaints.
+
+---
+
+### Act V: Statutory Justice & Long-Term Sanctuary
+
+#### Scene 12: Evidence Vault & Cryptographic Chain of Custody
+To prevent abusers from deleting chats or denying calls, the **Disguised Evidence Vault** secures media with cryptographic fingerprints:
+
+![Cryptographic Evidence Vault with SHA-256 Hashing](docs/screenshots/12_evidence_vault_chain_of_custody.png)
+
+* **Cryptographic Fingerprinting:** Instantaneous SHA-256 HMAC hash calculated upon upload.
+* **Tamper-Evident Chain of Custody:** Logs ISO timestamps, MIME types, file sizes, and cryptographic digests to prevent evidence tampering allegations in court.
+* **Calculator Camouflage:** One-click camouflage transforms the vault into a functional calculator.
+
+---
+
+#### Scene 13: ACTION & OUTPUT — 24/7 Statutory Legal Counselor (AI Chatbot)
+Survivors needing immediate answers about their rights can consult the **Safety & Legal Assistant**, backed by statutory Indian law knowledge bases:
+
+![Safety and Legal Assistant Chatbot with Zero FIR Directive](docs/screenshots/13_legal_chatbot_zero_fir_consult.png)
+
+* **Grounded Legal Counsel:** Provides plain-language explanations of Zero FIRs (BNSS Section 173), bodily privacy violations (IT Act 66E/67A), and criminal intimidation (BNS 351).
+* **9 Structured Triage Workflows:** Guides users through cyber blackmail, non-consensual image abuse, physical stalking, and StopNCII.org intake.
+* **Panic History Wipe:** One-tap memory wipe purges the entire consultation session instantly.
+
+---
+
+#### Scene 14: Urban Infrastructure & Civic Safety Audit
+Physical safety is deeply connected to urban infrastructure. SafeMate incorporates urban safety audit indicators to keep travelers informed:
+
+![SafeMate Urban Safety Matrix and Feature Cards](docs/screenshots/14_urban_civic_safety_matrix.png)
+
+* **Civic Safety Audit Index:** Evaluates street lighting, public transit density, sidewalk visibility, and crowd presence.
+* **Community Safety Nodes:** Highlights verified safe zones, 24/7 pharmacies, police booths, and women's transit desks.
+
+---
+
+## End-to-End System Architecture
 
 ```mermaid
 flowchart TB
     subgraph ClientLayer ["Client & Interface Layer"]
-        UI["SafeMate Responsive Web Client<br/>(React / Vite + Vanilla Design System)"]
-        Stealth["Stealth Panic Screen<br/>(Recipe Disguise)"]
-        Cam["Camera & Audio Capture<br/>(Web Speech & MediaDevices API)"]
+        UI["SafeMate Responsive Web Client<br/>(React / Vite + Maitri Vanilla CSS)"]
+        Stealth["Stealth Panic Screen<br/>(Recipe Disguise ESC)"]
+        Cam["Microphone & Camera API<br/>(Web Speech & MediaDevices API)"]
     end
 
     subgraph AccessShield ["3-Mode Access & Authorization Shield"]
-        JudgeMode["Judge Demo Mode<br/>(Zero-Friction Offline Data)"]
+        JudgeMode["Judge Demo Mode<br/>(Zero-Friction Offline Sample Data)"]
         GuestMode["Guest Session<br/>(Ephemeral Scoped Token)"]
         AuthMode["Personal Account<br/>(Argon2 / JWT Authenticated)"]
     end
